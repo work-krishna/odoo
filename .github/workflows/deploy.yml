@@ -1,0 +1,20 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [19.0]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # The VPS's authorized_keys entry for this key forces it to always run
+      # /opt/test_odoo/deploy.sh (git fetch + reset --hard + restart), no
+      # matter what command is sent here — this step is just the trigger.
+      - name: Trigger deploy on VPS
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: echo deploying
