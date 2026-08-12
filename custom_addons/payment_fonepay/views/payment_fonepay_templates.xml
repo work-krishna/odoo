@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="redirect_form">
+        <!-- No external redirection happens: this form is submitted to our own controller to
+             flip the transaction to 'pending' once the QR code has been generated, then the
+             customer lands on the payment status page where the QR code is displayed. -->
+        <form t-att-action="api_url" method="post">
+            <input type="hidden" name="reference" t-att-value="reference"/>
+        </form>
+    </template>
+
+    <template id="fonepay_state_header" inherit_id="payment.state_header">
+        <xpath expr="//div[@name='o_payment_status_alert']" position="inside">
+            <t t-set="fonepay_qr_code"
+               t-value="tx.provider_id.sudo().code == 'fonepay' and tx.state == 'pending' and tx._fonepay_get_qr_code()"
+            />
+            <t t-if="fonepay_qr_code">
+                <div name="o_fonepay_qr_wrapper"
+                     t-att-data-reference="tx.reference"
+                     class="o_fonepay_qr_card card mt-3 mx-auto flex-shrink-0"
+                >
+                    <div class="card-body d-flex flex-column align-items-center justify-content-center pb-3">
+                        <img class="mb-2 border rounded"
+                             style="max-width: 220px;"
+                             t-att-src="fonepay_qr_code"
+                             alt="Fonepay QR Code"
+                        />
+                        <small class="text-center text-wrap lh-sm">
+                            Open your mobile banking or wallet app that supports Fonepay and scan
+                            this QR code to pay. This page will update automatically once the
+                            payment is confirmed.
+                        </small>
+                    </div>
+                </div>
+            </t>
+        </xpath>
+    </template>
+
+</odoo>
