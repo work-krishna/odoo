@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="web_login_otp_inherit" inherit_id="web.login">
+        <xpath expr="//div[hasclass('oe_login_buttons')]" position="after">
+            <div class="text-center mt-3 border-top pt-3">
+                <button type="button" class="btn btn-outline-primary w-100"
+                        data-bs-toggle="modal" data-bs-target="#otpModal">
+                    <i class="fa fa-envelope-o me-2"/>
+                    Login with Email OTP
+                </button>
+            </div>
+
+            <div class="modal fade" id="otpModal" tabindex="-1" aria-labelledby="otpModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header border-0 pb-0">
+                            <h5 class="modal-title fw-bold" id="otpModalLabel">Email Verification</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <t t-call="i8_otp_login.otp_login_template">
+                                <t t-set="redirect" t-value="request.params.get('redirect') or '/'"/>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </template>
+    <template id="web_reset_password_otp_inherit" inherit_id="auth_signup.reset_password">
+        <xpath expr="//div[hasclass('oe_login_buttons')]" position="after">
+            <div class="text-center mt-3 border-top pt-3">
+                <button type="button" class="btn btn-outline-primary w-100"
+                        data-bs-toggle="modal" data-bs-target="#otpModal">
+                    <i class="fa fa-envelope-o me-2"/>
+                    Login with Email OTP
+                </button>
+            </div>
+        </xpath>
+
+        <xpath expr="//div[@id='oe_structure_reset_password_bottom']" position="inside">
+            <div class="modal fade" id="otpModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content text-start">
+                        <div class="modal-header border-0 pb-0">
+                            <h5 class="modal-title fw-bold">Email Verification</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <t t-call="i8_otp_login.otp_login_template">
+                                <t t-set="redirect" t-value="'/'"/>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </template>
+</odoo>

@@ -1,0 +1,43 @@
+<odoo>
+    <template id="setup_totp">
+        <t t-call="web.layout">
+            <t t-call-assets="kw_2fa.kw_2fa_assets" />
+            <div class="o_auth_totp_enable_2FA container">
+                <h3>Authenticator App Setup</h3>
+                <p>Scan the QR code below with your authenticator app or enter the secret key manually.</p>
+                <img t-att-src="'data:image/png;base64,%s' % totp_qr" alt="QR Code" />
+                <div class="center-button">
+                    <button type="button" onclick="toggleSecret()">Cannot scan it?</button>
+                </div>
+                <p class="formatted-secret">Secret Key: <t t-esc="formatted_totp_secret" /></p>
+                <form action="/kw_2fa/enable_totp" method="post">
+                    <input type="hidden" name="totp_secret" t-att-value="totp_secret" />
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <label for="totp_code">Enter the verification code from your authenticator app:</label>
+                    <input type="text" name="totp_code" required="required" />
+                    <button type="submit">Verify</button>
+                    <t t-if="error">
+                        <p class="text-danger"><t t-esc="error"/></p>
+                    </t>
+                </form>
+            </div>
+            <script>
+                function toggleSecret() {
+                    var secretElement = document.querySelector('.formatted-secret');
+                    if (secretElement.style.display === 'none') {
+                        secretElement.style.display = 'block';
+                    } else {
+                        secretElement.style.display = 'none';
+                    }
+                }
+            </script>
+        </t>
+    </template>
+
+
+    <template id="auth_totp_form_inherit" inherit_id="auth_totp.auth_totp_form" priority="1">
+        <xpath expr="//input[@id='switch-remember']/.." position="attributes">
+            <attribute name="class" add="d-none" separator=" "/>
+        </xpath>
+    </template>
+</odoo>

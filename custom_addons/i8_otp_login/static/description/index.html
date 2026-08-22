@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Email OTP Login – Passwordless Authentication for Odoo | i8CLOUD</title>
+    <meta name="description" content="Enhance your Odoo login security with passwordless authentication. Verify users instantly with a 6-digit email OTP (One-Time Password) sent straight to their inbox. Reduce forgotten password support tickets."/>
+    <meta name="keywords" content="odoo, otp login, passwordless authentication, email otp, odoo security, portal login, odoo community, odoo app"/>
+    <meta name="author" content="i8CLOUD"/>
+    
+    <!-- Premium Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #2D3748;
+            background-color: #FAFAFA;
+        }
+        h1, h2, h3, h4 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+        }
+        /* Custom Premium Micro-animations */
+        .feature-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .feature-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+            border-color: #00308F !important;
+        }
+        .support-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .support-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08) !important;
+            border-color: #FD7E14 !important;
+        }
+        .about-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .about-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15) !important;
+        }
+        .cta-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .cta-btn:hover {
+            transform: scale(1.04);
+            box-shadow: 0 10px 20px rgba(0, 48, 143, 0.2) !important;
+            opacity: 0.95;
+        }
+        .screenshot-container {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .screenshot-container:hover {
+            transform: scale(1.01) translateY(-2px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+        }
+        details {
+            transition: all 0.3s ease;
+        }
+        details[open] {
+            border-color: #00308F !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05) !important;
+        }
+        summary {
+            outline: none;
+        }
+        summary::-webkit-details-marker {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<!-- HERO HEADER -->
+<section id="main-hero" class="oe_container"
+        style="background-color: #00308F; color: #ffffff; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; padding: 36px 0 28px;">
+    <div class="container text-center" style="margin-top: 16px;">
+        <img src="i8-logo.png" alt="i8CLOUD consulting logo" class="img-fluid"
+             style="max-width: 250px; height: auto; border-radius: 8px; margin-bottom: 12px;"/>
+        <h1 id="hero-title" style="font-weight: 800; font-size: 54px; line-height: 1.2; margin-bottom: 8px; color: #fff; letter-spacing: -0.5px;">
+            Email OTP Login
+        </h1>
+        <p class="lead" style="opacity: 0.98; font-size: 23px; font-weight: 500; max-width: 800px; margin: 0 auto 12px; line-height: 1.4;">
+            Passwordless authentication for Odoo &#8212; a secure, one-time code sent straight to the inbox.
+        </p>
+        <div style="display: inline-flex; gap: 12px; margin-top: 8px; flex-wrap: wrap; justify-content: center;">
+            <span id="badge-enterprise" style="display: inline-block; background-color: #714B67; color: #fff; padding: .45rem 1rem; border-radius: 20px; font-size: .9rem; font-weight: 600; box-shadow: 0 4px 10px rgba(113, 75, 103, 0.35);">
+                <i class="fa fa-check" aria-hidden="true"></i>&nbsp;Enterprise
+            </span>
+            <span id="badge-community" style="display: inline-block; background-color: #6f649a; color: #fff; padding: .45rem 1rem; border-radius: 20px; font-size: .9rem; font-weight: 600; box-shadow: 0 4px 10px rgba(111, 100, 154, 0.35);">
+                <i class="fa fa-check" aria-hidden="true"></i>&nbsp;Community
+            </span>
+        </div>
+    </div>
+</section>
+
+<div id="main-content">
+    <!-- WHY -->
+    <section id="why-this-app" class="oe_container" style="padding: 36px 0 12px;">
+        <div class="container text-center">
+            <h2 style="font-weight: 700; font-size: 38px; color: #00308F; margin-bottom: 8px;">Why this app?</h2>
+            <hr style="width: 60px; border: 0; border-top: 4px solid #FD7E14; margin: 8px auto 16px;">
+            
+            <div class="text-start mx-auto" style="max-width: 850px; font-size: 17px; color: #2D3748; background: #fff; padding: 24px; border-radius: 16px; border: 1px solid #E2E8F0; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);">
+                <p style="margin-bottom: 12px;"><span style="color:#28a745; margin-right:8px; font-weight: bold;">&#10003;</span> <b>Drop passwords entirely</b> &#8212; log in securely with just an email address and a 6-digit code.</p>
+                <p style="margin-bottom: 12px;"><span style="color:#28a745; margin-right:8px; font-weight: bold;">&#10003;</span> <b>Seamless integration</b> &#8212; sits directly on Odoo's standard login screen, no new portal URL required.</p>
+                <p style="margin-bottom: 12px;"><span style="color:#28a745; margin-right:8px; font-weight: bold;">&#10003;</span> <b>Automatic user creation</b> &#8212; automatically creates a Portal User on first login, reducing admin workflow.</p>
+                <p style="margin-bottom: 12px;"><span style="color:#28a745; margin-right:8px; font-weight: bold;">&#10003;</span> <b>Robust security controls</b> &#8212; code expiration times and resend limits prevent brute-force attacks.</p>
+                <p style="margin-bottom: 0;"><span style="color:#28a745; margin-right:8px; font-weight: bold;">&#10003;</span> <b>Native auth layer</b> &#8212; built on top of Odoo's native authentication framework, keeping code trails audit-friendly.</p>
+            </div>
+
+            <h3 style="font-weight: 700; margin-top: 28px; text-align: center; color: #2D3748;">Quick Setup Flow</h3>
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; margin-top: 12px; gap: 12px;">
+                <span id="setup-step-1" style="display: inline-flex; align-items: center; border: 1px solid #E2E8F0; background: #fff; border-radius: 999px; padding: 10px 18px; font-size: 15px; font-weight: 600; color: #4A5568; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                    <b style="display: inline-block; width: 28px; height: 28px; line-height: 28px; text-align: center; border-radius: 50%; background-color: #00308F; color: #fff; font-weight: 700; margin-right: 10px;">1</b>
+                    Install Module
+                </span>
+                <span id="setup-step-2" style="display: inline-flex; align-items: center; border: 1px solid #E2E8F0; background: #fff; border-radius: 999px; padding: 10px 18px; font-size: 15px; font-weight: 600; color: #4A5568; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                    <b style="display: inline-block; width: 28px; height: 28px; line-height: 28px; text-align: center; border-radius: 50%; background-color: #00308F; color: #fff; font-weight: 700; margin-right: 10px;">2</b>
+                    Enable "Login with Email OTP"
+                </span>
+                <span id="setup-step-3" style="display: inline-flex; align-items: center; border: 1px solid #E2E8F0; background: #fff; border-radius: 999px; padding: 10px 18px; font-size: 15px; font-weight: 600; color: #4A5568; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                    <b style="display: inline-block; width: 28px; height: 28px; line-height: 28px; text-align: center; border-radius: 50%; background-color: #00308F; color: #fff; font-weight: 700; margin-right: 10px;">3</b>
+                    Configure Expiry &amp; Limits
+                </span>
+                <span id="setup-step-4" style="display: inline-flex; align-items: center; border: 1px solid #E2E8F0; background: #fff; border-radius: 999px; padding: 10px 18px; font-size: 15px; font-weight: 600; color: #4A5568; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                    <b style="display: inline-block; width: 28px; height: 28px; line-height: 28px; text-align: center; border-radius: 50%; background-color: #00308F; color: #fff; font-weight: 700; margin-right: 10px;">4</b>
+                    Go Live Instantly
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT LOOKS -->
+    <section id="how-it-looks" class="oe_container" style="padding: 24px 0;">
+        <div class="container text-center">
+            <h2 style="font-weight: 700; font-size: 38px; color: #00308F; margin-bottom: 8px;">User Interface Walkthrough</h2>
+            <hr style="width: 60px; border: 0; border-top: 4px solid #FD7E14; margin: 8px auto 16px;">
+
+            <!-- Choose OTP on Login -->
+            <div id="step-preview-1" style="margin-bottom: 40px;">
+                <h3 style="font-weight: 600; font-size: 22px; color: #1A202C;">1. Choose Email OTP Option</h3>
+                <p style="color: #4A5568; font-size: 16px; max-width: 800px; margin: 4px auto 14px;">
+                    A "Login with Email OTP" option appears directly on Odoo's standard login page. No separate system URLs needed.
+                </p>
+                <div class="screenshot-container shadow-lg" style="overflow: hidden; margin: 12px auto; max-width: 950px; border: 3px solid #E2E8F0; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
+                    <img src="screenshots/1.png" alt="Odoo standard login screen showing Login with Email OTP option" style="width: 100%; display: block;"/>
+                    <div style="background: #F8FAFC; border-top: 1px solid #E2E8F0; padding: 10px 14px; font-size: .9rem; font-weight: 600; color: #4A5568;">
+                        Seamless login interface option alongside default credentials flow
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enter Email & Request Code -->
+            <div id="step-preview-2" style="margin-bottom: 40px;">
+                <h3 style="font-weight: 600; font-size: 22px; color: #1A202C;">2. Enter Email &amp; Request Code</h3>
+                <p style="color: #4A5568; font-size: 16px; max-width: 800px; margin: 4px auto 14px;">
+                    The user enters their email and taps "Verify". The server handles code generation, validation, and delivery securely.
+                </p>
+                <div class="screenshot-container shadow-lg" style="overflow: hidden; margin: 12px auto; max-width: 950px; border: 3px solid #E2E8F0; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
+                    <img src="screenshots/2.png" alt="Enter email field and verify action on OTP login form" style="width: 100%; display: block;"/>
+                    <div style="background: #F8FAFC; border-top: 1px solid #E2E8F0; padding: 10px 14px; font-size: .9rem; font-weight: 600; color: #4A5568;">
+                        Instant background validation checks for user registration and domain permission
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enter the code -->
+            <div id="step-preview-3" style="margin-bottom: 40px;">
+                <h3 style="font-weight: 600; font-size: 22px; color: #1A202C;">3. Verify 6-Digit Code</h3>
+                <p style="color: #4A5568; font-size: 16px; max-width: 800px; margin: 4px auto 14px;">
+                    The user receives a clean, branded email containing the secure 6-digit code. They input it directly on the verification screen.
+                </p>
+                <div class="screenshot-container shadow-lg" style="overflow: hidden; margin: 12px auto; max-width: 950px; border: 3px solid #E2E8F0; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
+                    <img src="screenshots/3.png" alt="6-digit verification code entry screen with expiry" style="width: 100%; display: block;"/>
+                    <div style="background: #F8FAFC; border-top: 1px solid #E2E8F0; padding: 10px 14px; font-size: .9rem; font-weight: 600; color: #4A5568;">
+                        Clean verification container ensuring safe and fast user experience
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resend -->
+            <div id="step-preview-4" style="margin-bottom: 40px;">
+                <h3 style="font-weight: 600; font-size: 22px; color: #1A202C;">4. Resend Without Restarting</h3>
+                <p style="color: #4A5568; font-size: 16px; max-width: 800px; margin: 4px auto 14px;">
+                    If the code expires or gets delayed, the user requests a new code with a single click without leaving the page.
+                </p>
+                <div class="screenshot-container shadow-lg" style="overflow: hidden; margin: 12px auto; max-width: 950px; border: 3px solid #E2E8F0; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
+                    <img src="screenshots/4.png" alt="Resend OTP button on verification container" style="width: 100%; display: block;"/>
+                    <div style="background: #F8FAFC; border-top: 1px solid #E2E8F0; padding: 10px 14px; font-size: .9rem; font-weight: 600; color: #4A5568;">
+                        Intelligent code replacement prevents multiple active codes and security loopholes
+                    </div>
+                </div>
+            </div>
+
+            <!-- Session opens -->
+            <div id="step-preview-5" style="margin-bottom: 24px;">
+                <h3 style="font-weight: 600; font-size: 22px; color: #1A202C;">5. Auto-Created Portal Access</h3>
+                <p style="color: #4A5568; font-size: 16px; max-width: 800px; margin: 4px auto 14px;">
+                    New contacts automatically get created as Portal Users on successful login. Zero administration effort.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES AT A GLANCE -->
+    <section id="features-at-a-glance" class="oe_container" style="padding: 36px 0 24px; background-color: #F8FAFC;">
+        <div class="container text-center">
+            <h2 style="font-weight: 700; font-size: 38px; color: #00308F; margin-bottom: 8px;">Features at a Glance</h2>
+            <hr style="width: 60px; border: 0; border-top: 4px solid #FD7E14; margin: 8px auto 16px;">
+
+            <div class="row g-3 mt-2" style="display: flex; flex-wrap: wrap; gap: 16px; justify-content: center;">
+                <div class="col-md-3" style="flex: 1 1 22%;">
+                    <article id="feature-passwordless" class="feature-card shadow-sm" style="border-radius: 16px; padding: 22px 18px; background: #fff; border: 1px solid #E2E8F0; height: 100%; text-align: left;">
+                        <h4 style="margin: 0 0 8px; color: #00308F; font-weight: 700; font-size: 18px;">
+                            <i class="fa fa-magic" aria-hidden="true" style="margin-right: 8px; color: #00308F;"></i>Passwordless Login
+                        </h4>
+                        <p style="margin: 0; color: #4A5568; font-size: 14px; line-height: 1.5;">Log in using a secure one-time code instead of memory-heavy, static passwords. Speed and security combined.</p>
+                    </article>
+                </div>
+                <div class="col-md-3" style="flex: 1 1 22%;">
+                    <article id="feature-secure-code" class="feature-card shadow-sm" style="border-radius: 16px; padding: 22px 18px; background: #fff; border: 1px solid #E2E8F0; height: 100%; text-align: left;">
+                        <h4 style="margin: 0 0 8px; color: #00308F; font-weight: 700; font-size: 18px;">
+                            <i class="fa fa-envelope-o" aria-hidden="true" style="margin-right: 8px; color: #00308F;"></i>Secure 6-Digit Code
+                        </h4>
+                        <p style="margin: 0; color: #4A5568; font-size: 14px; line-height: 1.5;">Generates a high-entropy code delivered securely using your default configured Odoo outgoing mail server.</p>
+                    </article>
+                </div>
+                <div class="col-md-3" style="flex: 1 1 22%;">
+                    <article id="feature-smart-expiry" class="feature-card shadow-sm" style="border-radius: 16px; padding: 22px 18px; background: #fff; border: 1px solid #E2E8F0; height: 100%; text-align: left;">
+                        <h4 style="margin: 0 0 8px; color: #00308F; font-weight: 700; font-size: 18px;">
+                            <i class="fa fa-hourglass-half" aria-hidden="true" style="margin-right: 8px; color: #00308F;"></i>Smart Expiry
+                        </h4>
+                        <p style="margin: 0; color: #4A5568; font-size: 14px; line-height: 1.5;">Codes automatically self-destruct and expire after a customizable amount of time to block replay attacks.</p>
+                    </article>
+                </div>
+                <div class="col-md-3" style="flex: 1 1 22%;">
+                    <article id="feature-inpage-resend" class="feature-card shadow-sm" style="border-radius: 16px; padding: 22px 18px; background: #fff; border: 1px solid #E2E8F0; height: 100%; text-align: left;">
+                        <h4 style="margin: 0 0 8px; color: #00308F; font-weight: 700; font-size: 18px;">
+                            <i class="fa fa-refresh" aria-hidden="true" style="margin-right: 8px; color: #00308F;"></i>In-Page Resend
+                        </h4>
+                        <p style="margin: 0; color: #4A5568; font-size: 14px; line-height: 1.5;">Missed the inbox window? Trigger a new code with a single resend tap without resetting or restarting the flow.</p>
+                    </article>
+                </div>
+                <div class="col-md-3" style="flex: 1 1 22%;">
+                    <article id="feature-portal-user" class="feature-card shadow-sm" style="border-radius: 16px; padding: 22px 18px; background: #fff; border: 1px solid #E2E8F0; height: 100%; text-align: left;">
+                        <h4 style="margin: 0 0 8px; color: #00308F; font-weight: 700; font-size: 18px;">
+                            <i class="fa fa-user-plus" aria-hidden="true" style="margin-right: 8px; color: #00308F;"></i>Auto Portal User
+                        </h4>
+                        <p style="margin: 0; color: #4A5568; font-size: 14px; line-height: 1.5;">Instantly and automatically register first-time users as Odoo Portal contacts on successful verification.</p>
+                    </article>
+                </div>
+                <div class="col-md-3" style="flex: 1 1 22%;">
+                    <article id="feature-native-layer" class="feature-card shadow-sm" style="border-radius: 16px; padding: 22px 18px; background: #fff; border: 1px solid #E2E8F0; height: 100%; text-align: left;">
+                        <h4 style="margin: 0 0 8px; color: #00308F; font-weight: 700; font-size: 18px;">
+                            <i class="fa fa-shield" aria-hidden="true" style="margin-right: 8px; color: #00308F;"></i>Native Odoo Layer
+                        </h4>
+                        <p style="margin: 0; color: #4A5568; font-size: 14px; line-height: 1.5;">Built directly into Odoo's core auth controller logic. Avoids third-party dependencies, APIs, and monthly fees.</p>
+                    </article>
+                </div>
+                <div class="col-md-3" style="flex: 1 1 22%;">
+                    <article id="feature-audit-trail" class="feature-card shadow-sm" style="border-radius: 16px; padding: 22px 18px; background: #fff; border: 1px solid #E2E8F0; height: 100%; text-align: left;">
+                        <h4 style="margin: 0 0 8px; color: #00308F; font-weight: 700; font-size: 18px;">
+                            <i class="fa fa-list-alt" aria-hidden="true" style="margin-right: 8px; color: #00308F;"></i>Auditable Login Trail
+                        </h4>
+                        <p style="margin: 0; color: #4A5568; font-size: 14px; line-height: 1.5;">Tracks every single login request, code delivery status, and verification attempt in a secure backend log table.</p>
+                    </article>
+                </div>
+                <div class="col-md-3" style="flex: 1 1 22%;">
+                    <article id="feature-low-support" class="feature-card shadow-sm" style="border-radius: 16px; padding: 22px 18px; background: #fff; border: 1px solid #E2E8F0; height: 100%; text-align: left;">
+                        <h4 style="margin: 0 0 8px; color: #00308F; font-weight: 700; font-size: 18px;">
+                            <i class="fa fa-life-ring" aria-hidden="true" style="margin-right: 8px; color: #00308F;"></i>Fewer Support Tickets
+                        </h4>
+                        <p style="margin: 0; color: #4A5568; font-size: 14px; line-height: 1.5;">Eliminating static user passwords drastically reduces reset requests and administrative burden.</p>
+                    </article>
+                </div>
+            </div>
+
+            <!-- Before / After -->
+            <h3 style="font-weight: 700; margin-top: 36px; text-align: center; color: #2D3748;">Workflow Transformation</h3>
+            <div class="row g-3 mt-1 text-center" style="display: flex; flex-wrap: wrap; gap: 16px; justify-content: center;">
+                <div class="col-md-6" style="flex: 1 1 45%;">
+                    <div style="display: flex; border: 1px solid #E2E8F0; background: #fff; border-radius: 16px; height: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.02);" class="shadow">
+                        <div style="width: 10px; background-color: #e74c3c; border-radius: 16px 0 0 16px;"></div>
+                        <div style="padding: 18px; text-align: left;">
+                            <h4 style="margin: 0 0 6px; color: #e74c3c; font-weight: 700;">Before OTP Login</h4>
+                            <p style="color: #4A5568; font-size: 15px; margin: 0; line-height: 1.5;">Forgotten passwords, constant reset requests, and written-down sticky notes compromising system security.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6" style="flex: 1 1 45%;">
+                    <div style="display: flex; border: 1px solid #E2E8F0; background: #fff; border-radius: 16px; height: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.02);" class="shadow">
+                        <div style="width: 10px; background-color: #28a745; border-radius: 16px 0 0 16px;"></div>
+                        <div style="padding: 18px; text-align: left;">
+                            <h4 style="margin: 0 0 6px; color: #28a745; font-weight: 700;">After OTP Login</h4>
+                            <p style="color: #4A5568; font-size: 15px; margin: 0; line-height: 1.5;">Secure 6-digit codes delivered straight to verified inboxes. Safe, frictionless, self-service user login.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ -->
+            <h3 style="font-weight: 700; margin-top: 36px; color: #2D3748;">Frequently Asked Questions</h3>
+            <div class="mx-auto text-start" style="max-width: 850px; margin-top: 14px;">
+                <details id="faq-item-1" style="margin: 12px 0; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 14px 18px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);">
+                    <summary style="cursor: pointer; font-weight: 700; color: #00308F; font-size: 16px; display: block; width: 100%;">
+                        Does this replace standard password authentication?
+                        <i class="fa fa-chevron-down" aria-hidden="true" style="font-size: 12px; color: #A0AEC0; float: right; margin-top: 6px;"></i>
+                    </summary>
+                    <p style="margin: 10px 0 0; color: #4A5568; font-size: 15px; line-height: 1.5; border-top: 1px solid #EDF2F7; padding-top: 10px;">
+                        No. The Email OTP login function works alongside default passwords. Users can choose either route on the sign-in page.
+                    </p>
+                </details>
+                <details id="faq-item-2" style="margin: 12px 0; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 14px 18px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);">
+                    <summary style="cursor: pointer; font-weight: 700; color: #00308F; font-size: 16px; display: block; width: 100%;">
+                        What happens when a new contact attempts to log in?
+                        <i class="fa fa-chevron-down" aria-hidden="true" style="font-size: 12px; color: #A0AEC0; float: right; margin-top: 6px;"></i>
+                    </summary>
+                    <p style="margin: 10px 0 0; color: #4A5568; font-size: 15px; line-height: 1.5; border-top: 1px solid #EDF2F7; padding-top: 10px;">
+                        A corresponding Portal User profile is auto-generated in the backend database. They gain client access without admin intervention.
+                    </p>
+                </details>
+                <details id="faq-item-3" style="margin: 12px 0; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 14px 18px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);">
+                    <summary style="cursor: pointer; font-weight: 700; color: #00308F; font-size: 16px; display: block; width: 100%;">
+                        Can users configure the OTP code length and expiry timer?
+                        <i class="fa fa-chevron-down" aria-hidden="true" style="font-size: 12px; color: #A0AEC0; float: right; margin-top: 6px;"></i>
+                    </summary>
+                    <p style="margin: 10px 0 0; color: #4A5568; font-size: 15px; line-height: 1.5; border-top: 1px solid #EDF2F7; padding-top: 10px;">
+                        Yes. System administrators can adjust the code duration and maximum invalid verification attempts inside system settings.
+                    </p>
+                </details>
+                <details id="faq-item-4" style="margin: 12px 0; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 14px 18px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);">
+                    <summary style="cursor: pointer; font-weight: 700; color: #00308F; font-size: 16px; display: block; width: 100%;">
+                        Is a third-party SMS API or mailing server provider required?
+                        <i class="fa fa-chevron-down" aria-hidden="true" style="font-size: 12px; color: #A0AEC0; float: right; margin-top: 6px;"></i>
+                    </summary>
+                    <p style="margin: 10px 0 0; color: #4A5568; font-size: 15px; line-height: 1.5; border-top: 1px solid #EDF2F7; padding-top: 10px;">
+                        No. The module utilizes Odoo's standard outgoing mail server configuration. No external subscriptions are needed.
+                    </p>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- POST-PURCHASE SUPPORT -->
+    <section id="post-purchase-support" class="oe_container" style="padding: 36px 0; background: #f0f4ff; border-radius: 20px; margin: 24px 0;">
+        <div class="container text-center">
+            <h2 style="font-weight: 700; font-size: 38px; color: #00308F; margin-bottom: 6px;">After You Buy</h2>
+            <hr style="width: 60px; border: 0; border-top: 4px solid #FD7E14; margin: 8px auto 16px;">
+            <p style="max-width: 750px; margin: 0 auto 24px; color: #4A5568; font-size: 17px; line-height: 1.5;">
+                We stand behind our code. If you face installation bugs or need configuration assistance, get in touch with our team.
+            </p>
+            <div class="row g-3 mt-1" style="display: flex; flex-wrap: wrap; gap: 16px; justify-content: center;">
+                <div class="col-md-4" style="flex: 1 1 30%;">
+                    <div class="support-card shadow-sm" style="border-radius: 16px; padding: 24px 20px; background: #fff; border: 1px solid #E2E8F0; height: 100%; text-align: center;">
+                        <h4 style="margin: 0 0 10px; color: #00308F; font-weight: 700; font-size: 19px;">
+                            <i class="fa fa-envelope" aria-hidden="true" style="margin-right: 8px; color: #00308F;"></i>Email Support
+                        </h4>
+                        <p style="margin: 0 0 14px; color: #4A5568; font-size: 14px;">Contact us for installation troubleshooting and general setup inquiries.</p>
+                        <a id="btn-support-email" href="mailto:contact@i8cloudconsulting.com?subject=Email OTP Login - Support" class="cta-btn"
+                           style="background-color: #00308F; border-radius: 10px; display: inline-block; padding: 10px 24px; text-decoration: none; font-weight: 700; color: #fff;">
+                            Email Us
+                        </a>
+                        <p style="margin: 8px 0 0; font-size: 13px; color: #718096;">contact@i8cloudconsulting.com</p>
+                    </div>
+                </div>
+                <div class="col-md-4" style="flex: 1 1 30%;">
+                    <div class="support-card shadow-sm" style="border-radius: 16px; padding: 24px 20px; background: #fff; border: 1px solid #E2E8F0; height: 100%; text-align: left;">
+                        <h4 style="margin: 0 0 10px; color: #00308F; font-weight: 700; font-size: 19px; text-align: center;">
+                            <i class="fa fa-wrench" aria-hidden="true" style="margin-right: 8px; color: #00308F;"></i>What we help with
+                        </h4>
+                        <ul style="color: #4A5568; font-size: 14px; padding-left: 18px; margin: 0; line-height: 1.8;">
+                            <li>Installation &amp; server dependencies</li>
+                            <li>Module error logs and debugging</li>
+                            <li>Configuring OTP thresholds</li>
+                            <li>Custom verification templates</li>
+                            <li>Standard upgrades validation</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-4" style="flex: 1 1 30%;">
+                    <div class="support-card shadow-sm" style="border-radius: 16px; padding: 24px 20px; background: #fff; border: 1px solid #E2E8F0; height: 100%; text-align: center;">
+                        <h4 style="margin: 0 0 10px; color: #FD7E14; font-weight: 700; font-size: 19px;">
+                            <i class="fa fa-code" aria-hidden="true" style="margin-right: 8px; color: #FD7E14;"></i>Custom Work
+                        </h4>
+                        <p style="margin: 0 0 14px; color: #4A5568; font-size: 14px;">Require specialized authentication rules, SMS integration, or multi-factor extensions?</p>
+                        <a id="btn-support-web" href="https://www.i8cloudconsulting.com" target="_blank" rel="noopener" class="cta-btn"
+                           style="background-color: #FD7E14; border-radius: 10px; display: inline-block; padding: 10px 24px; text-decoration: none; font-weight: 700; color: #fff;">
+                            Visit Website
+                        </a>
+                        <p style="margin: 8px 0 0; font-size: 13px; color: #718096;">www.i8cloudconsulting.com</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- FOOTER COMPANY INFO -->
+<section id="main-footer" class="oe_container" style="padding: 36px 0; background: #F7F9FC; border-top: 1px solid #E2E8F0;">
+    <div class="container text-center">
+        <h2 style="font-weight: 700; font-size: 38px; color: #00308F; margin-bottom: 6px;">About i8CLOUD</h2>
+        <hr style="width: 60px; border: 0; border-top: 4px solid #FD7E14; margin: 8px auto 16px;">
+        <p style="max-width: 850px; margin: 6px auto 26px; color: #4A5568; font-size: 16px; line-height: 1.6;">
+            We are an Odoo Implementation Partner specializing in Odoo Community Edition. We construct robust, high-performance modules for businesses globally, focusing on search systems, security layers, and collaboration.
+        </p>
+
+        <div class="row g-3 mt-2" style="display: flex; flex-wrap: wrap; gap: 16px; justify-content: center;">
+            <div class="col-md-4" style="flex: 1 1 30%;">
+                <div class="about-card shadow" style="border-radius: 16px; padding: 22px 18px; color: #fff; background-color: #2C7BE5; height: 100%; text-align: left; border: 1px solid rgba(255,255,255,0.1);">
+                    <h4 style="margin: 0 0 8px; color: #fff; font-weight: 700; font-size: 19px;">
+                        <i class="fa fa-sitemap" aria-hidden="true" style="margin-right: 6px;"></i>Odoo Implementation
+                    </h4>
+                    <p style="margin: 0; color: rgba(255,255,255,0.9); font-size: 14px; line-height: 1.5;">End-to-end setups, customized system audits, performance optimizations, and user workflows designed for growth.</p>
+                </div>
+            </div>
+            <div class="col-md-4" style="flex: 1 1 30%;">
+                <div class="about-card shadow" style="border-radius: 16px; padding: 22px 18px; color: #fff; background-color: #6F42C1; height: 100%; text-align: left; border: 1px solid rgba(255,255,255,0.1);">
+                    <h4 style="margin: 0 0 8px; color: #fff; font-weight: 700; font-size: 19px;">
+                        <i class="fa fa-puzzle-piece" aria-hidden="true" style="margin-right: 6px;"></i>Custom Modules
+                    </h4>
+                    <p style="margin: 0; color: rgba(255,255,255,0.9); font-size: 14px; line-height: 1.5;">Highly scalable modules built with pristine code standards. From knowledge base portals to secure logins.</p>
+                </div>
+            </div>
+            <div class="col-md-4" style="flex: 1 1 30%;">
+                <div class="about-card shadow" style="border-radius: 16px; padding: 22px 18px; color: #fff; background-color: #20C997; height: 100%; text-align: left; border: 1px solid rgba(255,255,255,0.1);">
+                    <h4 style="margin: 0 0 8px; color: #fff; font-weight: 700; font-size: 19px;">
+                        <i class="fa fa-life-ring" aria-hidden="true" style="margin-right: 6px;"></i>Ongoing Support
+                    </h4>
+                    <p style="margin: 0; color: rgba(255,255,255,0.9); font-size: 14px; line-height: 1.5;">Reliable service level agreements, fast response times, system migrations, and version maintenance updates.</p>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; text-align: center;">
+            <a id="btn-footer-contact" href="mailto:contact@i8cloudconsulting.com?subject=Contact%20i8CLOUD%20%E2%80%93%20Email%20OTP%20Login" class="cta-btn"
+               style="display: inline-block; background-color: #00308F; color: #fff; text-decoration: none; padding: 12px 28px; border-radius: 10px; font-size: 18px; font-weight: 700; border: 1px solid #00308F; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                Talk to our team &rarr;
+            </a>
+            <div style="margin-top: 10px; color: #00308F; font-weight: 700; font-size: 15px;">
+                contact@i8cloudconsulting.com &nbsp;|&nbsp; www.i8cloudconsulting.com
+            </div>
+        </div>
+    </div>
+</section>
+
+</body>
+</html>

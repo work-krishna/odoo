@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data>
+        <record id="otp_email_template_otp_login" model="mail.template">
+            <field name="name">Frontend Form OTP: Event Style</field>
+            <field name="model_id" ref="base.model_res_partner"/>
+            <field name="subject">🔐 {{ ctx.get('otp_code') }} is your  verification code</field>
+            <field name="email_from">{{ (object.company_id.email_formatted or user.email_formatted) }}</field>
+            <field name="email_to">{{ object.email or ctx.get('email_to') }}</field>
+            <field name="body_html" type="html">
+                <div style="background-color: #f4f4f4; padding: 20px; font-family: Arial, Helvetica, sans-serif;">
+                    <t t-set="base_url" t-value="object.get_base_url()"/>
+
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #e0e0e0;">
+
+                        <tr>
+                            <td align="center" style="padding: 40px 20px 20px 20px;">
+                                <img t-attf-src="{{ base_url }}/logo.png" alt=" Logo" style="max-height: 80px; width: auto; margin-bottom: 15px;"/>
+                                <h2 style="margin: 0; color: #8E210B; font-size: 18px; letter-spacing: 2px; text-transform: uppercase; font-weight: bold;">
+                                    i8CLOUD
+
+                                </h2>
+                                <div style="width: 100%; height: 2px; background-color: #8E210B; margin-top: 25px;"></div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td align="center" style="padding: 30px 40px;">
+                                <h1 style="margin: 0; color: #333333; font-size: 24px; font-weight: bold;">Verify Your Email</h1>
+                                <p style="margin: 15px 0 0 0; color: #666666; font-size: 15px; line-height: 1.5;">
+                                   Please use the following One-Time Password (OTP) to complete your login or registration process.
+                                </p>
+
+                                <div style="margin: 40px 0; padding: 30px; border: 2px dashed #D4AF37; border-radius: 12px; background-color: #ffffff;">
+                                    <p style="margin: 0 0 15px 0; color: #8E210B; font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1.5px;">
+                                        Your Verification Code
+                                    </p>
+                                    <div style="display: inline-block; padding: 15px 30px; border: 2px solid #D4AF37; border-radius: 8px; background-color: #ffffff;">
+                                        <span style="font-size: 42px; font-weight: bold; color: #8E210B; letter-spacing: 12px; font-family: 'Courier New', Courier, monospace; -webkit-user-select: all; user-select: all;">
+                                            <t t-out="ctx.get('otp_code')">000000</t>
+                                        </span>
+                                    </div>
+                                    <p style="margin: 15px 0 0 0; color: #999999; font-size: 12px; font-style: italic;">
+                                        This code will expire in 10 minutes.
+                                    </p>
+                                </div>
+
+                                <p style="margin: 0; color: #888888; font-size: 13px;">
+                                    If you did not request this code, please ignore this email safely.
+                                </p>
+                            </td>
+                        </tr>
+
+                    </table>
+
+                </div>
+            </field>
+        </record>
+    </data>
+</odoo>
