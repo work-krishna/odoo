@@ -1,0 +1,840 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="planning_model_planning_role_x_is_a_room_offer_field" model="ir.model.fields">
+    <field name="ttype">boolean</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Is Stay Offer</field>
+    <field name="model_id" ref="planning.model_planning_role"/>
+    <field name="name">x_is_a_room_offer</field>
+  </record>
+  <record id="base_model_res_partner_x_nationality_field" model="ir.model.fields">
+    <field name="ttype">many2one</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Nationality</field>
+    <field name="model_id" ref="base.model_res_partner"/>
+    <field name="name">x_nationality</field>
+    <field name="relation">res.country</field>
+  </record>
+  <record id="base_model_res_partner_x_document_type_field" model="ir.model.fields">
+    <field name="ttype">selection</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Document Type</field>
+    <field name="model_id" ref="base.model_res_partner"/>
+    <field name="name">x_document_type</field>
+  </record>
+  <record id="base_model_res_partner_x_document_type_field_selection_passport" model="ir.model.fields.selection">
+    <field name="name">Passport</field>
+    <field name="field_id" ref="base_model_res_partner_x_document_type_field" />
+    <field name="value">Passport</field>
+  </record>
+  <record id="base_model_res_partner_x_document_type_field_selection_id_card" model="ir.model.fields.selection">
+    <field name="name">ID card</field>
+    <field name="field_id" ref="base_model_res_partner_x_document_type_field" />
+    <field name="value">ID card</field>
+  </record>
+  <record id="base_model_res_partner_x_document_type_field_selection_driving_license" model="ir.model.fields.selection">
+    <field name="name">Driving license</field>
+    <field name="field_id" ref="base_model_res_partner_x_document_type_field" />
+    <field name="value">Driving license</field>
+  </record>
+  <record id="base_model_res_partner_x_document_number_field" model="ir.model.fields">
+    <field name="ttype">char</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Document Number</field>
+    <field name="model_id" ref="base.model_res_partner"/>
+    <field name="name">x_document_number</field>
+  </record>
+  <record id="base_model_res_partner_x_identity_check_field" model="ir.model.fields">
+    <field name="ttype">selection</field>
+    <field name="depends">x_nationality, x_document_type, x_document_number</field>
+    <field name="field_description">Identity Check</field>
+    <field name="model_id" ref="base.model_res_partner"/>
+    <field name="name">x_identity_check</field>
+    <field name="readonly" eval="True"/>
+    <field name="selectable" eval="False"/>
+    <field name="store" eval="False"/>
+  </record>
+  <record id="base_model_res_partner_x_identity_check_field_selection_na" model="ir.model.fields.selection">
+    <field name="name">NA</field>
+    <field name="field_id" ref="base_model_res_partner_x_identity_check_field" />
+    <field name="value">na</field>
+  </record>
+  <record id="base_model_res_partner_x_identity_check_field_selection_ok" model="ir.model.fields.selection">
+    <field name="name">OK</field>
+    <field name="field_id" ref="base_model_res_partner_x_identity_check_field" />
+    <field name="value">ok</field>
+  </record>
+  <record id="base_model_res_partner_x_identity_check_field_selection_invalid" model="ir.model.fields.selection">
+    <field name="name">Invalid</field>
+    <field name="field_id" ref="base_model_res_partner_x_identity_check_field" />
+    <field name="value">invalid</field>
+  </record>
+  <record id="base_model_res_partner_x_identity_check_field" model="ir.model.fields">
+    <field name="compute"><![CDATA[for record in self:
+    if not record.x_nationality and not record.x_document_type and not record.x_document_number:
+        record['x_identity_check'] = 'na'
+    elif record.x_nationality and record.x_document_type and record.x_document_number:
+        record['x_identity_check'] = 'ok'
+    else: record['x_identity_check'] = 'invalid'
+]]></field>
+  </record>
+  <record id="product_model_product_template_x_is_a_room_offer_field" model="ir.model.fields">
+    <field name="ttype">boolean</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Is Stay Offer</field>
+    <field name="model_id" ref="product.model_product_template"/>
+    <field name="name">x_is_a_room_offer</field>
+  </record>
+  <record id="product_model_product_template_x_has_city_tax_field" model="ir.model.fields">
+    <field name="ttype">boolean</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Has City Tax</field>
+    <field name="model_id" ref="product.model_product_template"/>
+    <field name="name">x_has_city_tax</field>
+  </record>
+  <record id="product_model_product_template_x_offer_type" model="ir.model.fields">
+    <field name="ttype">selection</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Offer Type</field>
+    <field name="model_id" ref="product.model_product_template"/>
+    <field name="help">Used by channel manager and OTAs to categorize offers.</field>
+    <field name="name">x_offer_type</field>
+  </record>
+  <record id="product_model_product_template_x_offer_type_selection_1" model="ir.model.fields.selection">
+    <field name="name">Standard</field>
+    <field name="field_id" ref="product_model_product_template_x_offer_type" />
+    <field name="value">STD</field>
+  </record>
+  <record id="product_model_product_template_x_offer_type_selection_2" model="ir.model.fields.selection">
+    <field name="name">Budget / Economy</field>
+    <field name="field_id" ref="product_model_product_template_x_offer_type" />
+    <field name="value">ECO</field>
+  </record>
+  <record id="product_model_product_template_x_offer_type_selection_3" model="ir.model.fields.selection">
+    <field name="name">Superior</field>
+    <field name="field_id" ref="product_model_product_template_x_offer_type" />
+    <field name="value">SUP</field>
+  </record>
+  <record id="product_model_product_template_x_offer_type_selection_4" model="ir.model.fields.selection">
+    <field name="name">Deluxe</field>
+    <field name="field_id" ref="product_model_product_template_x_offer_type" />
+    <field name="value">DLX</field>
+  </record>
+  <record id="product_model_product_template_x_offer_type_selection_5" model="ir.model.fields.selection">
+    <field name="name">Junior Suite</field>
+    <field name="field_id" ref="product_model_product_template_x_offer_type" />
+    <field name="value">JRST</field>
+  </record>
+  <record id="product_model_product_template_x_offer_type_selection_6" model="ir.model.fields.selection">
+    <field name="name">Suite</field>
+    <field name="field_id" ref="product_model_product_template_x_offer_type" />
+    <field name="value">SUI</field>
+  </record>
+  <record id="product_model_product_template_x_is_stay_tax_field" model="ir.model.fields">
+    <field name="ttype">boolean</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Is City Tax</field>
+    <field name="model_id" ref="product.model_product_template"/>
+    <field name="name">x_is_stay_tax</field>
+  </record>
+  <record id="product_model_product_template_x_resource_ids_field" model="ir.model.fields">
+    <field name="ttype">many2many</field>
+    <field name="field_description">Resources</field>
+    <field name="model_id" ref="product.model_product_template"/>
+    <field name="name">x_resource_ids</field>
+    <field name="related">planning_role_id.resource_ids</field>
+    <field name="relation">resource.resource</field>
+  </record>
+  <record id="sale_model_sale_order_x_nights_field" model="ir.model.fields">
+    <field name="ttype">integer</field>
+    <field name="field_description">Nights</field>
+    <field name="readonly" eval="True"/>
+    <field name="model_id" ref="sale.model_sale_order_line"/>
+    <field name="copied" eval="False"/>
+    <field name="name">x_nights</field>
+  </record>
+  <record id="sale_order_x_order_involves_room" model="ir.model.fields">
+    <field name="ttype">boolean</field>
+    <field name="field_description">Order Involves Room</field>
+    <field name="model_id" ref="sale.model_sale_order"/>
+    <field name="name">x_order_involves_room</field>
+    <field name="compute"><![CDATA[
+for record in self: record['x_order_involves_room'] = any(line.product_id.x_is_a_room_offer for line in record.order_line)
+]]></field>
+    <field name="depends">order_line</field>
+  </record>
+    <record id="sale_model_sale_order_x_picked_up" model="ir.model.fields">
+    <field name="ttype">boolean</field>
+    <field name="field_description">Picked up</field>
+    <field name="readonly" eval="True"/>
+    <field name="model_id" ref="sale.model_sale_order"/>
+    <field name="name">x_picked_up</field>
+    <field name="compute"><![CDATA[for record in self:
+    record['x_picked_up'] = False
+    if record.state == 'sale' and record.is_rental_order:
+        rental_order_lines = record.order_line.filtered(lambda line: line.is_rental and line.product_type != 'combo')
+        record['x_picked_up'] = not any(sol.qty_delivered < sol.product_uom_qty for sol in rental_order_lines)
+]]></field>
+    <field name="depends">order_line.qty_delivered</field>
+  </record>
+  <record id="resource_x_on_going_booking" model="ir.model.fields">
+    <field name="ttype">one2many</field>
+    <field name="domain">[('sale_line_id.qty_delivered', '&gt;', 0), ('sale_line_id.qty_returned', '=', 0)]</field>
+    <field name="field_description">Ongoing Booking</field>
+    <field name="model_id" ref="resource.model_resource_resource"/>
+    <field name="relation">planning.slot</field>
+    <field name="relation_field">resource_id</field>
+    <field name="name">x_ongoing_booking</field>
+  </record>
+  <record id="model_product_attribute_x_captures_guests" model="ir.model.fields">
+    <field name="ttype">boolean</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Captures Guests</field>
+    <field name="model_id" ref="product.model_product_attribute"/>
+    <field name="name">x_captures_guests</field>
+  </record>
+  <record id="model_product_attribute_value_x_adults" model="ir.model.fields">
+    <field name="ttype">integer</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Adults</field>
+    <field name="model_id" ref="product.model_product_attribute_value"/>
+    <field name="name">x_adults</field>
+  </record>
+  <record id="model_product_attribute_value_x_children" model="ir.model.fields">
+    <field name="ttype">integer</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Children</field>
+    <field name="model_id" ref="product.model_product_attribute_value"/>
+    <field name="name">x_children</field>
+  </record>
+  <record id="model_sale_order_line_x_total_guests" model="ir.model.fields">
+    <field name="compute"><![CDATA[for record in self:
+    x_total_guests = 0
+    for product_template_attribute_value in record.product_id.product_template_attribute_value_ids:
+        if product_template_attribute_value.attribute_id.x_captures_guests:
+            if product_attribute_value := product_template_attribute_value.attribute_id.value_ids.filtered(lambda v: v.id == product_template_attribute_value.product_attribute_value_id.id):
+                x_total_guests += product_attribute_value.x_adults + product_attribute_value.x_children
+    record['x_total_guests'] = x_total_guests
+    ]]></field>
+    <field name="ttype">integer</field>
+    <field name="depends">product_id</field>
+    <field name="field_description">Guests</field>
+    <field name="model_id" ref="sale.model_sale_order_line"/>
+    <field name="name">x_total_guests</field>
+    <field name="readonly" eval="True"/>
+    <field name="selectable" eval="False"/>
+    <field name="store" eval="False"/>
+  </record>
+  <record id="model_sale_order_line_x_resource_id" model="ir.model.fields">
+    <field name="ttype">many2one</field>
+    <field name="related">planning_slot_ids.resource_id</field>
+    <field name="field_description">Resource</field>
+    <field name="model_id" ref="sale.model_sale_order_line"/>
+    <field name="name">x_resource_id</field>
+    <field name="readonly" eval="True"/>
+    <field name="relation">resource.resource</field>
+    <field name="store" eval="False"/>
+  </record>
+  <record id="resource_x_is_stay_resource" model="ir.model.fields">
+    <field name="ttype">boolean</field>
+    <field name="field_description">Is Stay Resource</field>
+    <field name="model_id" ref="resource.model_resource_resource"/>
+    <field name="name">x_is_stay_resource</field>
+  </record>
+  <record id="model_planning_slot_x_nights" model="ir.model.fields">
+    <field name="ttype">integer</field>
+    <field name="field_description">Nights</field>
+    <field name="model_id" ref="planning.model_planning_slot"/>
+    <field name="depends">start_datetime, end_datetime</field>
+    <field name="name">x_nights</field>
+    <field name="compute"><![CDATA[
+for record in self: record['x_nights'] = ((record.end_datetime - record.start_datetime).total_seconds() + 86399) // 86400 if (record.start_datetime and record.end_datetime) else 0
+]]></field>
+  </record>
+  <record id="model_planning_slot_x_guests" model="ir.model.fields">
+    <field name="ttype">integer</field>
+    <field name="field_description">Guests</field>
+    <field name="model_id" ref="planning.model_planning_slot"/>
+    <field name="name">x_guests</field>
+    <field name="related">sale_line_id.x_total_guests</field>
+  </record>
+  <record id="model_planning_slot_x_city_tax" model="ir.model.fields">
+    <field name="ttype">integer</field>
+    <field name="field_description">City tax count</field>
+    <field name="model_id" ref="planning.model_planning_slot"/>
+    <field name="depends">x_nights, x_guests</field>
+    <field name="name">x_city_tax</field>
+    <field name="compute"><![CDATA[
+for record in self: record['x_city_tax'] = record.x_nights * record.x_guests
+]]></field>
+  </record>
+  <record id="x_model_city_tax_x_sale_order_id" model="ir.model.fields">
+    <field name="ttype">many2one</field>
+    <field name="field_description">Sale order</field>
+    <field name="model_id" ref="x_model_city_tax"/>
+    <field name="relation">sale.order</field>
+    <field name="name">x_sale_order_id</field>
+    <field name="readonly" eval="True"/>
+  </record>
+  <record id="x_model_city_tax_x_slot_ids" model="ir.model.fields">
+    <field name="ttype">many2many</field>
+    <field name="field_description">Slots</field>
+    <field name="model_id" ref="x_model_city_tax"/>
+    <field name="relation">planning.slot</field>
+    <field name="name">x_slot_ids</field>
+    <field name="depends">x_sale_order_id</field>
+    <field name="compute"><![CDATA[
+for record in self: record['x_slot_ids'] = record.x_sale_order_id.order_line.planning_slot_ids.filtered(lambda s: any(product.x_has_city_tax for product in s.role_product_ids)).ids
+      ]]></field>
+  </record>
+  <record id="x_model_city_tax_x_total" model="ir.model.fields">
+    <field name="ttype">integer</field>
+    <field name="field_description">Total</field>
+    <field name="model_id" ref="x_model_city_tax"/>
+    <field name="relation_field">planning_total</field>
+    <field name="name">x_total</field>
+    <field name="depends">x_slot_ids, x_slot_ids.x_city_tax</field>
+    <field name="compute"><![CDATA[
+for record in self: record['x_total'] = sum(record.x_slot_ids.mapped('x_city_tax'))
+]]></field>
+    <field name="readonly" eval="True"/>
+    <field name="store" eval="False"/>
+  </record>
+  <record id="x_model_guests_line_x_sequence" model="ir.model.fields">
+    <field name="ttype">integer</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Sequence</field>
+    <field name="model_id" ref="x_model_guests_line"/>
+    <field name="name">x_sequence</field>
+  </record>
+  <record id="x_model_guests_line_x_name" model="ir.model.fields">
+    <field name="ttype">char</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Description</field>
+    <field name="model_id" ref="x_model_guests_line"/>
+    <field name="name">x_name</field>
+    <field name="translate">standard</field>
+  </record>
+  <record id="x_model_guests_line_x_sale_order_id" model="ir.model.fields">
+    <field name="ttype">many2one</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Sale Order</field>
+    <field name="model_id" ref="x_model_guests_line"/>
+    <field name="name">x_sale_order_id</field>
+    <field name="relation">sale.order</field>
+  </record>
+  <record id="x_model_guests_line_x_guest_partner_id" model="ir.model.fields">
+    <field name="ttype">many2one</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Guest</field>
+    <field name="model_id" ref="x_model_guests_line"/>
+    <field name="name">x_guest_partner_id</field>
+    <field name="relation">res.partner</field>
+  </record>
+  <record id="x_model_guests_line_x_room_resource_id" model="ir.model.fields">
+    <field name="ttype">many2one</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Room</field>
+    <field name="model_id" ref="x_model_guests_line"/>
+    <field name="name">x_room_resource_id</field>
+    <field name="relation">resource.resource</field>
+  </record>
+  <record id="x_model_guests_line_x_sol_resource_ids" model="ir.model.fields">
+    <field name="ttype">many2many</field>
+    <field name="field_description">Resource IDs</field>
+    <field name="model_id" ref="x_model_guests_line"/>
+    <field name="name">x_sol_resource_ids</field>
+    <field name="relation">resource.resource</field>
+    <field name="depends">x_sale_order_id.order_line</field>
+    <field name="store" eval="False"/>
+    <field name="compute"><![CDATA[ 
+for record in self: record['x_sol_resource_ids'] = record.x_sale_order_id.mapped('order_line.x_resource_id.id')
+      ]]></field>
+  </record>
+  <record id="x_model_guests_line_x_guest_identity_check" model="ir.model.fields">
+    <field name="ttype">selection</field>
+    <field name="related">x_guest_partner_id.x_identity_check</field>
+    <field name="field_description">Identity Check</field>
+    <field name="model_id" ref="x_model_guests_line"/>
+    <field name="name">x_guest_identity_check</field>
+    <field name="readonly" eval="True"/>
+    <field name="selectable" eval="False"/>
+    <field name="store" eval="False"/>
+  </record>
+  <record id="model_sale_order_x_guest_line_ids" model="ir.model.fields">
+    <field name="ttype">one2many</field>
+    <field name="field_description">Guest Line</field>
+    <field name="model_id" ref="sale.model_sale_order"/>
+    <field name="name">x_guest_line_ids</field>
+    <field name="relation">x_guests_line</field>
+    <field name="relation_field">x_sale_order_id</field>
+  </record>
+  <record id="sale_model_sale_order_x_guests_field" model="ir.model.fields">
+    <field name="ttype">many2many</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Guests</field>
+    <field name="model_id" ref="sale.model_sale_order"/>
+    <field name="name">x_guests</field>
+    <field name="relation">res.partner</field>
+    <field name="relation_table">x_res_partner_sale_order_rel</field>
+    <field name="depends">x_guest_line_ids</field>
+    <field name="compute"><![CDATA[
+for record in self:  record['x_guests'] = [(6, 0, record.x_guest_line_ids.mapped('x_guest_partner_id').ids)]
+      ]]></field>
+  </record>
+  <record id="rental_order_wizard_x_resource_id" model="ir.model.fields">
+    <field name="ttype">many2one</field>
+    <field name="field_description">Resource</field>
+    <field name="model_id" ref="sale_renting.model_rental_order_wizard_line"/>
+    <field name="name">x_resource_id</field>
+    <field name="relation">resource.resource</field>
+    <field name="related">order_line_id.x_resource_id</field>
+  </record>
+  <record id="resource_x_occupant_ids" model="ir.model.fields">
+    <field name="name">x_occupant_ids</field>
+    <field name="field_description">Occupant</field>
+    <field name="ttype">many2many</field>
+    <field name="model_id" ref="resource.model_resource_resource"/>
+    <field name="relation">res.partner</field>
+    <field name="readonly" eval="True"/>
+    <field name="depends">x_ongoing_booking.sale_order_id.x_guest_line_ids, x_ongoing_booking</field>
+    <field name="compute"><![CDATA[
+for record in self: record['x_occupant_ids'] = [(6, 0, record.x_ongoing_booking[:1].sale_order_id.x_guest_line_ids.filtered(lambda l: l.x_room_resource_id.id == record.id).mapped('x_guest_partner_id').ids)] if record.x_ongoing_booking else [(5, 0, 0)]
+  ]]></field>
+  </record>
+  <record id="res_partner_x_ongoing_bookings" model="ir.model.fields">
+    <field name="ttype">many2many</field>
+    <field name="field_description">Current Resource</field>
+    <field name="model_id" ref="base.model_res_partner"/>
+    <field name="relation">resource.resource</field>
+    <field name="readonly" eval="True"/>
+    <field name="name">x_ongoing_bookings</field>
+    <field name="compute"><![CDATA[ 
+for record in self: record['x_ongoing_bookings'] = self.env['resource.resource'].search([('x_occupant_ids', 'in', record.id)]).ids
+    ]]></field>
+    <field name="store" eval="False"/>
+  </record>
+  <record id="res_partner_x_guests_count" model="ir.model.fields">
+    <field name="compute"><![CDATA[
+for record in self: record['x_guests_count'] = self.env['x_guests_line'].search_count([('x_guest_partner_id.id', '=', record.id)])
+]]></field>
+    <field name="ttype">integer</field>
+    <field name="field_description">Guests count</field>
+    <field name="model_id" ref="base.model_res_partner"/>
+    <field name="selectable" eval="False"/>
+    <field name="store" eval="False"/>
+    <field name="readonly" eval="True"/>
+    <field name="name">x_guests_count</field>
+  </record>
+
+  <!-- House Keeping -->
+    <!-- Planning.role fields -->
+    <record id="_x_has_stayover_cleaning_field_planning_role" model="ir.model.fields">
+        <field name="ttype">boolean</field>
+        <field name="field_description">Stayover Cleaning</field>
+        <field name="model_id" ref="planning.model_planning_role"/>
+        <field name="name">x_has_stayover_cleaning</field>
+        <field name="help">When set, on a daily basis, stay-over house keeping tasks are created for resources in stay-over occupancy.</field>
+    </record>
+    <record id="x_has_checkout_cleaning_field_planning_role" model="ir.model.fields">
+        <field name="ttype">boolean</field>
+        <field name="field_description">Checkout Cleaning</field>
+        <field name="model_id" ref="planning.model_planning_role"/>
+        <field name="name">x_has_checkout_cleaning</field>
+        <field name="help">When set, on a daily basis, check-out house keeping tasks are created for resources in due out occupancy.</field>
+    </record>
+
+    <!-- Product.product fields -->
+    <record id="_x_has_stayover_cleaning_field_product_template" model="ir.model.fields">
+        <field name="ttype">boolean</field>
+        <field name="field_description">Stayover Cleaning</field>
+        <field name="model_id" ref="product.model_product_template"/>
+        <field name="related">planning_role_id.x_has_stayover_cleaning</field>
+        <field name="store" eval="False"/>
+        <field name="name">x_related_has_stayover_cleaning</field>
+        <field name="help">When set, on a daily basis, stay-over house keeping tasks are created for resources in stay-over occupancy.</field>
+    </record>
+    <record id="x_has_checkout_cleaning_field_product_template" model="ir.model.fields">
+        <field name="ttype">boolean</field>
+        <field name="field_description">Checkout Cleaning</field>
+        <field name="model_id" ref="product.model_product_template"/>
+        <field name="related">planning_role_id.x_has_checkout_cleaning</field>
+        <field name="store" eval="False"/>
+        <field name="name">x_related_has_checkout_cleaning</field>
+        <field name="help">When set, on a daily basis, check-out house keeping tasks are created for resources in due out occupancy.</field>
+    </record>
+
+    <!-- Project.project fields -->
+    <record id="x_is_house_keeping_project_field_project_project" model="ir.model.fields">
+        <field name="name">x_is_house_keeping_project</field>
+        <field name="ttype">boolean</field>
+        <field name="field_description">House Keeping Project</field>
+        <field name="help"><![CDATA[When set, the tasks from this project are used for house keeping management in the accommodation app.]]></field>
+        <field name="readonly" eval="True"/>
+        <field name="model_id" ref="project.model_project_project" />
+    </record>
+
+    <!-- project.task fields -->
+    <record id="x_resource_id_field_resource_resource" model="ir.model.fields">
+        <field name="name">x_resource_id</field>
+        <field name="ttype">many2one</field>
+        <field name="field_description">Resource</field>
+        <field name="model_id" ref="project.model_project_task" />
+        <field name="relation">resource.resource</field>
+    </record>
+    <record id="x_employee_id_field_project_task" model="ir.model.fields">
+        <field name="name">x_employee_id</field>
+        <field name="ttype">many2one</field>
+        <field name="field_description">Employee</field>
+        <field name="model_id" ref="project.model_project_task" />
+        <field name="relation">hr.employee</field>
+    </record>
+    <record id="x_cleaning_field_project_task" model="ir.model.fields">
+        <field name="name">x_cleaning</field>
+        <field name="ttype">selection</field>
+        <field name="field_description">Cleaning</field>
+        <field name="model_id" ref="project.model_project_task" />
+    </record>
+    <record id="x_cleaning_field_selection_stayover" model="ir.model.fields.selection">
+        <field name="name">Stayover</field>
+        <field name="field_id" ref="x_cleaning_field_project_task" />
+        <field name="value">stayover</field>
+    </record>
+    <record id="x_cleaning_field_selection_checkout" model="ir.model.fields.selection">
+        <field name="name">Checkout</field>
+        <field name="field_id" ref="x_cleaning_field_project_task" />
+        <field name="value">checkout</field>
+    </record>
+
+    <!-- resource.resource fields -->
+    <record id="x_occupancy_field_resource_resource" model="ir.model.fields">
+        <field name="name">x_occupancy</field>
+        <field name="ttype">selection</field>
+        <field name="field_description">Occupancy</field>
+        <field name="model_id" ref="resource.model_resource_resource" />
+    </record>
+    <record id="x_occupancy_field_selection_vacant" model="ir.model.fields.selection">
+        <field name="name">Vacant</field>
+        <field name="field_id" ref="x_occupancy_field_resource_resource" />
+        <field name="value">vacant</field>
+    </record>
+    <record id="x_occupancy_field_selection_occupied" model="ir.model.fields.selection">
+        <field name="name">Occupied</field>
+        <field name="field_id" ref="x_occupancy_field_resource_resource" />
+        <field name="value">occupied</field>
+    </record>
+    <record id="x_occupancy_field_selection_stayover" model="ir.model.fields.selection">
+        <field name="name">Stayover</field>
+        <field name="field_id" ref="x_occupancy_field_resource_resource" />
+        <field name="value">stayover</field>
+    </record>
+    <record id="x_occupancy_field_selection_due_out" model="ir.model.fields.selection">
+        <field name="name">Due Out</field>
+        <field name="field_id" ref="x_occupancy_field_resource_resource" />
+        <field name="value">due_out</field>
+    </record>
+
+    <record id="x_task_ids_field_project_task" model="ir.model.fields">
+        <field name="name">x_task_ids</field>
+        <field name="ttype">one2many</field>
+        <field name="field_description">Tasks</field>
+        <field name="model_id" ref="resource.model_resource_resource" />
+        <field name="relation">project.task</field>
+        <field name="relation_field">x_resource_id</field>
+    </record>
+    <record id="x_ongoing_task_id_field_resource_resource" model="ir.model.fields">
+        <field name="name">x_ongoing_task_id</field>
+        <field name="compute"><![CDATA[
+for record in self:
+    record['x_ongoing_task_id'] = False
+    for task in record.x_task_ids:
+        if not task.is_closed : record['x_ongoing_task_id'] = task.id
+]]></field>
+        <field name="ttype">many2one</field>
+        <field name="depends">x_task_ids, x_task_ids.stage_id</field>
+        <field name="field_description">Ongoing Task</field>
+        <field name="model_id" ref="resource.model_resource_resource" />
+        <field name="readonly" eval="True" />
+        <field name="relation">project.task</field>
+    </record>
+    <record id="x_house_keeping_stage_id_field_resource_resource" model="ir.model.fields">
+        <field name="name">x_house_keeping_stage_id</field>
+        <field name="ttype">many2one</field>
+        <field name="field_description">House Keeping Stage</field>
+        <field name="model_id" ref="resource.model_resource_resource" />
+        <field name="relation">project.task.type</field>
+        <field name="related">x_ongoing_task_id.stage_id</field>
+    </record>
+    <record id="x_is_in_stage_clean_field_resource_resource" model="ir.model.fields">
+        <field name="name">x_is_in_stage_clean</field>
+        <field name="ttype">boolean</field>
+        <field name="field_description">Is In House Keeping Stage Clean</field>
+        <field name="model_id" ref="resource.model_resource_resource" />
+        <field name="depends">x_house_keeping_stage_id</field>
+        <field name="compute"><![CDATA[
+for record in self: record['x_is_in_stage_clean'] = record.x_house_keeping_stage_id and record.x_house_keeping_stage_id == record.env.ref('booking_engine.project_task_type_17', raise_if_not_found=False)
+]]></field>
+    </record>
+    <record id="x_resource_employee_id_field_resource_resource" model="ir.model.fields">
+        <field name="name">x_resource_employee_id</field>
+        <field name="ttype">many2one</field>
+        <field name="related">x_ongoing_task_id.x_employee_id</field>
+        <field name="field_description">Task Employee</field>
+        <field name="model_id" ref="resource.model_resource_resource" />
+        <field name="readonly" eval="True" />
+        <field name="relation">hr.employee</field>
+        <field name="store" eval="False" />
+    </record>
+
+    <record id="x_task_occupancy_field_project_task" model="ir.model.fields">
+        <field name="name">x_task_occupancy</field>
+        <field name="ttype">selection</field>
+        <field name="related">x_resource_id.x_occupancy</field>
+        <field name="field_description">Occupancy</field>
+        <field name="model_id" ref="project.model_project_task" />
+        <field name="readonly" eval="True" />
+        <field name="store" eval="False" />
+    </record>
+
+    <!-- Colors for fields -->
+    <record id="x_cleaning_color_field_project_task" model="ir.model.fields">
+        <field name="ttype">integer</field>
+        <field name="field_description">Cleaning Color</field>
+        <field name="model_id" ref="project.model_project_task" />
+        <field name="name">x_cleaning_color</field>
+        <field name="store" eval="False"/>
+        <field name="depends">x_cleaning</field>
+        <field name="compute"><![CDATA[
+for record in self: record['x_cleaning_color'] = 1 if record.x_cleaning == 'checkout' else 3        
+]]></field>
+    </record>
+    <record id="x_occupancy_color_field_resource_resource" model="ir.model.fields">
+        <field name="ttype">integer</field>
+        <field name="field_description">Occupancy Color</field>
+        <field name="model_id" ref="resource.model_resource_resource" />
+        <field name="name">x_occupancy_color</field>
+        <field name="depends">x_occupancy</field>
+        <field name="compute"><![CDATA[
+for record in self: record['x_occupancy_color'] = 13 if record.x_occupancy == 'vacant' else 3
+]]></field>
+    </record>
+    <record id="x_task_stage_color_field_project_task" model="ir.model.fields">
+        <field name="ttype">integer</field>
+        <field name="field_description">Task Stage Color</field>
+        <field name="model_id" ref="resource.model_resource_resource" />
+        <field name="name">x_task_stage_color</field>
+        <field name="store" eval="False"/>
+        <field name="related">x_house_keeping_stage_id.color</field>
+    </record>
+    <record id="x_task_occupancy_color_field_project_task" model="ir.model.fields">
+        <field name="ttype">integer</field>
+        <field name="field_description">Occupancy Color</field>
+        <field name="model_id" ref="project.model_project_task" />
+        <field name="name">x_task_occupancy_color</field>
+        <field name="store" eval="False"/>
+        <field name="related">x_resource_id.x_occupancy_color</field>
+    </record>
+  <record id="x_name_field_x_availability" model="ir.model.fields">
+    <field name="ttype">char</field>
+    <field name="field_description">Description</field>
+    <field name="model_id" ref="x_model_availability"/>
+    <field name="name">x_name</field>
+  </record>
+  <record id="x_active_field_x_availability" model="ir.model.fields">
+    <field name="ttype">boolean</field>
+    <field name="field_description">Active</field>
+    <field name="model_id" ref="x_model_availability"/>
+    <field name="name">x_active</field>
+    <field name="readonly" eval="True"/>
+  </record>
+  <record id="x_to_recompute_field_x_availability" model="ir.model.fields">
+    <field name="ttype">boolean</field>
+    <field name="field_description">To Recompute</field>
+    <field name="model_id" ref="x_model_availability"/>
+    <field name="name">x_to_recompute</field>
+  </record>
+  <record id="x_sequence_field_x_availability" model="ir.model.fields">
+    <field name="ttype">integer</field>
+    <field name="field_description">Sequence</field>
+    <field name="model_id" ref="x_model_availability"/>
+    <field name="name">x_sequence</field>
+    <field name="readonly" eval="True"/>
+  </record>
+  <record id="x_stay_offer_field_x_availability" model="ir.model.fields">
+    <field name="ttype">many2one</field>
+    <field name="domain">[("x_is_a_room_offer", "!=", False)]</field>
+    <field name="field_description">Stay Offer</field>
+    <field name="model_id" ref="x_model_availability"/>
+    <field name="name">x_stay_offer_id</field>
+    <field name="relation">product.template</field>
+    <field name="readonly" eval="True"/>
+  </record>
+  <record id="x_date_field_x_availability" model="ir.model.fields">
+    <field name="ttype">date</field>
+    <field name="field_description">Date</field>
+    <field name="model_id" ref="x_model_availability"/>
+    <field name="name">x_date</field>
+    <field name="readonly" eval="True"/>
+  </record>
+  <record id="x_total_units_field_x_availability" model="ir.model.fields">
+    <field name="ttype">integer</field>
+    <field name="field_description">Total Units</field>
+    <field name="model_id" ref="x_model_availability"/>
+    <field name="name">x_total_units</field>
+    <field name="readonly" eval="True"/>
+  </record>
+  <record id="x_booked_field_x_availability" model="ir.model.fields">
+    <field name="ttype">integer</field>
+    <field name="field_description">Booked</field>
+    <field name="model_id" ref="x_model_availability"/>
+    <field name="name">x_booked</field>
+    <field name="readonly" eval="True"/>
+  </record>
+  <record id="x_available_field_x_availability" model="ir.model.fields">
+    <field name="compute"><![CDATA[for record in self: record['x_available'] = record.x_total_units - record.x_booked]]></field>
+    <field name="ttype">integer</field>
+    <field name="depends">x_total_units,x_booked</field>
+    <field name="field_description">Available</field>
+    <field name="model_id" ref="x_model_availability"/>
+    <field name="name">x_available</field>
+    <field name="readonly" eval="True"/>
+    <field name="store" eval="False"/>
+  </record>
+  <record id="x_availability_field_x_availability" model="ir.model.fields">
+    <field name="compute"><![CDATA[for record in self:
+      record['x_availability'] = record.x_available / record.x_total_units if record.x_total_units > 0 else 0]]></field>
+    <field name="ttype">float</field>
+    <field name="depends">x_available,x_total_units</field>
+    <field name="field_description">Availability</field>
+    <field name="model_id" ref="x_model_availability"/>
+    <field name="name">x_availability</field>
+    <field name="readonly" eval="True"/>
+    <field name="selectable" eval="False"/>
+    <field name="store" eval="False"/>
+  </record>
+  <record id="x_occupancy_field_x_availability" model="ir.model.fields">
+    <field name="compute"><![CDATA[for record in self:
+      record['x_occupancy'] = 0 if not record.x_total_units else 1 - record.x_available / record.x_total_units ]]></field>
+    <field name="ttype">float</field>
+    <field name="depends">x_available,x_total_units</field>
+    <field name="field_description">Occupancy</field>
+    <field name="model_id" ref="x_model_availability"/>
+    <field name="name">x_occupancy</field>
+    <field name="readonly" eval="True"/>
+    <field name="selectable" eval="False"/>
+    <field name="store" eval="False"/>
+  </record>
+  <record id="x_occupancy_color_field_x_availability" model="ir.model.fields">
+    <field name="ttype">integer</field>
+    <field name="depends">x_availability,x_total_units</field>
+    <field name="field_description">Occupancy Color</field>
+    <field name="model_id" ref="x_model_availability"/>
+    <field name="name">x_occupancy_color</field>
+    <field name="readonly" eval="True"/>
+    <field name="selectable" eval="False"/>
+    <field name="store" eval="False"/>
+    <field name="compute"><![CDATA[
+for r in self:
+    # Directly return the integer index (0-9)
+    r['x_occupancy_color'] = 0 if r.x_total_units == 0 else min(9, max(0, int(r.x_availability * 10)))
+]]></field>
+  </record>
+  <record id="x_availability_color_field_x_availability" model="ir.model.fields">
+    <field name="ttype">integer</field>
+    <field name="depends">x_total_units,x_availability</field>
+    <field name="field_description">Availability Color</field>
+    <field name="model_id" ref="x_model_availability"/>
+    <field name="name">x_availability_color</field>
+    <field name="readonly" eval="True"/>
+    <field name="selectable" eval="False"/>
+    <field name="store" eval="False"/>
+    <field name="compute"><![CDATA[
+for r in self:
+    # Directly return the integer index (0-9)
+    r['x_availability_color'] = 0 if r.x_total_units == 0 else min(9, max(0, int((1 - r.x_availability) * 10)))]]></field>
+  </record>
+  <record id="x_availability_ids_field_planning_slot" model="ir.model.fields">
+    <field name="ttype">many2many</field>
+    <field name="field_description">Availabilities</field>
+    <field name="model_id" ref="planning.model_planning_slot"/>
+    <field name="name">x_availability_ids</field>
+    <field name="relation">x_availability</field>
+    <field name="readonly" eval="True"/>
+  </record>
+  <record id="x_availability_ids_field_resource_calendar_leaves" model="ir.model.fields">
+    <field name="ttype">many2many</field>
+    <field name="field_description">Availabilities</field>
+    <field name="model_id" ref="resource.model_resource_calendar_leaves"/>
+    <field name="name">x_availability_ids</field>
+    <field name="relation">x_availability</field>
+    <field name="readonly" eval="True"/>
+  </record>
+  <record id="x_is_customer_satisfaction_survey_field" model="ir.model.fields">
+      <field name="name">x_is_customer_satisfaction_survey</field>
+      <field name="field_description">Is Customer Satisfaction Survey</field>
+      <field name="model_id" ref="survey.model_survey_survey"/>
+      <field name="ttype">boolean</field>
+      <field name="help"><![CDATA[When set, the survey email will be sent automatically to rental order customers.
+Note that saving a new survey with this set will archive previous survey with this setting to become the default satisfaction survey.]]></field>
+  </record>
+  <record id="x_email_delay_field" model="ir.model.fields">
+      <field name="name">x_email_delay</field>
+      <field name="field_description">Email Delay</field>
+      <field name="model_id" ref="survey.model_survey_survey"/>
+      <field name="ttype">integer</field>
+  </record>
+  <record id="x_is_survey_sent_field" model="ir.model.fields">
+      <field name="name">x_is_survey_sent</field>
+      <field name="field_description">Is Survey Sent</field>
+      <field name="model_id" ref="sale.model_sale_order"/>
+      <field name="ttype">boolean</field>
+  </record>
+  <record id="x_booking_color_field" model="ir.model.fields">
+    <field name="name">x_booking_color</field>
+    <field name="field_description">Booking Color</field>
+    <field name="model_id" ref="planning.model_planning_slot"/>
+    <field name="ttype">integer</field>
+    <field name="store" eval="False"/>
+    <field name="depends">sale_order_id.rental_status,sale_order_id.rental_start_date,sale_order_id.rental_return_date,sale_order_id.is_late</field>
+    <field name="compute"><![CDATA[
+today_start = datetime.datetime.combine(datetime.date.today(), datetime.time.min)
+today_end = datetime.datetime.combine(datetime.date.today(), datetime.time.max)
+
+for slot in self:
+    order = slot.sale_order_id
+    if not order:
+        slot['x_booking_color'] = 5   # purple - internal
+    elif order.rental_status == 'pickup' and order.rental_start_date and today_start <= order.rental_start_date <= today_end:
+        slot['x_booking_color'] = 3   # yellow - check in due
+    elif order.rental_status == 'return' and order.rental_return_date and order.rental_return_date > today_end:
+        slot['x_booking_color'] = 10  # green - ongoing
+    elif order.rental_status == 'return' and order.rental_return_date and today_start <= order.rental_return_date <= today_end:
+        slot['x_booking_color'] = 4   # blue - check out due
+    elif (order.rental_status == 'pickup' and order.is_late) or (order.rental_status == 'return' and order.is_late):
+        slot['x_booking_color'] = 1   # red - attention
+    else:
+        slot['x_booking_color'] = False # grey - no focus
+      ]]></field>
+  </record>
+  <record id="x_rental_status_field" model="ir.model.fields">
+    <field name="ttype">selection</field>
+    <field name="field_description">Rental Status</field>
+    <field name="model_id" ref="planning.model_planning_slot"/>
+    <field name="name">x_rental_status</field>
+    <field name="related">sale_order_id.rental_status</field>
+    <field name="store">False</field>
+    <field name="readonly" eval="True"/>
+  </record>
+  <record id="x_has_room_offer_role_field" model="ir.model.fields">
+      <field name="name">x_has_room_offer_role</field>
+      <field name="field_description">Has Room Offer Role</field>
+      <field name="model_id" ref="resource.model_resource_resource"/>
+      <field name="ttype">boolean</field>
+      <field name="store" eval="False"/>
+      <field name="depends">role_ids.x_is_a_room_offer</field>
+      <field name="compute"><![CDATA[
+for record in self:
+    record['x_has_room_offer_role'] = any(role.x_is_a_room_offer for role in record.role_ids)
+  ]]></field>
+  </record>
+</odoo>

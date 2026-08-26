@@ -1,0 +1,2736 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# * hotel
+#
+# Bone NI <bounkirdni@gmail.com>, 2026.
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-03 18:15+0000\n"
+"PO-Revision-Date: 2026-08-14 07:16+0000\n"
+"Last-Translator: Bone NI <bounkirdni@gmail.com>\n"
+"Language-Team: Lao <https://translate.odoo.com/projects/odoo-19/hotel/lo/>\n"
+"Language: lo\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid "&amp;nbsp;"
+msgstr "&amp;nbsp;"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+", and feel\n"
+"                    free to"
+msgstr ""
+", ແລະ ສາມາດ\n"
+"                    ສອບຖາມໄດ້ຕາມສະບາຍ"
+
+#. module: hotel
+#: model:website,contact_us_button_url:hotel.website_industry
+msgid "/contactus"
+msgstr "/contactus"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<a class=\"o_translate_inline btn btn-custom text-o-color-4\" href=\"/shop/"
+"21\" style=\"background-color: rgb(176, 158, 150); border-width: 1px; border-"
+"color: rgba(0, 0, 0, 0); border-style: solid; \">Discover the room</a>"
+msgstr ""
+"<a class=\"o_translate_inline btn btn-custom text-o-color-4\" href=\"/shop/"
+"21\" style=\"background-color: rgb(176, 158, 150); border-width: 1px; border-"
+"color: rgba(0, 0, 0, 0); border-style: solid; \">ຄົ້ນພົບຫ້ອງພັກ</a>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<a class=\"o_translate_inline btn btn-custom\" href=\"/shop/22\" "
+"style=\"color: #FFFFFF; background-color: rgb(176, 158, 150); border-width: "
+"1px; border-color: rgba(0, 0, 0, 0); border-style: solid; \">Discover the "
+"room</a>"
+msgstr ""
+"<a class=\"o_translate_inline btn btn-custom\" href=\"/shop/22\" "
+"style=\"color: #FFFFFF; background-color: rgb(176, 158, 150); border-width: "
+"1px; border-color: rgba(0, 0, 0, 0); border-style: solid; \">ຄົ້ນພົບຫ້ອງພັກ</a>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<a class=\"o_translate_inline btn btn-custom\" href=\"/shop/23\" "
+"style=\"color: #FFFFFF; background-color: rgb(176, 158, 150); border-width: "
+"1px; border-color: rgba(0, 0, 0, 0); border-style: solid; \">Discover the "
+"room</a>"
+msgstr ""
+"<a class=\"o_translate_inline btn btn-custom\" href=\"/shop/23\" "
+"style=\"color: #FFFFFF; background-color: rgb(176, 158, 150); border-width: "
+"1px; border-color: rgba(0, 0, 0, 0); border-style: solid; \">ຄົ້ນພົບຫ້ອງພັກ</a>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"<em>Don't forget to check the results from time to time to make your guests "
+"happier!</em>"
+msgstr "<em>ຢ່າລືມກວດສອບຜົນໄດ້ຮັບເປັນໄລຍະ ເພື່ອເຮັດໃຫ້ແຂກຂອງທ່ານມີຄວາມສຸກຫຼາຍຂຶ້ນ!</em>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "<em>Don't forget to thank your guests with a warm goodbye!</em>"
+msgstr "<em>ຢ່າລືມຂອບໃຈແຂກຂອງທ່ານດ້ວຍການກ່າວຄຳອຳລາທີ່ອົບອຸ່ນ!</em>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<i aria-label=\"Warning\" class=\"fa fa-warning\" role=\"img\"/><span "
+"name=\"renting_warning_message\"/>"
+msgstr ""
+"<i aria-label=\"Warning\" class=\"fa fa-warning\" role=\"img\"/><span "
+"name=\"renting_warning_message\"/>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"<i class=\"o_editor_banner_icon mb-3 fst-normal\" data-oe-aria-"
+"label=\"Banner Info\" aria-label=\"Banner Info\">💡</i>"
+msgstr ""
+"<i class=\"o_editor_banner_icon mb-3 fst-normal\" data-oe-aria-"
+"label=\"Banner Info\" aria-label=\"Banner Info\">💡</i>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"<i class=\"o_editor_banner_icon mb-3 fst-normal\" data-oe-aria-"
+"label=\"Banner Info\">💡</i>"
+msgstr ""
+"<i class=\"o_editor_banner_icon mb-3 fst-normal\" data-oe-aria-"
+"label=\"Banner Info\">💡</i>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"<i class=\"o_editor_banner_icon mb-3 fst-normal\" data-oe-aria-"
+"label=\"Banner Success\" aria-label=\"Banner Success\">✅</i>"
+msgstr ""
+"<i class=\"o_editor_banner_icon mb-3 fst-normal\" data-oe-aria-"
+"label=\"Banner Success\" aria-label=\"Banner Success\">✅</i>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"<i class=\"o_editor_banner_icon mb-3 fst-normal\" data-oe-aria-"
+"label=\"Banner Success\">✅</i>"
+msgstr ""
+"<i class=\"o_editor_banner_icon mb-3 fst-normal\" data-oe-aria-"
+"label=\"Banner Success\">✅</i>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"<i class=\"o_editor_banner_icon mb-3 fst-normal\" data-oe-aria-"
+"label=\"Banner Warning\" aria-label=\"Banner Warning\">⚠️</i>"
+msgstr ""
+"<i class=\"o_editor_banner_icon mb-3 fst-normal\" data-oe-aria-"
+"label=\"Banner Warning\" aria-label=\"Banner Warning\">⚠️</i>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"<i data-oe-aria-label=\"Banner Info\" class=\"o_editor_banner_icon mb-3 fst-"
+"normal\">💡</i>"
+msgstr ""
+"<i data-oe-aria-label=\"Banner Info\" class=\"o_editor_banner_icon mb-3 fst-"
+"normal\">💡</i>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"<i data-oe-aria-label=\"Banner Info\" class=\"o_editor_banner_icon mb-3 fst-"
+"normal\">🚀</i>"
+msgstr ""
+"<i data-oe-aria-label=\"Banner Info\" class=\"o_editor_banner_icon mb-3 fst-"
+"normal\">🚀</i>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"<i data-oe-aria-label=\"Banner Success\" class=\"o_editor_banner_icon mb-3 "
+"fst-normal\">✅</i>"
+msgstr ""
+"<i data-oe-aria-label=\"Banner Success\" class=\"o_editor_banner_icon mb-3 "
+"fst-normal\">✅</i>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"<i data-oe-aria-label=\"Banner Success\" class=\"o_editor_banner_icon mb-3 "
+"fst-normal\">🎉</i>"
+msgstr ""
+"<i data-oe-aria-label=\"Banner Success\" class=\"o_editor_banner_icon mb-3 "
+"fst-normal\">🎉</i>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"<i data-oe-aria-label=\"Banner Warning\" class=\"o_editor_banner_icon mb-3 "
+"fst-normal\">⚠️</i>"
+msgstr ""
+"<i data-oe-aria-label=\"Banner Warning\" class=\"o_editor_banner_icon mb-3 "
+"fst-normal\">⚠️</i>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<small class=\"text-muted\" style=\"text-align: center;\">Enjoy a generous "
+"breakfast every morning.</small><small class=\"text-muted\" style=\"text-"
+"align: center;\">The perfect beginning to your Alpine day.</small>"
+msgstr ""
+"<small class=\"text-muted\" style=\"text-align: center;"
+"\">ເພີດເພີນໄປກັບອາຫານເຊົ້າທີ່ແສນພິເສດໃນທຸກໆເຊົ້າ.</small><small class=\"text-muted\" "
+"style=\"text-align: center;\">ການເລີ່ມຕົ້ນທີ່ສົມບູນແບບສຳລັບວັນພັກຜ່ອນໃນເທືອກເຂົາ ແອວສ໌ "
+"ຂອງທ່ານ.</small>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<small class=\"text-muted\" style=\"text-align: center;\">Relax and recharge "
+"with free access<br/>to our full spa and wellness facilities.</small>"
+msgstr ""
+"<small class=\"text-muted\" style=\"text-align: center;\">ຜ່ອນຄາຍ ແລະ "
+"ເຕີມພະລັງດ້ວຍການເຂົ້າໃຊ້ບໍລິການ<br/>ສະປາ ແລະ ສິ່ງອໍານວຍຄວາມສະດວກດ້ານສຸຂະພາບຂອງພວກເຮົາໄດ້ຟຣີ."
+"</small>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<small class=\"text-muted\" style=\"text-align: center;\">Skiing, "
+"paragliding, mountain trails</small><small class=\"text-muted\" style=\"text-"
+"align: center;\">&amp;nbsp;and iconic Swiss landscapes within easy reach.</"
+"small>"
+msgstr ""
+"<small class=\"text-muted\" style=\"text-align: center;\">ສະກີ, ໂດດຈ້ອງ, "
+"ເສັ້ນທາງຍ່າງປ່າ</small><small class=\"text-muted\" style=\"text-align: center;"
+"\">&amp;nbsp;ແລະ ທິວທັດທຳມະຊາດຂອງສະວິດເຊີແລນທີ່ສວຍງາມ ຢູ່ໃກ້ພຽງເອື້ອມມື.</small>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<span class=\"d-md-none me-2\">Search period</span><i class=\"oi oi-search\" "
+"role=\"img\"/>"
+msgstr ""
+"<span class=\"d-md-none me-2\">ໄລຍະເວລາຄົ້ນຫາ</span><i class=\"oi oi-search\" "
+"role=\"img\"/>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<span class=\"display-1-fs\">\n"
+"                                                <span style=\"color: "
+"rgba(96, 70, 59, 0.74);\">\n"
+"                                                    Enhance Your "
+"<strong>Experience</strong>\n"
+"                                                </span>\n"
+"                                            </span>"
+msgstr ""
+"<span class=\"display-1-fs\">\n"
+"                                                <span style=\"color: "
+"rgba(96, 70, 59, 0.74);\">\n"
+"                                                    ຍົກລະດັບ <strong>ປະສົບການ</"
+"strong>\n"
+"                                                </span>\n"
+"                                            </span> ຂອງທ່ານ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<span class=\"display-3-fs\" style=\"color: rgb(245, 235, 224);\">Our luxury "
+"rooms</span>"
+msgstr ""
+"<span class=\"display-3-fs\" style=\"color: rgb(245, 235, 224);"
+"\">ຫ້ອງພັກສຸດຫູຫລາຂອງພວກເຮົາ</span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"<span class=\"display-4-fs\">\n"
+"                <strong>Hotel</strong>\n"
+"            </span>\n"
+"            <br/>"
+msgstr ""
+"<span class=\"display-4-fs\">\n"
+"                <strong>ໂຮງແຮມ</strong>\n"
+"            </span>\n"
+"            <br/>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid "<span class=\"fa fa-hotel\"/>&amp;nbsp; Discover our rooms"
+msgstr "<span class=\"fa fa-hotel\"/>&amp;nbsp; ຄົ້ນພົບຫ້ອງພັກຂອງພວກເຮົາ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid "<span class=\"fa fa-phone\"/>&amp;nbsp; Contact us"
+msgstr "<span class=\"fa fa-phone\"/>&amp;nbsp; ຕິດຕໍ່ພວກເຮົາ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_contactus
+msgid ""
+"<span class=\"h2-fs\">\n"
+"                                        <span style=\"color: rgb(198, 185, "
+"179);\">\n"
+"                                            Norris\n"
+"                                        </span>\n"
+"                                    </span>"
+msgstr ""
+"<span class=\"h2-fs\">\n"
+"                                        <span style=\"color: rgb(198, 185, "
+"179);\">\n"
+"                                            Norris\n"
+"                                        </span>\n"
+"                                    </span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<span class=\"h2-fs\"><span style=\"color: rgb(198, 185, 179);\">The story</"
+"span></span>"
+msgstr ""
+"<span class=\"h2-fs\"><span style=\"color: rgb(198, 185, 179);\">ເລື່ອງລາວ</"
+"span></span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<span class=\"h4-fs text-o-color-1\">Breakfast included<br/>all rooms</span>"
+msgstr "<span class=\"h4-fs text-o-color-1\">ລວມອາຫານເຊົ້າ<br/>ທຸກຫ້ອງພັກ</span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_contactus
+msgid ""
+"<span class=\"h4-fs\">\n"
+"                                        <span class=\"text-o-color-1\">\n"
+"                                            Feel free to contact us if you "
+"have any questions\n"
+"                                        </span>\n"
+"                                    </span>"
+msgstr ""
+"<span class=\"h4-fs\">\n"
+"                                        <span class=\"text-o-color-1\">\n"
+"                                            ຕິດຕໍ່ສອບຖາມພວກເຮົາໄດ້ "
+"ຫາກທ່ານມີຂໍ້ສົງໄສໃດໆ\n"
+"                                        </span>\n"
+"                                    </span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.footer_copyright_company_name
+msgid ""
+"<span class=\"o_footer_copyright_name me-2 small\" style=\"text-align: "
+"center;\">Copyright &amp;copy; <strong>GRAND NORRIS PALACE</strong></span>"
+msgstr ""
+"<span class=\"o_footer_copyright_name me-2 small\" style=\"text-align: "
+"center;\">ລິຂະສິດ &amp;copy; <strong>GRAND NORRIS PALACE</strong></span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_contactus
+msgid ""
+"<span class=\"o_small-fs\">\n"
+"                                                <br/>Our reception is open "
+"24/7, and you can reach us<br/>anytime at\n"
+"                                                <span class=\"text-o-"
+"color-1\">\n"
+"                                                    +41 27 000 00 00\n"
+"                                                </span>\n"
+"                                                .\n"
+"                                            </span>"
+msgstr ""
+"<span class=\"o_small-fs\">\n"
+"                                                <br/"
+">ພະແນກຕ້ອນຮັບຂອງພວກເຮົາເປີດຕະຫຼອດ 24 ຊົ່ວໂມງ, ທ່ານສາມາດຕິດຕໍ່ຫາພວກເຮົາໄດ້<br/>ທຸກເວລາທີ່ເບີ\n"
+"                                                <span class=\"text-o-"
+"color-1\">\n"
+"                                                    +41 27 000 00 00\n"
+"                                                </span>\n"
+"                                                .\n"
+"                                            </span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_contactus
+msgid ""
+"<span class=\"o_small-fs\"><br/>Route des Glaciers 14</span><br/>1937 "
+"Orsières,\n"
+"                                            <span class=\"text-o-color-1\">\n"
+"                                                Switzerland\n"
+"                                            </span>"
+msgstr ""
+"<span class=\"o_small-fs\"><br/>Route des Glaciers 14</span><br/>1937 "
+"Orsières,\n"
+"                                            <span class=\"text-o-color-1\">\n"
+"                                                ສະວິດເຊີແລນ\n"
+"                                            </span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_contactus
+msgid "<span class=\"s_website_form_label_content\">Phone Number</span>"
+msgstr "<span class=\"s_website_form_label_content\">ເບີໂທລະສັບ</span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_contactus
+msgid ""
+"<span class=\"s_website_form_label_content\">Subject</span> <span "
+"class=\"s_website_form_mark\">*</span>"
+msgstr ""
+"<span class=\"s_website_form_label_content\">ຫົວຂໍ້</span> <span "
+"class=\"s_website_form_mark\">*</span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_contactus
+msgid "<span class=\"s_website_form_label_content\">Your Company</span>"
+msgstr "<span class=\"s_website_form_label_content\">ບໍລິສັດຂອງທ່ານ</span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_contactus
+msgid ""
+"<span class=\"s_website_form_label_content\">Your Email</span> <span "
+"class=\"s_website_form_mark\">*</span>"
+msgstr ""
+"<span class=\"s_website_form_label_content\">ອີເມວຂອງທ່ານ</span> <span "
+"class=\"s_website_form_mark\">*</span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_contactus
+msgid ""
+"<span class=\"s_website_form_label_content\">Your Name</span> <span "
+"class=\"s_website_form_mark\">*</span>"
+msgstr ""
+"<span class=\"s_website_form_label_content\">ຊື່ຂອງທ່ານ</span> <span "
+"class=\"s_website_form_mark\">*</span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_contactus
+msgid ""
+"<span class=\"s_website_form_label_content\">Your Question</span> <span "
+"class=\"s_website_form_mark\">*</span>"
+msgstr ""
+"<span class=\"s_website_form_label_content\">ຄຳຖາມຂອງທ່ານ</span> <span "
+"class=\"s_website_form_mark\">*</span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_contactus
+msgid ""
+"<span class=\"text-gradient\" style=\"background-image: linear-"
+"gradient(135deg, rgb(169, 169, 152) 15%, rgb(96, 70, 59) 100%);\">\n"
+"                                                <strong>Contact us</strong>\n"
+"                                            </span>"
+msgstr ""
+"<span class=\"text-gradient\" style=\"background-image: linear-"
+"gradient(135deg, rgb(169, 169, 152) 15%, rgb(96, 70, 59) 100%);\">\n"
+"                                                <strong>ຕິດຕໍ່ພວກເຮົາ</strong>\n"
+"                                            </span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<span class=\"text-o-color-1 h4-fs\">+100 activities<br/>around the palace</"
+"span>"
+msgstr ""
+"<span class=\"text-o-color-1 h4-fs\">+100 ກິດຈະກຳ<br/>ອ້ອມຮອບພະລາຊະວັງ</span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<span class=\"text-o-color-1 h4-fs\">Free access to<br/>our wellness</span>"
+msgstr "<span class=\"text-o-color-1 h4-fs\">ເຂົ້າໃຊ້ບໍລິການ<br/>ສຸຂະພາບຟຣີ</span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<span class=\"text-o-color-4\"><span class=\"fa fa-tv\"/>&amp;nbsp; "
+"&amp;nbsp;<span class=\"fa fa-bathtub\"/>&amp;nbsp; &amp;nbsp;<span "
+"class=\"fa fa-wifi\"/>&amp;nbsp; &amp;nbsp;<span class=\"fa fa-free-code-"
+"camp\"/>&amp;nbsp;&amp;nbsp;<span class=\"fa fa-coffee\"/>&amp;nbsp; <span "
+"class=\"o_small-fs\">and more</span></span><br/><br/>"
+msgstr ""
+"<span class=\"text-o-color-4\"><span class=\"fa fa-tv\"/>&amp;nbsp; "
+"&amp;nbsp;<span class=\"fa fa-bathtub\"/>&amp;nbsp; &amp;nbsp;<span "
+"class=\"fa fa-wifi\"/>&amp;nbsp; &amp;nbsp;<span class=\"fa fa-free-code-"
+"camp\"/>&amp;nbsp;&amp;nbsp;<span class=\"fa fa-coffee\"/>&amp;nbsp; <span "
+"class=\"o_small-fs\">ແລະ ອື່ນໆ</span></span><br/><br/>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<span class=\"text-o-color-4\"><strong>LA CLAUDIA<br/></strong> <span "
+"class=\"h5-fs\"><strong>★★★<span class=\"h5-fs\">★</span></strong></span></"
+"span>"
+msgstr ""
+"<span class=\"text-o-color-4\"><strong>LA CLAUDIA<br/></strong> <span "
+"class=\"h5-fs\"><strong>★★★<span class=\"h5-fs\">★</span></strong></span></"
+"span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<span class=\"text-o-color-4\"><strong>LA MARIA<br/></strong> <span "
+"class=\"h5-fs\"><strong>★★★<span class=\"h5-fs\">★</span></strong></span></"
+"span>"
+msgstr ""
+"<span class=\"text-o-color-4\"><strong>LA MARIA<br/></strong> <span "
+"class=\"h5-fs\"><strong>★★★<span class=\"h5-fs\">★</span></strong></span></"
+"span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<span class=\"text-o-color-4\"><strong>LA NINA<br/></strong> <span "
+"class=\"h5-fs\"><strong>★★★<br/></strong></span></span>"
+msgstr ""
+"<span class=\"text-o-color-4\"><strong>LA NINA<br/></strong> <span "
+"class=\"h5-fs\"><strong>★★★<br/></strong></span></span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<span class=\"text-o-color-4\">La Claudia invites you into a bright and "
+"contemporary environment, where soft colors and chic furnishings enhance "
+"your sense of well-being. Whether you are unwinding after an active day or "
+"enjoying a quiet morning with a view, this room brings together elegance, "
+"space, and serenity for an unforgettable stay.</span>"
+msgstr ""
+"<span class=\"text-o-color-4\">La Claudia ຂໍເຊີນທ່ານເຂົ້າສູ່ບັນຍາກາດທີ່ສົດໃສ ແລະ "
+"ທັນສະໄໝ, ບ່ອນທີ່ມີສີສັນອ່ອນໆ ແລະ ເຟີນິເຈີທີ່ຫຼູຫຼາ ຊ່ວຍໃຫ້ທ່ານຮູ້ສຶກຜ່ອນຄາຍ. "
+"ບໍ່ວ່າທ່ານຈະມາພັກຜ່ອນຫຼັງຈາກມື້ທີ່ເມື່ອຍລ້າ ຫຼື ເພີດເພີນກັບຕອນເຊົ້າທີ່ງຽບສະຫງົບພ້ອມກັບທິວທັດທີ່ສວຍງາມ, "
+"ຫ້ອງນີ້ໄດ້ລວມເອົາຄວາມສະຫງ່າງາມ, ພື້ນທີ່ກວ້າງຂວາງ ແລະ ຄວາມງຽບສະຫງົບ ເພື່ອການພັກຜ່ອນທີ່ໜ້າຈົດຈຳ.</"
+"span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<span class=\"text-o-color-4\">La Maria is a beautifully designed retreat "
+"featuring contemporary aesthetics and high-end finishes. Enjoy generous "
+"comfort, a stylish seating area, and peaceful mountain surroundings all "
+"crafted to elevate your stay.</span>"
+msgstr ""
+"<span class=\"text-o-color-4\">La Maria ແມ່ນສະຖານທີ່ພັກຜ່ອນທີ່ຖືກອອກແບບມາຢ່າງສວຍງາມ "
+"ດ້ວຍຄວາມງາມແບບທັນສະໄໝ ແລະ ການຕົກແຕ່ງລະດັບພຣີມຽມ. ເພີດເພີນໄປກັບຄວາມສະດວກສະບາຍ, "
+"ພື້ນທີ່ນັ່ງຫຼິ້ນທີ່ທັນສະໄໝ ແລະ ບັນຍາກາດອ້ອມຮອບດ້ວຍພູເຂົາທີ່ງຽບສະຫງົບ "
+"ເຊິ່ງທັງໝົດນີ້ຖືກສ້າງຂຶ້ນເພື່ອຍົກລະດັບການພັກເຊົາຂອງທ່ານ.</span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<span class=\"text-o-color-4\">La Nina is a sophisticated haven combining "
+"contemporary elegance with the charm of alpine living. Its thoughtfully "
+"curated decor, premium bedding, and high-end comforts create a serene "
+"environment for true rest.</span>"
+msgstr ""
+"<span class=\"text-o-color-4\">La Nina ແມ່ນສະຖານທີ່ພັກຜ່ອນທີ່ທັນສະໄໝ "
+"ເຊິ່ງປະສົມປະສານຄວາມສະຫງ່າງາມກັບສະເໜ່ຂອງການໃຊ້ຊີວິດໃນເທືອກເຂົາ ແອວສ໌. ດ້ວຍການຕົກແຕ່ງທີ່ພິຖີພິຖັນ, "
+"ເຄື່ອງນອນລະດັບພຣີມຽມ ແລະ ຄວາມສະດວກສະບາຍລະດັບສູງ "
+"ເພື່ອສ້າງບັນຍາກາດທີ່ງຽບສະຫງົບສຳລັບການພັກຜ່ອນຢ່າງແທ້ຈິງ.</span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_contactus
+msgid ""
+"<span style=\"background-image: linear-gradient(135deg, rgb(169, 169, 152) "
+"15%, rgb(96, 70, 59) 100%);\" class=\"text-gradient\">\n"
+"                                                Find us\n"
+"                                            </span>\n"
+"                                            <br/>"
+msgstr ""
+"<span style=\"background-image: linear-gradient(135deg, rgb(169, 169, 152) "
+"15%, rgb(96, 70, 59) 100%);\" class=\"text-gradient\">\n"
+"                                                ສະຖານທີ່ຂອງພວກເຮົາ\n"
+"                                            </span>\n"
+"                                            <br/>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_contactus
+msgid ""
+"<span style=\"background-image: linear-gradient(45deg, rgb(169, 169, 152) "
+"15%, rgb(96, 70, 59) 100%);\" class=\"text-gradient\">\n"
+"                                                Call us\n"
+"                                            </span>\n"
+"                                            <br/>"
+msgstr ""
+"<span style=\"background-image: linear-gradient(45deg, rgb(169, 169, 152) "
+"15%, rgb(96, 70, 59) 100%);\" class=\"text-gradient\">\n"
+"                                                ໂທຫາພວກເຮົາ\n"
+"                                            </span>\n"
+"                                            <br/>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_contactus
+msgid ""
+"<span style=\"background-image: linear-gradient(45deg, rgb(169, 169, 152) "
+"15%, rgb(96, 70, 59) 100%);\" class=\"text-gradient\">\n"
+"                                                Email us\n"
+"                                            </span>\n"
+"                                            <br/>"
+msgstr ""
+"<span style=\"background-image: linear-gradient(45deg, rgb(169, 169, 152) "
+"15%, rgb(96, 70, 59) 100%);\" class=\"text-gradient\">\n"
+"                                                ສົ່ງອີເມວຫາພວກເຮົາ\n"
+"                                            </span>\n"
+"                                            <br/>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<span style=\"color: rgba(96, 70, 59, 0.74);\"><br/>From private ski-in "
+"access to curated alpine dining, every detail at the Grand Norris Palace is "
+"designed to elevate your stay. Indulge in experiences as unique as the "
+"landscape that surrounds you.<br/><br/></span>"
+msgstr ""
+"<span style=\"color: rgba(96, 70, 59, 0.74);\"><br/>ຕັ້ງແຕ່ທາງເຂົ້າສະກີແບບສ່ວນຕົວ ຈົນເ"
+"ຖິງການຮັບປະທານອາຫານແບບເທິງເຂົາທີ່ຄັດສັນມາຢ່າງພິເສດ, ທຸກໆລາຍລະອຽດຢູ່ Grand Norris Palace ແມ່"
+"ນຖືກອອກແບບມາເພື່ອຍົກລະດັບການພັກເຊົາຂອງທ່ານ. ດື່ມດຳໄປກັບປະສົບການທີ່ມີຄວາມເປັນເອກະລັກຄືກັບທິວທັດທຳມະ"
+"ຊາດທີ່ອ້ອມຮອບຕົວທ່ານ.<br/><br/></span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<span style=\"color: rgba(96, 70, 59, 0.74);\"><strong>Grand Norris Palace</"
+"strong></span>"
+msgstr ""
+"<span style=\"color: rgba(96, 70, 59, 0.74);\"><strong>Grand Norris Palace</"
+"strong></span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<span style=\"color: rgba(96, 70, 59, 0.74);\"><strong>Swiss Alps</strong></"
+"span>"
+msgstr ""
+"<span style=\"color: rgba(96, 70, 59, 0.74);\"><strong>ເທືອກເຂົາ ແອວສ໌ ສະວິດ</"
+"strong></span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<span style=\"font-size: 120px; color: rgb(245, 235, 224);\">\n"
+"                                                GRAND NORRIS<br/>\n"
+"                                                PALACE\n"
+"                                            </span>"
+msgstr ""
+"<span style=\"font-size: 120px; color: rgb(245, 235, 224);\">\n"
+"                                                GRAND NORRIS<br/>\n"
+"                                                PALACE\n"
+"                                            </span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<span style=\"font-size: 18px; color: rgb(245, 235, 224);\">A hidden jewel "
+"in the heart of the Swiss Alps. Where discreet luxury, pure mountain air, "
+"and breathtaking horizons come together to create moments that last a "
+"lifetime.</span>"
+msgstr ""
+"<span style=\"font-size: 18px; color: rgb(245, 235, 224);"
+"\">ອັນຍະມະນີທີ່ເຊື່ອງໄວ້ໃນໃຈກາງຂອງເທືອກເຂົາ ແອວສ໌ ສະວິດ. ບ່ອນທີ່ຄວາມຫຼູຫຼາທີ່ເປັນສ່ວນຕົວ, "
+"ອາກາດບໍລິສຸດຂອງພູເຂົາ ແລະ ຂອບຟ້າທີ່ສວຍງາມຈັບໃຈ ມາລວມຕົວກັນເພື່ອສ້າງຊ່ວງເວລາທີ່ຈະຄົງຢູ່ຕະຫຼອດໄປ.</"
+"span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<span style=\"font-size: 30px; color: rgb(198, 185, 179);\">Norris</span>"
+msgstr ""
+"<span style=\"font-size: 30px; color: rgb(198, 185, 179);\">Norris</span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<span style=\"font-size: 40px; color: rgb(198, 185, 179);\">Our beloved</"
+"span><br/>"
+msgstr ""
+"<span style=\"font-size: 40px; color: rgb(198, 185, 179);\">ທີ່ຮັກແພງຂອງພວກເຮົາ</"
+"span><br/>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<span style=\"font-size: 60px; color: rgb(245, 235, 224);\">\n"
+"                                                GRAND NORRIS PALACE\n"
+"                                            </span>"
+msgstr ""
+"<span style=\"font-size: 60px; color: rgb(245, 235, 224);\">\n"
+"                                                GRAND NORRIS PALACE\n"
+"                                            </span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_contactus
+msgid ""
+"<span style=\"font-style: normal;\" class=\"o_small-fs\">\n"
+"                                                <br/>You can reach us at\n"
+"                                                <span class=\"text-o-"
+"color-1\">\n"
+"                                                    info@grandnorrispalace.com\n"
+"                                                </span>\n"
+"                                                or by using the contact form "
+"below.\n"
+"                                            </span>"
+msgstr ""
+"<span style=\"font-style: normal;\" class=\"o_small-fs\">\n"
+"                                                <br/>ທ່ານສາມາດຕິດຕໍ່ຫາພວກເຮົາໄດ້ທີ່\n"
+"                                                <span class=\"text-o-"
+"color-1\">\n"
+"                                                    info@grandnorrispalace.com\n"
+"                                                </span>\n"
+"                                                ຫຼື "
+"ໂດຍການນຳໃຊ້ແບບຟອມການຕິດຕໍ່ຂ້າງລຸ່ມນີ້.\n"
+"                                            </span>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"<strong><b>Contacts App</b>: </strong>Record guest identities securely, "
+"linking them to their rental orders for\n"
+"                compliance and personalized service."
+msgstr ""
+"<strong><b>ແອັບລາຍຊື່ຜູ້ຕິດຕໍ່</b>: </strong>ບັນທຶກຕົວຕົນຂອງແຂກຢ່າງປອດໄພ, "
+"ເຊື່ອມໂຍງພວກເຂົາເຂົ້າກັບລາຍການເຊົ່າທີ່ພັກ ເພື່ອ\n"
+"                ຄວາມຖືກຕ້ອງຕາມລະບຽບການ ແລະ ການບໍລິການທີ່ເປັນສ່ວນຕົວ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"<strong><b>Discuss App</b>: </strong>Facilitate communication between staff "
+"members, ensuring that maintenance\n"
+"                requests or special guest needs are shared instantly.<br/>"
+msgstr ""
+"<strong><b>ແອັບສົນທະນາ</b>: </strong>ອຳນວຍຄວາມສະດວກໃນການສື່ສານລະຫວ່າງພະນັກງານ, "
+"ເພື່ອຮັບປະກັນວ່າການແຈ້ງ\n"
+"                ສ້ອມແປງ ຫຼື ຄວາມຕ້ອງການພິເສດຂອງແຂກຖືກສົ່ງຕໍ່ຢ່າງທັນທີ.<br/>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"<strong><b>Invoicing App</b>: </strong>Simplify billing by generating "
+"professional invoices that include room\n"
+"                charges, extra services, and automatically computed city "
+"taxes."
+msgstr ""
+"<strong><b>ແອັບອອກໃບບິນ</b>: </strong>ເຮັດໃຫ້ການຄິດໄລ່ເງິນງ່າຍຂຶ້ນ "
+"ໂດຍການສ້າງໃບບິນແບບມືອາຊີບ ເຊິ່ງລວມມີຄ່າ\n"
+"                ຫ້ອງ, ການບໍລິການເສີມ ແລະ ຄິດໄລ່ອາກອນເມືອງແບບອັດຕະໂນມັດ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"<strong><b>Planning App</b>: </strong>Organize housekeeping and front desk "
+"shifts, binding them to rental orders\n"
+"                to ensure rooms are ready for new arrivals."
+msgstr ""
+"<strong><b>ແອັບວາງແຜນ</b>: </strong>ຈັດຕາຕະລາງການເຮັດວຽກຂອງພະນັກງານອະນາໄມ ແລະ "
+"ພະນັກງານຕ້ອນຮັບ, ເຊື່ອມໂຍງກັບລາຍການຈອງ\n"
+"                ເພື່ອຮັບປະກັນວ່າຫ້ອງພັກພ້ອມສຳລັບແຂກຄົນໃໝ່."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"<strong><b>Rental App</b>: </strong>Manage room availability and pricing "
+"models, ensuring that every booking is\n"
+"                tracked and double-bookings are impossible.<br/>"
+msgstr ""
+"<strong><b>ແອັບການເຊົ່າ</b>: </strong>ຈັດການສະຖານະຫ້ອງວ່າງ ແລະ ຮູບແບບລາຄາ, "
+"ຮັບປະກັນວ່າທຸກການຈອງຖືກ\n"
+"                ຕິດຕາມ ແລະ ບໍ່ໃຫ້ມີການຈອງຊ້ຳກັນ.<br/>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"<strong><b>Website &amp; eCommerce App</b>: </strong>specific your rooms and "
+"amenities online, enabling\n"
+"                customers to book directly through a professional, mobile-"
+"friendly portal.<br/>"
+msgstr ""
+"<strong><b>ແອັບເວັບໄຊ ແລະ ອີຄອມເມີຊ</b>: </strong>ສະແດງລາຍລະອຽດຫ້ອງພັກ ແລະ "
+"ສິ່ງອຳນວຍຄວາມສະດວກທາງອອນລາຍ, ເພື່ອໃຫ້\n"
+"                ລູກຄ້າສາມາດຈອງໄດ້ໂດຍກົງຜ່ານລະບົບທີ່ທັນສະໄໝ ແລະ ຮອງຮັບການໃຊ້ງານຜ່ານມືຖື.<br/"
+">"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"<strong><span class=\"text-o-color-1\">The Grand Norris Palace</span></"
+"strong> is a place where <b><span class=\"text-o-color-1\">luxury meets "
+"wilderness</span></b>, where silence becomes a form of poetry, and where "
+"every horizon reminds you how vast and beautiful the world can be."
+msgstr ""
+"<strong><span class=\"text-o-color-1\">The Grand Norris Palace</span></"
+"strong> ແມ່ນສະຖານທີ່ທີ່ <b><span class=\"text-o-"
+"color-1\">ຄວາມຫຼູຫຼາພົບກັບທຳມະຊາດທີ່ບໍລິສຸດ</span></b>, ບ່ອນທີ່ຄວາມງຽບສະຫງົບກາຍເປັນບົດກະວີ, "
+"ແລະ ທຸກໆຂອບຟ້າຈະເຕືອນໃຫ້ທ່ານຮູ້ວ່າໂລກນີ້ກວ້າງໃຫຍ່ ແລະ ສວຍງາມພຽງໃດ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "<strong>Basics</strong>"
+msgstr "<strong>ພື້ນຖານ</strong>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "<strong>Company specific offers</strong>"
+msgstr "<strong>ຂໍ້ສະເໜີສະເພາະຂອງບໍລິສັດ</strong>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "<strong>Do you want to go further?</strong>"
+msgstr "<strong>ທ່ານຕ້ອງການລົງເລິກຕື່ມອີກບໍ່?</strong>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "<strong>Final word</strong>"
+msgstr "<strong>ບົດສະຫຼຸບ</strong>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"<strong>In such situation, feel free to experiment with this database and "
+"then\n"
+"                        to create a new one for your own usage.</strong>"
+msgstr ""
+"<strong>ໃນກໍລະນີນັ້ນ, ທ່ານສາມາດທົດລອງໃຊ້ຖານຂໍ້ມູນນີ້ໄດ້ຕາມສະບາຍ ແລະ ຈາກນັ້ນ\n"
+"                        ຈຶ່ງສ້າງຖານຂໍ້ມູນໃໝ່ສຳລັບການໃຊ້ງານຕົວຈິງຂອງທ່ານ.</strong>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "<strong>Multiple resource blocking / period closure</strong>"
+msgstr "<strong>ການປິດກັ້ນຫຼາຍຊັບພະຍາກອນ / ການປິດຊ່ວງເວລາ</strong>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "<strong>Shared offers</strong>"
+msgstr "<strong>ຂໍ້ສະເໜີທີ່ໃຊ້ຮ່ວມກັນ</strong>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "<strong>Single resource blocking</strong>"
+msgstr "<strong>ການປິດກັ້ນຊັບພະຍາກອນດຽວ</strong>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "<strong>Use case</strong>"
+msgstr "<strong>ຕົວຢ່າງການໃຊ້ງານ</strong>"
+
+#. module: hotel
+#: model_terms:product.template,description_ecommerce:hotel.product_template_12
+msgid ""
+"A wonderful selection of local products<br>Sweet and salty taste<br>Fresh "
+"fruits and vegetables<br>Locally roasted Italian coffee<br>Veggie and vegan "
+"available"
+msgstr ""
+"ສິນຄ້າທ້ອງຖິ່ນທີ່ຄັດສັນມາຢ່າງດີ<br>ລົດຊາດຫວານ ແລະ ເຄັມ<br>ໝາກໄມ້ ແລະ "
+"ຜັກສົດ<br>ກາເຟອີຕາລີຂົ້ວເອງໃນທ້ອງຖິ່ນ<br>ມີເມນູມັງສະວິລັດ ແລະ ວີແກນ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Access to more details clicking the slot."
+msgstr "ເຂົ້າເບິ່ງລາຍລະອຽດເພີ່ມເຕີມໂດຍການຄລິກໃສ່ຊ່ອງຂໍ້ມູນ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Add a line with Dinner Tray or an Airport Shuttle and update the counts as "
+"per guest\n"
+"                request."
+msgstr ""
+"ເພີ່ມລາຍການ ຖາດອາຫານແລງ ຫຼື ລົດຮັບ-ສົ່ງສະໜາມບິນ ແລະ ອັບເດດຈຳນວນຕາມທີ່ແຂກ\n"
+"                ຕ້ອງການ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Add here as many of them as needed."
+msgstr "ເພີ່ມລາຍການໄດ້ຕາມຈຳນວນທີ່ຕ້ອງການຢູ່ທີ່ນີ້."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Add some products to the ongoing order and send it to the preparation "
+"display and\n"
+"                bring them to your guests."
+msgstr ""
+"ເພີ່ມສິນຄ້າບາງຢ່າງໃສ່ໃນລາຍການທີ່ກຳລັງດຳເນີນການ ແລະ ສົ່ງໄປຍັງໜ້າຈໍການກຽມອາຫານ\n"
+"                ເພື່ອໄປເສີບໃຫ້ແຂກຂອງທ່ານ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Adjust the number of stars, leave a comment and send it!"
+msgstr "ເລືອກຈຳນວນດາວ, ຂຽນຄຳຄິດເຫັນ ແລະ ສົ່ງໄດ້ເລີຍ!"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Adjust the rental dates, click the book button and then proceed to checkout."
+msgstr "ປັບປ່ຽນວັນທີຈອງ, ຄລິກປຸ່ມຈອງ ແລະ ດຳເນີນການຊຳລະເງິນ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Adjusting your offers in consequence"
+msgstr "ປັບປ່ຽນຂໍ້ສະເໜີຂອງທ່ານຕາມຄວາມເໝາະສົມ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Again, the <strong>Hotel App </strong>helps you manage the end of the stay!"
+msgstr "ອີກຄັ້ງໜຶ່ງ, <strong>ແອັບໂຮງແຮມ </strong>ຈະຊ່ວຍທ່ານຈັດການໃນຊ່ວງທ້າຍຂອງການພັກເຊົາ!"
+
+#. module: hotel
+#: model:product.template,name:hotel.product_template_17
+msgid "Airport Shuttle"
+msgstr "ລົດຮັບ-ສົ່ງສະໜາມບິນ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.products_oe_structure_website_sale_products_1
+msgid "All our rooms"
+msgstr "ທຸກຫ້ອງພັກຂອງພວກເຮົາ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Alternativelly, you can use the Front Desk from the POS App, selecting the\n"
+"                    customer, adding any additional services and then paying "
+"with the customer\n"
+"                    account. At the end of the stay the customer account "
+"will be charged as well."
+msgstr ""
+"ນອກຈາກນັ້ນ, ທ່ານສາມາດໃຊ້ໜ້າວຽກຕ້ອນຮັບຈາກແອັບ POS, ໂດຍການເລືອກ\n"
+"                    ລູກຄ້າ, ເພີ່ມການບໍລິການເສີມຕ່າງໆ ແລະ ຊຳລະຜ່ານບັນຊີຂອງລູກຄ້າ.\n"
+"                    ເມື່ອສິ້ນສຸດການພັກເຊົາ, ຄ່າໃຊ້ຈ່າຍຈະຖືກເກັບຈາກບັນຊີລູກຄ້າເຊັ່ນກັນ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Alternatively to individual resource blocking slots described earlier, you "
+"can select a resource this leave applies to."
+msgstr ""
+"ນອກຈາກການປິດກັ້ນຊັບພະຍາກອນແບບແຍກແຕ່ລະອັນຕາມທີ່ກ່າວມາກ່ອນໜ້ານີ້, "
+"ທ່ານຍັງສາມາດເລືອກຊັບພະຍາກອນທີ່ຕ້ອງການໃຫ້ການຢຸດພັກນີ້ມີຜົນບັງຄັບໃຊ້ໄດ້."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Alternatively, switch to the list view, and then change the resource.<br/"
+">Be\n"
+"                    careful not to double book a resource with such change!"
+msgstr ""
+"ນອກຈາກນັ້ນ, ທ່ານສາມາດປ່ຽນເປັນມຸມມອງແບບລາຍການ, ແລ້ວປ່ຽນຊັບພະຍາກອນ.<br/>ກະລຸນາ\n"
+"                    ລະມັດລະວັງບໍ່ໃຫ້ມີການຈອງຊ້ຳຊ້ອນໃນຂະນະທີ່ປ່ຽນແປງ!"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Alternatively, switch to the list view, which is more suitable if the "
+"booking is\n"
+"                    not during the visualized date range and update the "
+"booking date range."
+msgstr ""
+"ນອກຈາກນັ້ນ, ໃຫ້ປ່ຽນເປັນມຸມມອງແບບລາຍການ ເຊິ່ງຈະເໝາະສົມກວ່າຖ້າການຈອງນັ້ນ\n"
+"                    ບໍ່ໄດ້ຢູ່ໃນຊ່ວງວັນທີທີ່ສະແດງຢູ່ ແລະ ອັບເດດຊ່ວງວັນທີຂອງການຈອງ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Alternatively, type in the search bar and select the appropriate filter."
+msgstr "ນອກຈາກນັ້ນ, ໃຫ້ພິມໃນແຖບຄົ້ນຫາ ແລະ ເລືອກຕົວກອງທີ່ເໝາະສົມ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Alternatively, you can create a slot as placeholder from the planning "
+"directly:"
+msgstr "ນອກຈາກນັ້ນ, ທ່ານສາມາດສ້າງຊ່ອງຂໍ້ມູນເພື່ອສຳຮອງໄວ້ໄດ້ໂດຍກົງຈາກການວາງແຜນ:"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "An automation is setup for an email to be sent automatically for you."
+msgstr "ລະບົບອັດຕະໂນມັດຖືກຕັ້ງຄ່າເພື່ອໃຫ້ສົ່ງອີເມລໃຫ້ທ່ານໂດຍອັດຕະໂນມັດ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Any time you create a new survey and save it with the setting \"is customer "
+"satisfaction survey\", previous ones\n"
+"                    will be archived so that it becomes your new default "
+"survey."
+msgstr ""
+"ທຸກໆຄັ້ງທີ່ທ່ານສ້າງແບບສຳຫຼວດໃໝ່ ແລະ ບັນທຶກດ້ວຍການຕັ້ງຄ່າ \"ແມ່ນແບບສຳຫຼວດຄວາມເພິ່ງພໍໃຈຂອງລູກຄ້າ\", "
+"ແບບສຳຫຼວດກ່ອນໜ້ານີ້\n"
+"                    ຈະຖືກຈັດເກັບໄວ້ ເພື່ອໃຫ້ອັນໃໝ່ກາຍເປັນແບບສຳຫຼວດເລີ່ມຕົ້ນຂອງທ່ານ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Anyone can create a portal account on your database.<br/>Open your website "
+"home page\n"
+"                in a private tab to do so."
+msgstr ""
+"ທຸກຄົນສາມາດສ້າງບັນຊີຜ່ານປະຕູ (portal account) ໃນຖານຂໍ້ມູນຂອງທ່ານໄດ້.<br/"
+">ໃຫ້ເປີດໜ້າທຳອິດຂອງເວັບໄຊ\n"
+"                ໃນແຖບສ່ວນຕົວ (private tab) ເພື່ອທົດລອງສ້າງ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Assign them a resource, which helps you keeping track."
+msgstr "ກຳນົດຊັບພະຍາກອນໃຫ້ພວກເຂົາ ເພື່ອຊ່ວຍໃນການຕິດຕາມ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"At any time during their stay, open their rental order from the Hotel App."
+msgstr ""
+"ໃນລະຫວ່າງການພັກເຊົາ, ທ່ານສາມາດເປີດເບິ່ງລາຍການຈອງຂອງພວກເຂົາໄດ້ຕະຫຼອດເວລາຈາກແອັບໂຮງແຮມ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"At any time from the guest order, use the Send message capability in the "
+"chatter\n"
+"                    to exchange with your guest."
+msgstr ""
+"ທ່ານສາມາດໃຊ້ຟັງຊັນການສົ່ງຂໍ້ຄວາມໃນສ່ວນການສົນທະນາ (chatter) ຂອງລາຍການຈອງແຂກ\n"
+"                    ເພື່ອສື່ສານກັບແຂກຂອງທ່ານໄດ້ຕະຫຼອດເວລາ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"At any time you can adjust the city tax count delivered by re-opening the "
+"city tax widget clicking the City Tax button on the guest order."
+msgstr ""
+"ທ່ານສາມາດປັບຈຳນວນອາກອນເມືອງໄດ້ຕະຫຼອດເວລາ ໂດຍການເປີດໜ້າຕ່າງອາກອນເມືອງຄືນໃໝ່ ດ້ວຍການຄລິກປຸ່ມ "
+"City Tax ໃນລາຍການຈອງຂອງແຂກ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "At the end of their stay, your guests will pay for all those extras."
+msgstr "ເມື່ອສິ້ນສຸດການພັກເຊົາ, ແຂກຂອງທ່ານຈະຊຳລະຄ່າບໍລິການເສີມທັງໝົດເຫຼົ່ານັ້ນ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Bar &amp; Restaurant and extra services"
+msgstr "ບາ &amp; ຮ້ານອາຫານ ແລະ ການບໍລິການເສີມ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Beyond daily operations, the Steering menu serves as the \"Captain’s "
+"Bridge\" of your hotel. It provides a 500-day horizon to anticipate market "
+"trends, manage risks, and optimize your revenue."
+msgstr ""
+"ນອກຈາກການດຳເນີນງານປະຈຳວັນແລ້ວ, ເມນູການບໍລິຫານ (Steering) ຍັງປຽບເໝືອນ \"ຫ້ອງຄວບຄຸມ\" "
+"ຂອງໂຮງແຮມ. ມັນຊ່ວຍໃຫ້ທ່ານເຫັນພາບລວມລ່ວງໜ້າໄດ້ເຖິງ 500 ວັນ ເພື່ອຄາດການແນວໂນ້ມຕະຫຼາດ, "
+"ຈັດການຄວາມສ່ຽງ ແລະ ເພີ່ມລາຍຮັບຂອງທ່ານໃຫ້ສູງສຸດ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Blocking resources"
+msgstr "ການປິດກັ້ນຊັບພະຍາກອນ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Booking a room"
+msgstr "ການຈອງຫ້ອງພັກ"
+
+#. module: hotel
+#: model:product.template,name:hotel.product_template_12
+msgid "Breakfast"
+msgstr "ອາຫານເຊົ້າ"
+
+#. module: hotel
+#: model:product.template,name:hotel.product_template_14
+msgid "Breakfast Tray"
+msgstr "ຖາດອາຫານເຊົ້າ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"By uploading this module's demo data, your database has been filled with a "
+"few products,\n"
+"            sale orders and more."
+msgstr ""
+"ໂດຍການອັບໂຫຼດຂໍ້ມູນຕົວຢ່າງຂອງໂມດູນນີ້, ຖານຂໍ້ມູນຂອງທ່ານຈະຖືກເພີ່ມດ້ວຍຂໍ້ມູນສິນຄ້າບາງຢ່າງ,\n"
+"            ລາຍການຂາຍ ແລະ ອື່ນໆ."
+
+#. module: hotel
+#: model:product.template,name:hotel.product_template_16
+msgid "Champagne Bottle"
+msgstr "ແຊມເປນໜຶ່ງຕຸກ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Charge your guests"
+msgstr "ເກັບຄ່າບໍລິການຈາກແຂກຂອງທ່ານ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_contactus
+msgid ""
+"Chat with us or fill in this form to get information about anything related "
+"to our rooms or the palace.<br/><br/>"
+msgstr ""
+"ແຊັດຫາພວກເຮົາ ຫຼື ຕື່ມຂໍ້ມູນໃສ່ແບບຟອມນີ້ ເພື່ອສອບຖາມຂໍ້ມູນຕ່າງໆ ກ່ຽວກັບຫ້ອງພັກ ຫຼື ພະລາຊະວັງຂອງພວກເຮົາ."
+"<br/><br/>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Check and adjust if needed the number of guest who stayed in each room. Then "
+"confirm the number of city tax to be charged, which updated the delivered "
+"city tax count."
+msgstr ""
+"ກວດສອບ ແລະ ປັບປ່ຽນຈຳນວນແຂກທີ່ພັກໃນແຕ່ລະຫ້ອງຕາມຄວາມຈຳເປັນ. "
+"ຈາກນັ້ນຢືນຢັນຈຳນວນອາກອນເມືອງທີ່ຈະເກັບ, ເຊິ່ງຈະເປັນການອັບເດດຈຳນວນອາກອນເມືອງທີ່ໄດ້ສົ່ງມອບແລ້ວ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Check guests in"
+msgstr "ແຈ້ງແຂກເຂົ້າພັກ (Check in)"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Check guests out"
+msgstr "ແຈ້ງແຂກອອກຈາກທີ່ພັກ (Check out)"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Check information and then confirm the booking."
+msgstr "ກວດສອບຂໍ້ມູນ ແລະ ຈາກນັ້ນຢືນຢັນການຈອງ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"City Taxes are to be billed to spent nights in practice and not in theory "
+"and are counted as the sum of nights each guest stayed."
+msgstr ""
+"ອາກອນເມືອງຈະຖືກຄິດໄລ່ຕາມຈຳນວນຄືນທີ່ພັກເຊົາຕົວຈິງ ໂດຍນັບຈາກຜົນລວມຂອງຈຳນວນຄືນທີ່ແຂກແຕ່ລະຄົນພັກ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Click one of the room to book."
+msgstr "ຄລິກໃສ່ຫ້ອງໃດໜຶ່ງເພື່ອທຳການຈອງ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Click the Check in button to confirm they are now staying at your place!"
+msgstr "ຄລິກປຸ່ມ ເຂົ້າພັກ (Check in) ເພື່ອຢືນຢັນວ່າພວກເຂົາໄດ້ເຂົ້າພັກໃນທີ່ພັກຂອງທ່ານແລ້ວ!"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Click the Check out button to capture they return you the keys."
+msgstr "ຄລິກປຸ່ມ ອອກຈາກທີ່ພັກ (Check out) ເພື່ອບັນທຶກວ່າພວກເຂົາໄດ້ຄືນກະແຈໃຫ້ທ່ານແລ້ວ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Click the Create Order to open the order form."
+msgstr "ຄລິກປຸ່ມ ສ້າງລາຍການ (Create Order) ເພື່ອເປີດແບບຟອມການຈອງ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Click the Pay with demo button, and then Pay button to mimic the payment."
+msgstr ""
+"ຄລິກປຸ່ມ ຊຳລະດ້ວຍຕົວຢ່າງ (Pay with demo), ແລະ ຈາກນັ້ນຄລິກປຸ່ມ ຊຳລະເງິນ ເພື່ອທົດລອງການຊຳລະ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Click the Settle PoS Orders button to add the corresponding order lines."
+msgstr "ຄລິກປຸ່ມ ຈັດການລາຍການ PoS (Settle PoS Orders) ເພື່ອເພີ່ມລາຍການທີ່ກ່ຽວຂ້ອງ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Click the tail of the corresponding booking and drag it to the requested "
+"date."
+msgstr "ຄລິກທີ່ສ່ວນທ້າຍຂອງລາຍການຈອງທີ່ຕ້ອງການ ແລ້ວລາກໄປຫາວັນທີທີ່ຕ້ອງການ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Configure the email delay as you wish the email to be sent after the guest "
+"checkout."
+msgstr "ຕັ້ງຄ່າໄລຍະເວລາການສົ່ງອີເມລຕາມທີ່ທ່ານຕ້ອງການ ຫຼັງຈາກທີ່ແຂກແຈ້ງອອກແລ້ວ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.template_footer_minimalist
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_contactus
+msgid "Contact us"
+msgstr "ຕິດຕໍ່ພວກເຮົາ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Create a new leave selecting the appropriate working schedule, the one from "
+"your stay resources."
+msgstr "ສ້າງການຢຸດພັກໃໝ່ໂດຍເລືອກຕາຕະລາງການເຮັດວຽກທີ່ເໝາະສົມ ຈາກຊັບພະຍາກອນທີ່ພັກຂອງທ່ານ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Create a new leave the same way as previously, but this time specify the "
+"resource this applies to."
+msgstr "ສ້າງການຢຸດພັກໃໝ່ໃນຮູບແບບດຽວກັນກັບຄັ້ງກ່ອນ, ແຕ່ຄັ້ງນີ້ໃຫ້ລະບຸຊັບພະຍາກອນທີ່ຈະນຳໃຊ້."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Created offers are assigned no company nor branch (default behavior).<br/>As "
+"a result, they are available from all companies and branches, as well as all "
+"websites from those."
+msgstr ""
+"ຂໍ້ສະເໜີທີ່ສ້າງຂຶ້ນຈະບໍ່ໄດ້ກຳນົດໃຫ້ບໍລິສັດ ຫຼື ສາຂາໃດໜຶ່ງ (ຄ່າເລີ່ມຕົ້ນ).<br/>ດັ່ງນັ້ນ, "
+"ພວກມັນຈຶ່ງສາມາດໃຊ້ໄດ້ກັບທຸກບໍລິສັດ ແລະ ທຸກສາຂາ, ລວມທັງທຸກເວັບໄຊຂອງພວກເຂົາ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Define start and end date time and save your leave."
+msgstr "ກຳນົດວັນທີ ແລະ ເວລາເລີ່ມຕົ້ນ - ສິ້ນສຸດ ແລ້ວບັນທຶກການຢຸດພັກຂອງທ່ານ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Deliver extra services"
+msgstr "ໃຫ້ບໍລິການເສີມ"
+
+#. module: hotel
+#: model:product.template,name:hotel.product_template_15
+msgid "Dinner Tray"
+msgstr "ຖາດອາຫານແລງ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Discover more about Odoo by diving into our"
+msgstr "ຮຽນຮູ້ເພີ່ມເຕີມກ່ຽວກັບ Odoo ໂດຍການເຂົ້າເບິ່ງ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Discover the basics of this package and explore all the possibilities Odoo "
+"offers to\n"
+"            improve your experience."
+msgstr ""
+"ຮຽນຮູ້ພື້ນຖານຂອງແພັກເກດນີ້ ແລະ ຄົ້ນຫາທຸກຄວາມເປັນໄປໄດ້ທີ່ Odoo ມອບໃຫ້ ເພື່ອ\n"
+"            ປັບປຸງປະສົບການຂອງທ່ານ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Don't be limited to those examples, you could have a gym area available to "
+"members or a\n"
+"            spa with massages!"
+msgstr ""
+"ບໍ່ຈຳກັດພຽງແຕ່ຕົວຢ່າງເຫຼົ່ານີ້, ທ່ານຍັງສາມາດມີພື້ນທີ່ອອກກຳລັງກາຍສຳລັບສະມາຊິກ ຫຼື\n"
+"            ສະປາພ້ອມບໍລິການນວດໄດ້ເຊັ່ນກັນ!"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Don't forget to send them their invoice!"
+msgstr "ຢ່າລືມສົ່ງໃບບິນໃຫ້ພວກເຂົາ!"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"During an available period, click, drag and drop on a room line to create a "
+"slot."
+msgstr "ໃນຊ່ວງເວລາທີ່ວ່າງ, ໃຫ້ຄລິກ, ລາກ ແລະ ວາງລົງໃນແຖວຂອງຫ້ອງພັກເພື່ອສ້າງລາຍການຈອງ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Each company can have its own website!"
+msgstr "ແຕ່ລະບໍລິສັດສາມາດມີເວັບໄຊເປັນຂອງຕົນເອງໄດ້!"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"Each stone was carved from the surrounding cliffs, each beam of larch wood "
+"carried up the slopes by mule. The architecture blended <b><span "
+"class=\"text-o-color-1\">Belle Époque elegance</span></b> with <b><span "
+"class=\"text-o-color-1\">mountain authenticity</span></b>, creating an "
+"atmosphere that felt both majestic and deeply intimate."
+msgstr ""
+"ຫີນແຕ່ລະກ້ອນຖືກສະກັດມາຈາກໜ້າຜາທີ່ຢູ່ອ້ອມຮອບ, ໄມ້ແຕ່ລະລຳຖືກຂົນຂຶ້ນມາເທິງຄ້ອຍໂດຍລໍ. "
+"ສະຖາປັດຕະຍະກຳໄດ້ປະສົມປະສານ <b><span class=\"text-o-color-1\">ຄວາມສະຫງ່າງາມແບບ "
+"Belle Époque</span></b> ເຂົ້າກັບ <b><span class=\"text-o-"
+"color-1\">ຄວາມເປັນທຳມະຊາດຂອງພູເຂົາ</span></b>, ສ້າງບັນຍາກາດທີ່ຮູ້ສຶກໄດ້ທັງຄວາມຍິ່ງໃຫຍ່ ແລະ "
+"ຄວາມໃກ້ຊິດຢ່າງເລິກເຊິ່ງ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Employee assignations"
+msgstr "ການມອບໝາຍພະນັກງານ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Employee would open the tasks from their hand and update the status until "
+"Clean."
+msgstr ""
+"ພະນັກງານຈະເປີດເບິ່ງໜ້າວຽກຈາກອຸປະກອນຂອງພວກເຂົາ ແລະ ອັບເດດສະຖານະຈົນກວ່າຈະ \"ສະອາດ\"."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid "End date"
+msgstr "ວັນທີສິ້ນສຸດ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Example: A room for 2 is booked for 4 nights, two guests were here for the "
+"first three nights but only one stayed the last night. Then the guests x "
+"nights is 2x3+1x1=7."
+msgstr ""
+"ຕົວຢ່າງ: ຫ້ອງພັກສຳລັບ 2 ທ່ານຖືກຈອງ 4 ຄືນ, ແຂກສອງຄົນພັກໃນສາມຄືນທຳອິດ "
+"ແຕ່ມີພຽງຄົນດຽວພັກໃນຄືນສຸດທ້າຍ. ດັ່ງນັ້ນ, ຈຳນວນແຂກ x ຄືນ ແມ່ນ 2x3 + 1x1 = 7."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.template_footer_minimalist
+msgid "Follow us"
+msgstr "ຕິດຕາມພວກເຮົາ"
+
+#. module: hotel
+#: model:product.template,name:hotel.product_template_11
+msgid "Free Cancellation"
+msgstr "ຍົກເລີກຟຣີ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"From the <strong>Hotel App</strong>, you can manage your bookings.<br/>The\n"
+"            Hotel App relies on the Rental and Planning Apps binding, with a "
+"few\n"
+"            customizations."
+msgstr ""
+"ຈາກ <strong>ແອັບໂຮງແຮມ</strong>, ທ່ານສາມາດຈັດການການຈອງຂອງທ່ານໄດ້.<br/>ແອັບ\n"
+"            ໂຮງແຮມເຮັດວຽກໂດຍການເຊື່ອມໂຍງລະຫວ່າງແອັບການເຊົ່າ ແລະ ແອັບວາງແຜນ, ໂດຍມີການ\n"
+"            ປັບແຕ່ງບາງສ່ວນ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"From the Roles sections, you can select the companies and branches this "
+"employee shall have access to as well as the default one."
+msgstr ""
+"ໃນສ່ວນຂອງບົດບາດ (Roles), ທ່ານສາມາດເລືອກບໍລິສັດ ແລະ ສາຂາທີ່ພະນັກງານຄົນນີ້ສາມາດເຂົ້າເຖິງໄດ້ "
+"ລວມທັງກຳນົດບໍລິສັດຫຼັກ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"From the search bar select the Today filter to see to check in and to check "
+"out\n"
+"                orders."
+msgstr ""
+"ຈາກແຖບຄົ້ນຫາ ໃຫ້ເລືອກຕົວກອງ \"ມື້ນີ້\" ເພື່ອເບິ່ງລາຍການຈອງທີ່ຕ້ອງ\n"
+"                ເຂົ້າພັກ (check in) ແລະ ອອກຈາກທີ່ພັກ (check out)."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "From there you can add new companies."
+msgstr "ຈາກບ່ອນນັ້ນ ທ່ານສາມາດເພີ່ມບໍລິສັດໃໝ່ໄດ້."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"Guided by this vision, Norris chose a secluded plateau overlooking a "
+"pristine valley, where the silence of the pines mingled with the distant "
+"echo of cowbells. There, with the help of local craftsmen and artisans, he "
+"began to build what would become the <b><span class=\"text-o-color-1\">Grand "
+"Norris Palace</span></b>."
+msgstr ""
+"ດ້ວຍວິໄສທັດນີ້, Norris ໄດ້ເລືອກພື້ນທີ່ຮາບສູງທີ່ແຍກຕົວອອກມາ ເຊິ່ງສາມາດແນມເຫັນຮ່ອມພູທີ່ບໍລິສຸດ, "
+"ບ່ອນທີ່ຄວາມງຽບສະຫງົບຂອງປ່າສົນປະສົມປະສານກັບສຽງກະດິງງົວຈາກທາງໄກ. ຢູ່ທີ່ນັ້ນ, "
+"ດ້ວຍການຊ່ວຍເຫຼືອຈາກຊ່າງຝີມືທ້ອງຖິ່ນ, ລາວໄດ້ເລີ່ມສ້າງສິ່ງທີ່ຈະກາຍມາເປັນ <b><span class=\"text-o-"
+"color-1\">Grand Norris Palace</span></b>."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Hello there!"
+msgstr "ສະບາຍດີ!"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"Here, nature reigns supreme. Mornings begin with the scent of larch and the "
+"sound of distant waterfalls; evenings end under a canopy of stars untouched "
+"by city lights. The Palace's terraces open onto sweeping views of the <span "
+"class=\"text-o-color-1\"><b>Mont Blanc massif</b></span> and the <b><span "
+"class=\"text-o-color-1\">Trient Glacier</span></b>, offering a sense of "
+"peace that feels almost sacred."
+msgstr ""
+"ຢູ່ທີ່ນີ້, ທຳມະຊາດເປັນໃຫຍ່ທີ່ສຸດ. ຕອນເຊົ້າເລີ່ມຕົ້ນດ້ວຍກິ່ນຫອມຂອງຕົ້ນສົນ ແລະ ສຽງນ້ຳຕົກຈາກທາງໄກ; "
+"ຕອນແລງສິ້ນສຸດລົງພາຍໃຕ້ທ້ອງຟ້າທີ່ເຕັມໄປດ້ວຍດວງດາວທີ່ບໍ່ມີແສງໄຟຈາກເມືອງລົບກວນ. "
+"ລະບຽງຂອງພະລາຊະວັງເປີດອອກສູ່ທິວທັດອັນກວ້າງໃຫຍ່ຂອງ <span class=\"text-o-"
+"color-1\"><b>ເທືອກເຂົາ Mont Blanc</b></span> ແລະ <b><span class=\"text-o-"
+"color-1\">ນ້ຳແຂງ Trient</span></b>, ເຊິ່ງມອບຄວາມຮູ້ສຶກສະຫງົບສຸກຢ່າງແທ້ຈິງ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.template_footer_minimalist
+msgid "Home"
+msgstr "ໜ້າຫຼັກ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.res_config_settings_form_view_inherited
+msgid "Hotel"
+msgstr "ໂຮງແຮມ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"If not OK, then click the contact, fill in the Identity section and save "
+"the\n"
+"                contact."
+msgstr ""
+"ຖ້າຍັງບໍ່ຄົບຖ້ວນ, ໃຫ້ຄລິກໃສ່ລາຍຊື່ຜູ້ຕິດຕໍ່, ປ້ອນຂໍ້ມູນໃນສ່ວນຕົວຕົນ ແລະ ບັນທຶກ\n"
+"                ລາຍຊື່ຜູ້ນັ້ນ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"If they paid orders at any point of sale with their customer account, their "
+"customer account due amount will be displayed as well as a button for you to "
+"settle the associated orders."
+msgstr ""
+"ຫາກພວກເຂົາຊຳລະລາຍການຕ່າງໆຢູ່ຈຸດຂາຍ (POS) ດ້ວຍບັນຊີລູກຄ້າ, ຍອດເງິນທີ່ຕ້ອງຊຳລະຈະຖືກສະແດງຂຶ້ນ "
+"ພ້ອມກັບປຸ່ມເພື່ອໃຫ້ທ່ານຈັດການລາຍການທີ່ກ່ຽວຂ້ອງນັ້ນ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"If using the house keeping approver setting, designated\n"
+"                    approvers can check each room and set their state to "
+"ready to close the tasks."
+msgstr ""
+"ຫາກໃຊ້ການຕັ້ງຄ່າຜູ້ອະນຸມັດວຽກແມ່ບ້ານ, ຜູ້ທີ່ຖືກກຳນົດ\n"
+"                    ສາມາດກວດສອບແຕ່ລະຫ້ອງ ແລະ ຕັ້ງສະຖານະເປັນ \"ພ້ອມ\" ເພື່ອປິດໜ້າວຽກ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"If you want to execute a practical guided tour of this module, you should "
+"Import\n"
+"                    demo data and try the Demo - Use Case (In the next "
+"Knowledge Article)"
+msgstr ""
+"ຫາກທ່ານຕ້ອງການທົດລອງໃຊ້ງານໂມດູນນີ້ຕາມຂັ້ນຕອນຕົວຈິງ, ທ່ານຄວນນຳເຂົ້າ\n"
+"                    ຂໍ້ມູນຕົວຢ່າງ ແລະ ລອງໃຊ້ Demo - Use Case (ໃນບົດຄວາມຄວາມຮູ້ຖັດໄປ)"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"If you're not certain customers have ongoing bookings, before charging their "
+"customer accounts, open their contact details from their menu (from the "
+"customer list) and ask for the room they stay in.<br/>Note: Their room is "
+"listed in the Guests tab of their order."
+msgstr ""
+"ຫາກທ່ານບໍ່ແນ່ໃຈວ່າລູກຄ້າມີການຈອງທີ່ກຳລັງດຳເນີນຢູ່ຫຼືບໍ່, ກ່ອນຈະເກັບເງິນຈາກບັນຊີລູກຄ້າ, "
+"ໃຫ້ເປີດເບິ່ງລາຍລະອຽດຜູ້ຕິດຕໍ່ (ຈາກລາຍຊື່ລູກຄ້າ) ແລະ ສອບຖາມຫ້ອງທີ່ພວກເຂົາພັກ.<br/>ໝາຍເຫດ: "
+"ເບີຫ້ອງຂອງພວກເຂົາຈະຖືກສະແດງຢູ່ໃນແຖບ \"ແຂກ\" ຂອງລາຍການຈອງ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "In any case, the resources are company and branch dependent."
+msgstr "ໃນທຸກກໍລະນີ, ຊັບພະຍາກອນຈະຂຶ້ນຢູ່ກັບບໍລິສັດ ແລະ ສາຂາ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"In any case, you may have written records in journals which are not delete-"
+"able and which\n"
+"            might be an issue for your traceability."
+msgstr ""
+"ໃນບາງກໍລະນີ, ທ່ານອາດຈະມີການບັນທຶກໃນສະໝຸດບັນຊີທີ່ບໍ່ສາມາດລຶບໄດ້ ເຊິ່ງ\n"
+"            ອາດຈະເປັນບັນຫາໃນການກວດສອບຍ້ອນຫຼັງຂອງທ່ານ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"In case you outsource or rely more heavily on suppliers, the "
+"<strong>Purchase App</strong>\n"
+"                will help you to manage those aspects."
+msgstr ""
+"ໃນກໍລະນີທີ່ທ່ານຈ້າງບໍລິສັດພາຍນອກ ຫຼື ເພິ່ງພາຜູ້ສະໜອງສິນຄ້າຫຼາຍຂຶ້ນ, <strong>ແອັບການຈັດຊື້</strong>\n"
+"                ຈະຊ່ວຍທ່ານຈັດການໃນສ່ວນເຫຼົ່ານັ້ນ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"In the Options tab, you can see it is made the customer satisfaction survey "
+"in the participants section."
+msgstr ""
+"ໃນແຖບຕົວເລືອກ, ທ່ານສາມາດເບິ່ງໄດ້ວ່າການສ້າງແບບສຳຫຼວດຄວາມເພິ່ງພໍໃຈຂອງລູກຄ້າຢູ່ໃນສ່ວນຂອງຜູ້ເຂົ້າຮ່ວມ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"It enables each place manager to adjust the stay offers with greater "
+"flexibility without impacting other places."
+msgstr ""
+"ມັນຊ່ວຍໃຫ້ຜູ້ຈັດການໃນແຕ່ລະສະຖານທີ່ສາມາດປັບປ່ຽນຂໍ້ສະເໜີທີ່ພັກໄດ້ຢ່າງຄ່ອງຕົວ ໂດຍບໍ່ສົ່ງຜົນກະທົບຕໍ່ສະຖານທີ່ອື່ນໆ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Keep your guests satisfied"
+msgstr "ເຮັດໃຫ້ແຂກຂອງທ່ານມີຄວາມເພິ່ງພໍໃຈສະເໝີ"
+
+#. module: hotel
+#: model:product.template,name:hotel.product_template_8
+msgid "La Claudia"
+msgstr "La Claudia"
+
+#. module: hotel
+#: model_terms:product.template,description_ecommerce:hotel.product_template_8
+msgid ""
+"La Claudia invites you into a bright and contemporary environment, where "
+"soft colors and chic furnishings enhance your sense of well-being. Whether "
+"you are unwinding after an active day or enjoying a quiet morning with a "
+"view, this room brings together elegance, space, and serenity for an "
+"unforgettable stay."
+msgstr ""
+"La Claudia ຂໍເຊີນທ່ານເຂົ້າສູ່ບັນຍາກາດທີ່ສົດໃສ ແລະ ທັນສະໄໝ, ບ່ອນທີ່ມີສີສັນອ່ອນໆ ແລະ ເຟີນິເຈີທີ່ຫຼູຫຼາ "
+"ຊ່ວຍໃຫ້ທ່ານຮູ້ສຶກຜ່ອນຄາຍ. ບໍ່ວ່າທ່ານຈະມາພັກຜ່ອນຫຼັງຈາກມື້ທີ່ເມື່ອຍລ້າ ຫຼື "
+"ເພີດເພີນກັບຕອນເຊົ້າທີ່ງຽບສະຫງົບພ້ອມກັບທິວທັດທີ່ສວຍງາມ, ຫ້ອງນີ້ໄດ້ລວມເອົາຄວາມສະຫງ່າງາມ, "
+"ພື້ນທີ່ກວ້າງຂວາງ ແລະ ຄວາມງຽບສະຫງົບ ເພື່ອການພັກຜ່ອນທີ່ໜ້າຈົດຈຳ."
+
+#. module: hotel
+#: model:product.template,name:hotel.product_template_9
+msgid "La Maria"
+msgstr "La Maria"
+
+#. module: hotel
+#: model_terms:product.template,description_ecommerce:hotel.product_template_9
+msgid ""
+"La Maria welcomes you with a bright and refined atmosphere, blending modern "
+"comfort with subtle alpine charm. Soft textures, elegant furnishings, and "
+"thoughtfully designed spaces create the ideal setting to relax and recharge. "
+"With its soothing ambiance and premium amenities, La Maria offers a serene "
+"escape in the heart of the Swiss Alps."
+msgstr ""
+"La Maria ຕ້ອນຮັບທ່ານດ້ວຍບັນຍາກາດທີ່ສົດໃສ ແລະ ປານີດ, "
+"ປະສົມປະສານຄວາມສະດວກສະບາຍທີ່ທັນສະໄໝກັບສະເໜ່ຂອງເທືອກເຂົາ ແອວສ໌. ດ້ວຍເນື້ອສຳຜັດທີ່ອ່ອນນຸ້ມ, "
+"ເຟີນິເຈີທີ່ຫຼູຫຼາ ແລະ ພື້ນທີ່ທີ່ຖືກອອກແບບມາຢ່າງພິຖີພິຖັນ ເພື່ອສ້າງສະພາບແວດລ້ອມທີ່ເໝາະສົມສຳລັບການພັກຜ່ອນ "
+"ແລະ ເຕີມພະລັງ. ດ້ວຍບັນຍາກາດທີ່ຜ່ອນຄາຍ ແລະ ສິ່ງອຳນວຍຄວາມສະດວກລະດັບພຣີມຽມ, La Maria "
+"ມອບການພັກຜ່ອນທີ່ງຽບສະຫງົບໃນໃຈກາງຂອງເທືອກເຂົາ ແອວສ໌ ສະວິດ."
+
+#. module: hotel
+#: model:product.template,name:hotel.product_template_10
+msgid "La Nina"
+msgstr "La Nina"
+
+#. module: hotel
+#: model_terms:product.template,description_ecommerce:hotel.product_template_10
+msgid ""
+"La Nina is a sophisticated haven combining contemporary elegance with the "
+"charm of alpine living. Its thoughtfully curated decor, premium bedding, and "
+"high-end comforts create a serene environment for true rest. Enjoy the "
+"mountain view from your private space, indulge in a moment of calm, and "
+"experience a stay where every detail is designed for your well-being."
+msgstr ""
+"La Nina ແມ່ນສະຖານທີ່ພັກຜ່ອນທີ່ທັນສະໄໝ "
+"ເຊິ່ງປະສົມປະສານຄວາມສະຫງ່າງາມກັບສະເໜ່ຂອງການໃຊ້ຊີວິດໃນເທືອກເຂົາ ແອວສ໌. ດ້ວຍການຕົກແຕ່ງທີ່ພິຖີພິຖັນ, "
+"ເຄື່ອງນອນລະດັບພຣີມຽມ ແລະ ຄວາມສະດວກສະບາຍລະດັບສູງ "
+"ເພື່ອສ້າງບັນຍາກາດທີ່ງຽບສະຫງົບສຳລັບການພັກຜ່ອນຢ່າງແທ້ຈິງ. "
+"ເພີດເພີນໄປກັບທິວທັດພູເຂົາຈາກພື້ນທີ່ສ່ວນຕົວຂອງທ່ານ, ດື່ມດ່ຳກັບຊ່ວງເວລາແຫ່ງຄວາມສະຫງົບ ແລະ "
+"ສຳຜັດກັບການພັກເຊົາທີ່ທຸກລາຍລະອຽດຖືກອອກແບບມາເພື່ອສຸຂະພາບທີ່ດີຂອງທ່ານ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Leaving a review"
+msgstr "ການຂຽນຄຳຄິດເຫັນ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Let's book a room!"
+msgstr "ມາຈອງຫ້ອງພັກກັນເລີຍ!"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Manage your accounting easier than ever with a completely integrated "
+"environment i<font class=\"text-o-color-5\">n </font><strong>\n"
+"                    <font class=\"text-o-color-5\">Accounting App</font>\n"
+"                </strong><font class=\"text-o-color-5\">.</font>"
+msgstr ""
+"ຈັດການວຽກງານບັນຊີຂອງທ່ານໃຫ້ງ່າຍກວ່າທີ່ເຄີຍ ດ້ວຍລະບົບທີ່ເຊື່ອມໂຍງກັນຢ່າງສົມບູນໃ<font class=\"text-"
+"o-color-5\">ນ </font><strong>\n"
+"                    <font class=\"text-o-color-5\">ແອັບບັນຊີ</font>\n"
+"                </strong><font class=\"text-o-color-5\">.</font>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Managing scarcity with availability"
+msgstr "ຈັດການຄວາມຕ້ອງການທີ່ສູງດ້ວຍການກວດສອບສະຖານະຫ້ອງວ່າງ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Managing your businesses"
+msgstr "ຈັດການທຸລະກິດຂອງທ່ານ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Monitoring success with occupancy"
+msgstr "ຕິດຕາມຄວາມສຳເລັດດ້ວຍອັດຕາການເຂົ້າພັກ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Now that they relax, you can offer extra services to make your guests fill "
+"even more\n"
+"            comfortable!"
+msgstr ""
+"ໃນຂະນະທີ່ພວກເຂົາກຳລັງພັກຜ່ອນ, ທ່ານສາມາດສະເໜີບໍລິການເສີມ ເພື່ອໃຫ້ແຂກຂອງທ່ານຮູ້ສຶກ\n"
+"            ສະດວກສະບາຍຍິ່ງຂຶ້ນ!"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Now that you have several companies or branches, you may want some of your "
+"employees to access only to some of them in case they always work in some of "
+"your places."
+msgstr ""
+"ເມື່ອທ່ານມີຫຼາຍບໍລິສັດ ຫຼື ສາຂາ, ທ່ານອາດຈະຕ້ອງການໃຫ້ພະນັກງານບາງຄົນເຂົ້າເຖິງໄດ້ພຽງແຕ່ບາງສາຂາ "
+"ເຊິ່ງແມ່ນບ່ອນທີ່ພວກເຂົາເຮັດວຽກປະຈຳ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Odoo offers you infinite possibilities, such as:"
+msgstr "Odoo ມອບຄວາມເປັນໄປໄດ້ທີ່ບໍ່ມີຂີດຈຳກັດໃຫ້ທ່ານ ເຊັ່ນ:"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Of course, this is just an overview of the features included in this "
+"package. Feel free\n"
+"            to add new apps, delete/modify demo data, and test everything "
+"around!"
+msgstr ""
+"ແນ່ນອນວ່າ ນີ້ເປັນພຽງພາບລວມຂອງຄຸນສົມບັດໃນແພັກເກດນີ້. ທ່ານສາມາດ\n"
+"            ເພີ່ມແອັບໃໝ່, ລຶບ ຫຼື ແກ້ໄຂຂໍ້ມູນຕົວຢ່າງ ແລະ ທົດລອງທຸກຢ່າງໄດ້ຕາມສະບາຍ!"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"On a daily basis, house keeping tasks are created depending\n"
+"                    the current stays."
+msgstr ""
+"ໃນແຕ່ລະມື້, ວຽກງານອະນາໄມຈະຖືກສ້າງຂຶ້ນໂດຍອີງຕາມ\n"
+"                    ການພັກເຊົາໃນປັດຈຸບັນ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "On a resource to block line, click, drag and drop to create a slot."
+msgstr "ໃນແຖວຊັບພະຍາກອນທີ່ຕ້ອງການປິດກັ້ນ, ໃຫ້ຄລິກ, ລາກ ແລະ ວາງເພື່ອສ້າງລາຍການ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "On top of guest and stay management, you need to keep the place clean!"
+msgstr "ນອກຈາກການຈັດການແຂກ ແລະ ການພັກເຊົາແລ້ວ, ທ່ານຍັງຕ້ອງຮັກສາຄວາມສະອາດຂອງສະຖານທີ່ນຳອີກ!"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Once confirmed, the payment is done and the order booked seamlessly!"
+msgstr "ເມື່ອຢືນຢັນແລ້ວ, ການຊຳລະເງິນຈະສຳເລັດ ແລະ ການຈອງຈະຖືກບັນທຶກຢ່າງຄ່ອງຕົວ!"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Once defined, you can switch between companies or branches from the company "
+"selector at the top right of your screen.<br/>This will expose depending on "
+"where you are, only the selected companies and branches data."
+msgstr ""
+"ເມື່ອກຳນົດແລ້ວ, ທ່ານສາມາດສະຫຼັບລະຫວ່າງບໍລິສັດ ຫຼື ສາຂາ ໄດ້ຈາກຕົວເລືອກບໍລິສັດຢູ່ມຸມຂວາເທິງຂອງໜ້າຈໍ.<br/"
+">ລະບົບຈະສະແດງສະເພາະຂໍ້ມູນຂອງບໍລິສັດ ແລະ ສາຂາທີ່ເລືອກໄວ້ເທົ່ານັ້ນ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Once done adding all the necessary rooms, click on a recently added slot and "
+"then\n"
+"                click the rental order link."
+msgstr ""
+"ເມື່ອເພີ່ມຫ້ອງທີ່ຈຳເປັນທັງໝົດແລ້ວ, ໃຫ້ຄລິກໃສ່ລາຍການທີ່ຫາສ້າງໃໝ່ ແລະ ຈາກນັ້ນ\n"
+"                ຄລິກໃສ່ລິ້ງລາຍການເຊົ່າ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Once done, let's click, drag and drop on another room line to create a slot."
+msgstr "ເມື່ອສຳເລັດແລ້ວ, ໃຫ້ຄລິກ, ລາກ ແລະ ວາງລົງໃນແຖວຂອງຫ້ອງອື່ນເພື່ອສ້າງລາຍການຈອງ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Once done, logged in as a portal user."
+msgstr "ເມື່ອສຳເລັດແລ້ວ, ໃຫ້ເຂົ້າສູ່ລະບົບໃນຖານະຜູ້ໃຊ້ຜ່ານປະຕູ (portal user)."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Once your guest order is all set after check out, create an invoice from "
+"their order."
+msgstr ""
+"ເມື່ອລາຍການຈອງຂອງແຂກຖືກຈັດການຮຽບຮ້ອຍຫຼັງຈາກແຈ້ງອອກແລ້ວ, ໃຫ້ສ້າງໃບບິນຈາກລາຍການຈອງນັ້ນ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Open a room page from the website and scroll down to the Customer Reviews "
+"section."
+msgstr "ເປີດໜ້າຫ້ອງພັກຈາກເວັບໄຊ ແລະ ເລື່ອນລົງໄປທີ່ສ່ວນຂອງ ຄຳຄິດເຫັນຈາກລູກຄ້າ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Open now, the Tasks from the accommodation app, House Keeping menu.<br/>This "
+"is\n"
+"                the daily list of house keeping tasks to be tackled."
+msgstr ""
+"ເປີດເບິ່ງໜ້າວຽກຈາກແອັບທີ່ພັກ, ເມນູ ວຽກງານແມ່ບ້ານ.<br/>ນີ້ແມ່ນ\n"
+"                ລາຍການວຽກອະນາໄມປະຈຳວັນທີ່ຈະຕ້ອງໄດ້ຈັດການ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Open one, assign it to an employee to plan the house keeping of the day."
+msgstr "ເປີດລາຍການໃດໜຶ່ງ, ມອບໝາຍໃຫ້ພະນັກງານ ເພື່ອວາງແຜນວຽກອະນາໄມປະຈຳວັນ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Open the <strong>Settings App</strong> and reach the companies from the menu "
+"Users &amp; Companies."
+msgstr ""
+"ເປີດ <strong>ແອັບການຕັ້ງຄ່າ</strong> ແລະ ໄປທີ່ເມນູ ຜູ້ໃຊ້ &amp; ບໍລິສັດ ເພື່ອຈັດການບໍລິສັດ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Open the <strong>Settings App</strong> and reach the users from the menu "
+"Users &amp; Companies."
+msgstr "ເປີດ <strong>ແອັບການຕັ້ງຄ່າ</strong> ແລະ ໄປທີ່ເມນູ ຜູ້ໃຊ້ &amp; ບໍລິສັດ ເພື່ອຈັດການຜູ້ໃຊ້."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Open the <strong>Website App</strong> and navigate to the Rooms."
+msgstr "ເປີດ <strong>ແອັບເວັບໄຊ</strong> ແລະ ໄປທີ່ສ່ວນ ຫ້ອງພັກ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Open the Board from the accommodation app, House Keeping menu.<br/>Here you "
+"have an\n"
+"                overview of the cleanness state of your resources."
+msgstr ""
+"ເປີດກະດານຄວບຄຸມຈາກແອັບທີ່ພັກ, ເມນູ ວຽກງານແມ່ບ້ານ.<br/>ບ່ອນນີ້ທ່ານຈະເຫັນ\n"
+"                ພາບລວມຂອງສະຖານະຄວາມສະອາດຂອງຊັບພະຍາກອນຂອງທ່ານ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Open the Hotel App and navigate to the Configuration / Leaves menu."
+msgstr "ເປີດແອັບໂຮງແຮມ ແລະ ໄປທີ່ເມນູ ການຕັ້ງຄ່າ / ການຢຸດພັກ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Open the Hotel App and then navigate to the orders from the menu."
+msgstr "ເປີດແອັບໂຮງແຮມ ແລະ ໄປທີ່ເມນູ ລາຍການຈອງ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Open the Hotel App to appreciate the currently planned bookings with the\n"
+"                Schedule."
+msgstr ""
+"ເປີດແອັບໂຮງແຮມ ເພື່ອເບິ່ງລາຍການຈອງທີ່ໄດ້ວາງແຜນໄວ້ໃນ\n"
+"                ຕາຕະລາງ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Open the POS App and select one of the register, the Bar for example."
+msgstr "ເປີດແອັບ POS ແລະ ເລືອກເຄື່ອງບັນທຶກເງິນໃດໜຶ່ງ ເຊັ່ນ: ບາ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Open the Steering menu and select Availability."
+msgstr "ເປີດເມນູການບໍລິຫານ (Steering) ແລະ ເລືອກ ສະຖານະຫ້ອງວ່າງ (Availability)."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Open the Steering menu and select Occupancy."
+msgstr "ເປີດເມນູການບໍລິຫານ (Steering) ແລະ ເລືອກ ອັດຕາການເຂົ້າພັກ (Occupancy)."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Open the Survey App to find the customer satisfaction survey."
+msgstr "ເປີດແອັບແບບສຳຫຼວດ ເພື່ອຊອກຫາແບບສຳຫຼວດຄວາມເພິ່ງພໍໃຈຂອງລູກຄ້າ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Open the door for more custom workflows and actions with the power of "
+"<strong>Studio\n"
+"                App</strong>."
+msgstr ""
+"ເປີດໂອກາດສຳລັບຂັ້ນຕອນການເຮັດວຽກ ແລະ ການດຳເນີນການທີ່ປັບແຕ່ງໄດ້ຫຼາຍຂຶ້ນ ດ້ວຍປະສິດທິພາບຂອງ "
+"<strong>ແອັບ\n"
+"                ສະຕູດິໂອ (Studio)</strong>."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Open the order of you just arrived guests."
+msgstr "ເປີດລາຍການຈອງຂອງແຂກທີ່ຫາພ້ອມຈະເຂົ້າພັກ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Open your guest order from the Hotel App."
+msgstr "ເປີດລາຍການຈອງແຂກຂອງທ່ານຈາກແອັບໂຮງແຮມ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Organize your employees' schedules with<font class=\"text-o-color-5\"> "
+"<strong>\n"
+"                Planning</strong></font><strong>\n"
+"                    <font class=\"text-o-color-5\"> App</font>\n"
+"                </strong><font class=\"text-o-color-5\">.</font>"
+msgstr ""
+"ຈັດຕາຕະລາງການເຮັດວຽກຂອງພະນັກງານຂອງທ່ານດ້ວຍ<font class=\"text-o-color-5\"> "
+"<strong>\n"
+"                ແອັບການວາງແຜນ</strong></font><strong>\n"
+"                    <font class=\"text-o-color-5\"> </font>\n"
+"                </strong><font class=\"text-o-color-5\">.</font>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_contactus
+msgid ""
+"Our team will be delighted to assist you and will respond to your message "
+"within 2 open&amp;nbsp;days"
+msgstr "ທີມງານຂອງພວກເຮົາຍິນດີທີ່ຈະຊ່ວຍເຫຼືອທ່ານ ແລະ ຈະຕອບກັບຂໍ້ຄວາມຂອງທ່ານພາຍໃນ 2 ວັນທຳການ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"Perched high above the valley of <b><span class=\"text-o-color-1\">Orsières</"
+"span></b>, in the enchanting <b><span class=\"text-o-color-1\">Valais "
+"region</span></b> of Switzerland, the <b><span class=\"text-o-"
+"color-1\">Grand Norris Palace</span></b> enjoys one of the most breathtaking "
+"settings in the Alps.&amp;nbsp;"
+msgstr ""
+"ຕັ້ງຢູ່ເທິງໜ້າຜາສູງເໜືອຮ່ອມພູ <b><span class=\"text-o-color-1\">Orsières</span></b>, "
+"ໃນເຂດ <b><span class=\"text-o-color-1\">Valais</span></b> "
+"ທີ່ສວຍງາມຂອງປະເທດສະວິດເຊີແລນ, <b><span class=\"text-o-color-1\">Grand Norris "
+"Palace</span></b> ຕັ້ງຢູ່ໃນໜຶ່ງໃນສະຖານທີ່ທີ່ສວຍງາມທີ່ສຸດໃນເທືອກເຂົາ ແອວສ໌.&amp;nbsp;"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Proceed to the payment with your terminal and set the invoice as paid."
+msgstr "ດຳເນີນການຊຳລະເງິນຜ່ານເຄື່ອງຮູດບັດຂອງທ່ານ ແລະ ຕັ້ງສະຖານະໃບບິນເປັນ \"ຊຳລະແລ້ວ\"."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Reach us"
+msgstr "ຕິດຕໍ່ພວກເຮົາ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Record guest identity"
+msgstr "ບັນທຶກຕົວຕົນຂອງແຂກ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Recording the guest attendance is an obligation in numerous countries."
+msgstr "ການບັນທຶກການເຂົ້າພັກຂອງແຂກແມ່ນຂໍ້ບັງຄັບໃນຫຼາຍປະເທດ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.template_footer_minimalist
+msgid "Rooms"
+msgstr "ຫ້ອງພັກ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Save the order with those extra services."
+msgstr "ບັນທຶກລາຍການພ້ອມກັບການບໍລິການເສີມເຫຼົ່ານັ້ນ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Select one of your employee."
+msgstr "ເລືອກພະນັກງານຂອງທ່ານຄົນໃດຄົນໜຶ່ງ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Select or create a customer and then confirm the booking!"
+msgstr "ເລືອກ ຫຼື ສ້າງລູກຄ້າໃໝ່ ແລະ ຈາກນັ້ນຢືນຢັນການຈອງ!"
+
+#. module: hotel
+#: model:pos.category,name:hotel.pos_category_1
+msgid "Service"
+msgstr "ການບໍລິການ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Setup company or branch specific offers when relevant."
+msgstr "ຕັ້ງຄ່າຂໍ້ສະເໜີສະເພາະຂອງບໍລິສັດ ຫຼື ສາຂາ ເມື່ອມີຄວາມກ່ຽວຂ້ອງ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Share your stay offers across your companies and branches (default behavior);"
+msgstr "ແບ່ງປັນຂໍ້ສະເໜີທີ່ພັກຂອງທ່ານໄປຍັງທຸກບໍລິສັດ ແລະ ສາຂາ (ຄ່າເລີ່ມຕົ້ນ);"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid "Start date"
+msgstr "ວັນທີເລີ່ມຕົ້ນ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Still from the Hotel App Schedule, simply drag and drop a booking to "
+"another\n"
+"                more comfortable room!"
+msgstr ""
+"ໃນໜ້າຕາຕະລາງຂອງແອັບໂຮງແຮມ, ພຽງແຕ່ລາກ ແລະ ວາງລາຍການຈອງໄປຍັງຫ້ອງອື່ນ\n"
+"                ທີ່ສະດວກສະບາຍກວ່າ!"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Still from their Rental Order, open the Guests tab."
+msgstr "ໃນລາຍການຈອງຂອງພວກເຂົາ, ໃຫ້ເປີດແຖບ \"ແຂກ\"."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_contactus
+msgid "Submit"
+msgstr "ສົ່ງຂໍ້ມູນ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"Surrounded by <span class=\"text-o-color-1\"><b>snow-capped peaks, pine "
+"forests, and crystal-clear mountain lakes</b>,</span> the Palace overlooks a "
+"panorama that changes with every season <em>from the golden glow of autumn "
+"to the soft, shimmering silence of winter.</em>"
+msgstr ""
+"ອ້ອມຮອບດ້ວຍ <span class=\"text-o-color-1\"><b>ຍອດເຂົາທີ່ມີຫິມະປົກຄຸມ, ປ່າສົນ ແລະ "
+"ທະເລສາບພູເຂົາທີ່ໃສຄືກັບແກ້ວ</b>,</span> "
+"ພະລາຊະວັງແຫ່ງນີ້ສາມາດແນມເຫັນທິວທັດພາໂນຣາມາທີ່ປ່ຽນແປງໄປຕາມລະດູການ "
+"<em>ຕັ້ງແຕ່ແສງສີທອງຂອງລະດູໃບໄມ້ຫຼົ່ນ ຈົນເຖິງຄວາມງຽບສະຫງົບທີ່ງົດງາມຂອງລະດູໜາວ.</em>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"The Gantt chart is color-coded to reflect on the availability for you to "
+"work on filling in."
+msgstr ""
+"ແຜນພູມແກນທ໌ (Gantt chart) ຖືກກຳນົດດ້ວຍສີເພື່ອສະແດງສະຖານະຫ້ອງວ່າງ "
+"ເພື່ອໃຫ້ທ່ານຈັດການການຈອງໃຫ້ເຕັມ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"The Gantt chart is color-coded to reflect on the occupancy, the higher the "
+"better."
+msgstr "ແຜນພູມແກນທ໌ ຖືກກຳນົດດ້ວຍສີເພື່ອສະແດງອັດຕາການເຂົ້າພັກ, ຍິ່ງສີເຂັ້ມ ຫຼື ສູງເທົ່າໃດກໍຍິ່ງດີ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"The Occupancy view allows you to visualize your \"Sales Success\". It "
+"answers one simple question: <i>How well am I filling my hotel?</i>"
+msgstr ""
+"ມຸມມອງອັດຕາການເຂົ້າພັກ ຊ່ວຍໃຫ້ທ່ານເຫັນພາບ \"ຄວາມສຳເລັດຂອງການຂາຍ\". ມັນຕອບຄຳຖາມງ່າຍໆວ່າ: "
+"<i>ໂຮງແຮມຂອງຂ້ອຍມີແຂກພັກເຕັມດີປານໃດ?</i>"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"The estate lies at the crossroads of ancient mountain paths once used by "
+"shepherds and traders crossing into Italy. Today, it remains a place of "
+"quiet majesty, far from the noise of the world yet easily accessible from "
+"<b><span class=\"text-o-color-1\">Verbier, Montreux, or Geneva</span></b>. "
+"Guests arrive along a winding alpine road that reveals, turn after turn, a "
+"landscape of pure wonder — until, at last, the turrets of the Grand Norris "
+"Palace emerge against the sky."
+msgstr ""
+"ສະຖານທີ່ແຫ່ງນີ້ຕັ້ງຢູ່ເທິງທາງແຍກຂອງເສັ້ນທາງພູເຂົາບູຮານ ທີ່ເຄີຍຖືກນຳໃຊ້ໂດຍຄົນລ້ຽງແກະ ແລະ "
+"ພໍ່ຄ້າເພື່ອຂ້າມໄປປະເທດອີຕາລີ. ໃນປັດຈຸບັນ, ມັນຍັງຄົງເປັນສະຖານທີ່ທີ່ມີຄວາມຍິ່ງໃຫຍ່ ແລະ ງຽບສະຫງົບ, "
+"ຫ່າງໄກຈາກຄວາມວຸ້ນວາຍຂອງໂລກ ແຕ່ສາມາດເດີນທາງມາໄດ້ຢ່າງສະດວກຈາກ <b><span class=\"text-o-"
+"color-1\">Verbier, Montreux, ຫຼື Geneva</span></b>. "
+"ແຂກຈະເດີນທາງມາຕາມເສັ້ນທາງພູເຂົາທີ່ຄົດຄ້ຽວ ເຊິ່ງເຜີຍໃຫ້ເຫັນທິວທັດທີ່ໜ້າຕື່ນຕາຕື່ນໃຈໃນທຸກໆທາງໂຄ້ງ — "
+"ຈົນກວ່າຈະເຫັນຍອດຫໍຄອຍຂອງ Grand Norris Palace ປະກົດຂຶ້ນເທິງທ້ອງຟ້າ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.view_page_home
+msgid ""
+"The story begins in <b><span class=\"text-o-color-1\">1897</span></b>, when "
+"visionary hotelier <b><span class=\"text-o-color-1\">Edmond Norris</span></"
+"b> , captivated by the untouched majesty of the Valais mountains, dreamt of "
+"creating a sanctuary unlike any other — a place where the rugged purity of "
+"the Alps would meet the grace and refinement of European hospitality."
+msgstr ""
+"ເລື່ອງລາວເລີ່ມຕົ້ນໃນປີ <b><span class=\"text-o-color-1\">1897</span></b>, "
+"ເມື່ອເຈົ້າຂອງໂຮງແຮມທີ່ມີວິໄສທັດ <b><span class=\"text-o-color-1\">Edmond Norris</"
+"span></b> ຜູ້ທີ່ຫຼົງໄຫຼໃນຄວາມຍິ່ງໃຫຍ່ຂອງພູເຂົາ Valais, ໄດ້ຝັນຢາກສ້າງສະຖານທີ່ພັກຜ່ອນທີ່ບໍ່ຄືໃຜ — "
+"ບ່ອນທີ່ຄວາມບໍລິສຸດຂອງເທືອກເຂົາ ແອວສ໌ ຈະມາພົບກັບຄວາມສະຫງ່າງາມ ແລະ "
+"ຄວາມປານີດຂອງການຕ້ອນຮັບແບບຢູໂຣບ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"The strength of Odoo is to separate the accounting and many other aspects "
+"which are company dependent!"
+msgstr "ຈຸດເດັ່ນຂອງ Odoo ແມ່ນການແຍກວຽກງານບັນຊີ ແລະ ສ່ວນອື່ນໆ ໃຫ້ຂຶ້ນຢູ່ກັບແຕ່ລະບໍລິສັດ!"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"These all go free in your current subscription; feel free to explore! 🙃"
+msgstr "ທັງໝົດນີ້ແມ່ນໃຊ້ຟຣີໃນແພັກເກດປັດຈຸບັນຂອງທ່ານ; ເຊີນທົດລອງໃຊ້ງານໄດ້ເລີຍ! 🙃"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"They as well share the same pricing, defined at the stay offer level, which "
+"has its pros and cons."
+msgstr "ພວກມັນຍັງໃຊ້ລາຄາດຽວກັນ ເຊິ່ງກຳນົດໄວ້ໃນລະດັບຂໍ້ສະເໜີທີ່ພັກ, ເຊິ່ງມີທັງຂໍ້ດີ ແລະ ຂໍ້ເສຍ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "They want multiple rooms?"
+msgstr "ພວກເຂົາຕ້ອງການຫຼາຍກວ່າໜຶ່ງຫ້ອງບໍ?"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "They were happy about their stay, let's ask them to leave a review."
+msgstr "ພວກເຂົາພໍໃຈກັບການພັກເຊົາ, ໃຫ້ພວກເຮົາຂໍໃຫ້ພວກເຂົາຂຽນຄຳຄິດເຫັນໃຫ້."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "They will balance their customer account during the check out!"
+msgstr "ພວກເຂົາຈະຊຳລະຍອດຄົງຄ້າງໃນບັນຊີລູກຄ້າໃນລະຫວ່າງການແຈ້ງອອກ!"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"This blocks simulataneously all resources related to this working schedule "
+"during the prescribed period."
+msgstr "ສິ່ງນີ້ຈະປິດກັ້ນທຸກຊັບພະຍາກອນທີ່ກ່ຽວຂ້ອງກັບຕາຕະລາງການເຮັດວຽກນີ້ໃນຊ່ວງເວລາທີ່ກຳນົດໄວ້ພ້ອມໆກັນ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "This capability is enabled by a setting you can set/unset."
+msgstr "ຄວາມສາມາດນີ້ຖືກເປີດນຳໃຊ້ໂດຍການຕັ້ງຄ່າທີ່ທ່ານສາມາດກຳນົດ ຫຼື ຍົກເລີກໄດ້."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"This setup is relevant in case of place specific offers or when pricing "
+"varies between places."
+msgstr ""
+"ການຕັ້ງຄ່ານີ້ແມ່ນກ່ຽວຂ້ອງໃນກໍລະນີທີ່ມີຂໍ້ສະເໜີສະເພາະບາງສະຖານທີ່ ຫຼື "
+"ເມື່ອລາຄາມີຄວາມແຕກຕ່າງກັນໃນແຕ່ລະບ່ອນ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"This time click the Add to last order button to add this room to the booking "
+"and\n"
+"                voila!"
+msgstr ""
+"ຄັ້ງນີ້ໃຫ້ຄລິກປຸ່ມ \"ເພີ່ມໃສ່ລາຍການຫຼ້າສຸດ\" ເພື່ອເພີ່ມຫ້ອງນີ້ເຂົ້າໃນການຈອງ ແລະ\n"
+"                ຮຽບຮ້ອຍ!"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"This time, simply leave a note about the why this is booked and save the "
+"slot."
+msgstr "ຄັ້ງນີ້, ພຽງແຕ່ຂຽນໝາຍເຫດວ່າເປັນຫຍັງຈຶ່ງຈອງຫ້ອງນີ້ ແລະ ບັນທຶກລາຍການ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"To ensure your guests no longer receive the satisfaction survey, you can "
+"easily archive it at any time."
+msgstr ""
+"ເພື່ອຮັບປະກັນວ່າແຂກຂອງທ່ານຈະບໍ່ໄດ້ຮັບແບບສຳຫຼວດຄວາມເພິ່ງພໍໃຈອີກ, ທ່ານສາມາດຈັດເກັບ (archive) "
+"ມັນໄດ້ທຸກເວລາ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Trace guest attendance"
+msgstr "ຕິດຕາມການເຂົ້າພັກຂອງແຂກ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Two options are now available to you with multiple companies and branches:"
+msgstr "ຕອນນີ້ມີສອງທາງເລືອກໃຫ້ທ່ານສຳລັບການຈັດການຫຼາຍບໍລິສັດ ແລະ ສາຂາ:"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"Type in the customer name in the Schedule search bar filtering by Customer."
+msgstr "ພິມຊື່ລູກຄ້າໃນແຖບຄົ້ນຫາຂອງຕາຕະລາງ ໂດຍກອງຂໍ້ມູນຕາມລູກຄ້າ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Welcome your guests as well from the <strong>Hotel App</strong>."
+msgstr "ຕ້ອນຮັບແຂກຂອງທ່ານໄດ້ເຊັ່ນກັນຈາກ <strong>ແອັບໂຮງແຮມ</strong>."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "When all is in order, confirm their invoice for payment."
+msgstr "ເມື່ອທຸກຢ່າງຮຽບຮ້ອຍແລ້ວ, ໃຫ້ຢືນຢັນໃບບິນເພື່ອຊຳລະເງິນ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"When creating an offer, assign them a company or a branch.<br/>As a result, "
+"they are available only for the selected company or branch, and will be "
+"available only from its website."
+msgstr ""
+"ເມື່ອສ້າງຂໍ້ສະເໜີ, ໃຫ້ກຳນົດບໍລິສັດ ຫຼື ສາຂາໃຫ້ພວກມັນ.<br/>ດັ່ງນັ້ນ, "
+"ພວກມັນຈະສາມາດໃຊ້ໄດ້ສະເພາະກັບບໍລິສັດ ຫຼື ສາຂາທີ່ເລືອກເທົ່ານັ້ນ, ແລະ "
+"ຈະສະແດງສະເພາະໃນເວັບໄຊຂອງສາຂານັ້ນ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"When they ask for the bill, you can charge them directly or add the bill to "
+"their\n"
+"                customer account.<br/>To do so, open the corresponding order "
+"from the table or from\n"
+"                the order list and select the customer to charge.<br/>Click "
+"the payment and the\n"
+"                validation buttons!"
+msgstr ""
+"ເມື່ອພວກເຂົາຮ້ອງຂໍໃບບິນ, ທ່ານສາມາດເກັບເງິນໂດຍກົງ ຫຼື ເພີ່ມໃບບິນໃສ່ໃນ\n"
+"                ບັນຊີລູກຄ້າຂອງພວກເຂົາ.<br/>ໂດຍການເປີດລາຍການທີ່ກ່ຽວຂ້ອງຈາກໂຕະ ຫຼື ຈາກ\n"
+"                ລາຍການຈອງ ແລະ ເລືອກລູກຄ້າທີ່ຈະເກັບເງິນ.<br/>ຈາກນັ້ນຄລິກປຸ່ມການຊຳລະເງິນ "
+"ແລະ ປຸ່ມ\n"
+"                ຢືນຢັນ!"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"While Occupancy focuses on what is full, the Availability view focuses on "
+"what is left to sell. It is your primary tool for operational safety and "
+"\"Scarcity Pricing.\""
+msgstr ""
+"ໃນຂະນະທີ່ ອັດຕາການເຂົ້າພັກ ສຸມໃສ່ຈຳນວນຫ້ອງທີ່ເຕັມ, ມຸມມອງ ສະຖານະຫ້ອງວ່າງ "
+"ຈະສຸມໃສ່ຫ້ອງທີ່ເຫຼືອເພື່ອຂາຍ. ມັນເປັນເຄື່ອງມືຫຼັກຂອງທ່ານໃນການຈັດການຄວາມປອດໄພຂອງການດຳເນີນງານ ແລະ "
+"\"ການຕັ້ງລາຄາຕາມຄວາມຕ້ອງການ.\""
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Willing to upgrade a booking?"
+msgstr "ຕ້ອງການອັບເກຣດການຈອງບໍ?"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"With the create slot for this resource, no overlapping booking slot would be "
+"created.<br/>Care about the start and end time or this blockage to make to "
+"re-open when suited."
+msgstr ""
+"ດ້ວຍການສ້າງລາຍການປິດກັ້ນສຳລັບຊັບພະຍາກອນນີ້, ຈະບໍ່ມີການສ້າງການຈອງທີ່ຊ້ຳຊ້ອນກັນໄດ້.<br/"
+">ກະລຸນາກວດສອບເວລາເລີ່ມຕົ້ນ ແລະ ສິ້ນສຸດຂອງການປິດກັ້ນນີ້ ເພື່ອໃຫ້ເປີດໃຊ້ງານຄືນໃໝ່ໄດ້ໃນເວລາທີ່ເໝາະສົມ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Would you like to discuss your Odoo setup with us or go even further?"
+msgstr "ທ່ານຕ້ອງການປຶກສາຫາລືກ່ຽວກັບການຕັ້ງຄ່າ Odoo ກັບພວກເຮົາ ຫຼື ຕ້ອງການລົງເລິກຕື່ມອີກບໍ?"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "You Hotel is online and future guests found it!"
+msgstr "ໂຮງແຮມຂອງທ່ານອອນລາຍແລ້ວ ແລະ ແຂກໃນອະນາຄົດໄດ້ພົບມັນແລ້ວ!"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"You are repairing a room or simply welcoming family and don't want guests to "
+"book it?<br/>Alternatively, you are closing for a week during an inter "
+"season break?<br/>Let's have this reflected in your schedule!"
+msgstr ""
+"ທ່ານກຳລັງສ້ອມແປງຫ້ອງ ຫຼື ຕ້ອນຮັບຄອບຄົວ ແລະ ບໍ່ຕ້ອງການໃຫ້ແຂກຈອງຫ້ອງນັ້ນບໍ?<br/>ຫຼື "
+"ທ່ານກຳລັງປິດບໍລິການໜຶ່ງອາທິດໃນຊ່ວງພັກລະດູການ?<br/>ໃຫ້ຂໍ້ມູນເຫຼົ່ານີ້ສະແດງຢູ່ໃນຕາຕະລາງຂອງທ່ານ!"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"You can access every installed App in your Odoo database on your main "
+"dashboard."
+msgstr "ທ່ານສາມາດເຂົ້າເຖິງທຸກແອັບທີ່ຕິດຕັ້ງໄວ້ໃນຖານຂໍ້ມູນ Odoo ຂອງທ່ານໄດ້ທີ່ໜ້າຈໍຫຼັກ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"You can as well select your company and in the Branches tab define branches."
+msgstr "ທ່ານຍັງສາມາດເລືອກບໍລິສັດຂອງທ່ານ ແລະ ກຳນົດສາຂາຕ່າງໆໄດ້ໃນແຖບ ສາຂາ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"You can find the participants and answers from the smart buttons of the "
+"survey."
+msgstr "ທ່ານສາມາດເບິ່ງຜູ້ເຂົ້າຮ່ວມ ແລະ ຄຳຕອບໄດ້ຈາກປຸ່ມລັດ (smart buttons) ຂອງແບບສຳຫຼວດ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"You completed that demo use case! There are millions of other ways to adapt "
+"your\n"
+"                    Odoo setup to fit your business needs."
+msgstr ""
+"ທ່ານໄດ້ສຳເລັດການທົດລອງໃຊ້ງານຕົວຢ່າງແລ້ວ! ຍັງມີອີກຫຼາຍລ້ານວິທີໃນການປັບແຕ່ງ\n"
+"                    ການຕັ້ງຄ່າ Odoo ຂອງທ່ານໃຫ້ເໝາະສົມກັບຄວາມຕ້ອງການຂອງທຸລະກິດ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"You could customize this section to add the identity document picture or "
+"extra\n"
+"                    fields at your convenience with studio. Just be careful, "
+"such customizations can\n"
+"                    quickly become messy."
+msgstr ""
+"ທ່ານສາມາດປັບແຕ່ງສ່ວນນີ້ເພື່ອເພີ່ມຮູບພາບເອກະສານຢືນຢັນຕົວຕົນ ຫຼື ເພີ່ມ\n"
+"                    ຟິວຂໍ້ມູນອື່ນໆ ໄດ້ຕາມຄວາມຕ້ອງການດ້ວຍ Studio. ແຕ່ຕ້ອງລະມັດລະວັງ, "
+"ເພາະການປັບແຕ່ງດັ່ງກ່າວອາດ\n"
+"                    ເຮັດໃຫ້ລະບົບສັບສົນໄດ້ໄວ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"You didn't import demo data? You can still do it. Go to Apps &gt; Industries "
+"&gt;\n"
+"                    Upgrade your package and check the related box"
+msgstr ""
+"ທ່ານບໍ່ໄດ້ນຳເຂົ້າຂໍ້ມູນຕົວຢ່າງບໍ? ທ່ານຍັງສາມາດເຮັດໄດ້ຢູ່. ໄປທີ່ ແອັບ &gt; Industries >\n"
+"                    ອັບເກຣດແພັກເກດຂອງທ່ານ ແລະ ໝາຍເອົາຫ້ອງທີ່ກ່ຽວຂ້ອງ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "You have a future guest on the line willing to book a room?"
+msgstr "ທ່ານມີແຂກທີ່ກຳລັງຕິດຕໍ່ມາເພື່ອຂໍຈອງຫ້ອງພັກບໍ?"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"You have an hotel but may be providing numerous peripheral services and "
+"offers.<br/>Here\n"
+"            is how you might centralize those and bind them to your "
+"customers in a single database."
+msgstr ""
+"ທ່ານມີໂຮງແຮມ ແຕ່ອາດຈະມີການບໍລິການເສີມ ແລະ ຂໍ້ສະເໜີອື່ນໆອີກຫຼາຍຢ່າງ.<br/>ນີ້ແມ່ນ\n"
+"            ວິທີທີ່ທ່ານສາມາດລວມສູນຂໍ້ມູນເຫຼົ່ານັ້ນ ແລະ ເຊື່ອມໂຍງພວກມັນກັບລູກຄ້າຂອງທ່ານໃນຖານຂໍ້ມູນດຽວ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"You just installed the Odoo for Hotel package. By doing so, we have "
+"installed a\n"
+"            bunch of necessary apps to run your Hotel efficiently."
+msgstr ""
+"ທ່ານຫາພ້ອມແຕ່ຕິດຕັ້ງແພັກເກດ Odoo ສຳລັບໂຮງແຮມ. ເຊິ່ງພວກເຮົາໄດ້ຕິດຕັ້ງ\n"
+"            ແອັບທີ່ຈຳເປັນຫຼາຍຢ່າງເພື່ອໃຫ້ທ່ານບໍລິຫານໂຮງແຮມໄດ້ຢ່າງມີປະສິດທິພາບ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"You may be running multiple places at the same time and most likely be "
+"willing to run them all from the same database.<b/>We got you covered with "
+"this using multiple companies or branches!"
+msgstr ""
+"ທ່ານອາດຈະບໍລິຫານຫຼາຍສະຖານທີ່ໃນເວລາດຽວກັນ ແລະ ຕ້ອງການຈັດການທັງໝົດຈາກຖານຂໍ້ມູນດຽວກັນ.<b/"
+">ພວກເຮົາຮອງຮັບການເຮັດວຽກນີ້ໂດຍການໃຊ້ລະບົບຫຼາຍບໍລິສັດ ຫຼື ຫຼາຍສາຂາ!"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "You might have tested this package with or without demo data."
+msgstr "ທ່ານອາດຈະໄດ້ທົດລອງໃຊ້ແພັກເກດນີ້ໂດຍມີ ຫຼື ບໍ່ມີຂໍ້ມູນຕົວຢ່າງ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"You noticed that the Identity Check highlights whether you captured all the\n"
+"            necessary information for a guest?"
+msgstr ""
+"ທ່ານສັງເກດບໍ່ວ່າ ການກວດສອບຕົວຕົນ (Identity Check) ຈະເນັ້ນໃຫ້ເຫັນວ່າທ່ານໄດ້ບັນທຶກ\n"
+"            ຂໍ້ມູນທີ່ຈຳເປັນທັງໝົດຂອງແຂກແລ້ວຫຼືບໍ່?"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"You now know how to create a new order.<br/>Let's replicate the previous "
+"steps but\n"
+"                this time, without confirming the order (just saving it as "
+"draft)."
+msgstr ""
+"ຕອນນີ້ທ່ານຮູ້ວິທີສ້າງລາຍການຈອງໃໝ່ແລ້ວ.<br/>ລອງເຮັດຕາມຂັ້ນຕອນກ່ອນໜ້ານີ້ຄືນອີກ ແຕ່\n"
+"                ຄັ້ງນີ້ ບໍ່ຕ້ອງຢືນຢັນລາຍການ (ພຽງແຕ່ບັນທຶກເປັນຮ່າງໄວ້)."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"You should be able to execute the following flows to have an overview of "
+"various flows\n"
+"            you can quickly execute with this package using Odoo."
+msgstr ""
+"ທ່ານຄວນຈະສາມາດທົດລອງຂັ້ນຕອນການເຮັດວຽກຕໍ່ໄປນີ້ ເພື່ອໃຫ້ເຫັນພາບລວມຂອງຂະບວນການຕ່າງໆ\n"
+"            ທີ່ທ່ານສາມາດເຮັດໄດ້ຢ່າງວ່ອງໄວດ້ວຍແພັກເກດນີ້ໂດຍໃຊ້ Odoo."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "You welcome your first guests, awesome!"
+msgstr "ທ່ານໄດ້ຕ້ອນຮັບແຂກກຸ່ມທຳອິດຂອງທ່ານແລ້ວ, ດີຫຼາຍ!"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "You're now waiting for your guest to arrive."
+msgstr "ຕອນນີ້ທ່ານກຳລັງລໍຖ້າໃຫ້ແຂກຂອງທ່ານເດີນທາງມາຮອດ."
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "Your customer wants to stay longer?"
+msgstr "ລູກຄ້າຂອງທ່ານຕ້ອງການພັກເຊົາຕໍ່ບໍ?"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "academy"
+msgstr "ສະຖາບັນການຮຽນຮູ້"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "and"
+msgstr "ແລະ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "documentation"
+msgstr "ເອກະສານຄູ່ມື"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"if you need\n"
+"                    help!"
+msgstr ""
+"ຫາກທ່ານຕ້ອງການ\n"
+"                    ຄວາມຊ່ວຍເຫຼືອ!"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "request a demo"
+msgstr "ຮ້ອງຂໍການສາທິດ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "🌐 Online booking and reviews"
+msgstr "🌐 ການຈອງທາງອອນລາຍ ແລະ ຄຳຄິດເຫັນ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "🍸 Beyond a place to stay"
+msgstr "🍸 ເປັນຫຼາຍກວ່າພຽງແຕ່ທີ່ພັກ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"🎓\n"
+"                Companies"
+msgstr ""
+"🎓\n"
+"                ບໍລິສັດ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"🎓\n"
+"                Contacts"
+msgstr ""
+"🎓\n"
+"                ລາຍຊື່ຜູ້ຕິດຕໍ່"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"🎓\n"
+"                Invoicing"
+msgstr ""
+"🎓\n"
+"                ການອອກໃບບິນ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"🎓\n"
+"                Taxes"
+msgstr ""
+"🎓\n"
+"                ພາສີ/ອາກອນ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"🎓\n"
+"                Websites"
+msgstr ""
+"🎓\n"
+"                ເວັບໄຊ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"🎓\n"
+"                eCommerce"
+msgstr ""
+"🎓\n"
+"                ອີຄອມເມີຊ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid ""
+"🎓\n"
+"            POS"
+msgstr ""
+"🎓\n"
+"            ຈຸດຂາຍ (POS)"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "🎓 POS"
+msgstr "🎓 ຈຸດຂາຍ (POS)"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "🎓 Preparation Display"
+msgstr "🎓 ໜ້າຈໍການກຽມອາຫານ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "🎓Booking Engine"
+msgstr "🎓ລະບົບການຈອງ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "🎓Planning"
+msgstr "🎓ການວາງແຜນ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "🎓Rental"
+msgstr "🎓ການເຊົ່າ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "🎓Surveys"
+msgstr "🎓ແບບສຳຫຼວດ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "👋 Wave your guests"
+msgstr "👋 ກ່າວລາແຂກຂອງທ່ານ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "🔢 Running multiple places"
+msgstr "🔢 ບໍລິຫານຫຼາຍສະຖານທີ່"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "🗓️ Manage bookings"
+msgstr "🗓️ ຈັດການການຈອງ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "😎 Welcome guests"
+msgstr "😎 ຕ້ອນຮັບແຂກ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "🚀 Strategic Oversight"
+msgstr "🚀 ການກຳນົດຍຸດທະສາດ"
+
+#. module: hotel
+#: model_terms:ir.ui.view,arch_db:hotel.welcome_article_body
+msgid "🧽 Managing house keeping"
+msgstr "🧽 ຈັດການວຽກງານແມ່ບ້ານ"
+
+#~ msgid ""
+#~ "<span style=\"color: rgba(96, 70, 59, 0.74);\"><br/>A hidden jewel in the "
+#~ "heart of the Swiss Alps. Where discreet luxury, pure mountain air, and "
+#~ "breathtaking horizons come together to create moments that last a "
+#~ "lifetime. A hidden jewel in the heart of the Swiss Alps. Where discreet "
+#~ "luxury, pure mountain air, and breathtaking horizons come together to "
+#~ "create moments that last a lifetime.<br/><br/></span>"
+#~ msgstr ""
+#~ "<span style=\"color: rgba(96, 70, 59, 0.74);\"><br/"
+#~ ">ອັນຍະມະນີທີ່ເຊື່ອງໄວ້ໃນໃຈກາງຂອງເທືອກເຂົາ ແອວສ໌ ສະວິດ. ບ່ອນທີ່ຄວາມຫຼູຫຼາທີ່ເປັນສ່ວນຕົວ, "
+#~ "ອາກາດບໍລິສຸດຂອງພູເຂົາ ແລະ ຂອບຟ້າທີ່ສວຍງາມຈັບໃຈ ມາລວມຕົວກັນເພື່ອສ້າງຊ່ວງເວລາທີ່ຈະຄົງຢູ່ຕະຫຼອດໄປ."
+#~ "<br/><br/></span>"
+
+#~ msgid ""
+#~ "<a class=\"btn btn-primary btn-lg o_translate_inline\" href=\"/"
+#~ "shop\">Book Your Stay</a>"
+#~ msgstr ""
+#~ "<a class=\"btn btn-primary btn-lg o_translate_inline\" href=\"/"
+#~ "shop\">ຈອງທີ່ພັກຂອງທ່ານ</a>"
+
+#~ msgid ""
+#~ "<span class=\"carousel-control-next-icon\" aria-hidden=\"true\"/>\n"
+#~ "                  <span class=\"visually-hidden\">Next</span>"
+#~ msgstr ""
+#~ "<span class=\"carousel-control-next-icon\" aria-hidden=\"true\"/>\n"
+#~ "                  <span class=\"visually-hidden\">ຖັດໄປ</span>"
+
+#~ msgid ""
+#~ "<span class=\"carousel-control-prev-icon\" aria-hidden=\"true\"/>\n"
+#~ "                  <span class=\"visually-hidden\">Previous</span>"
+#~ msgstr ""
+#~ "<span class=\"carousel-control-prev-icon\" aria-hidden=\"true\"/>\n"
+#~ "                  <span class=\"visually-hidden\">ກ່ອນໜ້າ</span>"
+
+#~ msgid ""
+#~ "<span class=\"o_small\">\n"
+#~ "                            <strong>Iris DOE</strong>\n"
+#~ "                            <br/>\n"
+#~ "                            <span class=\"text-muted\">Manager of "
+#~ "OurHotel</span>\n"
+#~ "                          </span>"
+#~ msgstr ""
+#~ "<span class=\"o_small\">\n"
+#~ "                            <strong>Iris DOE</strong>\n"
+#~ "                            <br/>\n"
+#~ "                            <span class=\"text-muted\">ຜູ້ຈັດການ ຂອງ "
+#~ "OurHotel</span>\n"
+#~ "                          </span>"
+
+#~ msgid ""
+#~ "<span class=\"o_small\">\n"
+#~ "                            <strong>Jane DOE</strong>\n"
+#~ "                            <br/>\n"
+#~ "                            <span class=\"text-muted\">CEO of OurHotel</"
+#~ "span>\n"
+#~ "                          </span>"
+#~ msgstr ""
+#~ "<span class=\"o_small\">\n"
+#~ "                            <strong>Jane DOE</strong>\n"
+#~ "                            <br/>\n"
+#~ "                            <span class=\"text-muted\">ປະທານບໍລິຫານ ຂອງ "
+#~ "OurHotel</span>\n"
+#~ "                          </span>"
+
+#~ msgid ""
+#~ "<span class=\"o_small\">\n"
+#~ "                            <strong>John DOE</strong>\n"
+#~ "                            <br/>\n"
+#~ "                            <span class=\"text-muted\">CCO of OurHotel</"
+#~ "span>\n"
+#~ "                          </span>"
+#~ msgstr ""
+#~ "<span class=\"o_small\">\n"
+#~ "                            <strong>John DOE</strong>\n"
+#~ "                            <br/>\n"
+#~ "                            <span class=\"text-muted\">ຜູ້ອໍານວຍການຝ່າຍການຄ້າ "
+#~ "ຂອງ OurHotel</span>\n"
+#~ "                          </span>"
+
+#~ msgid ""
+#~ "<span class=\"s_pricelist_cafe_item_name\">Deluxe Room</span>\n"
+#~ "                          <span class=\"s_pricelist_cafe_item_line flex-"
+#~ "grow-1 ms-2 border-top\"/>\n"
+#~ "                          <span class=\"s_pricelist_cafe_item_price ms-"
+#~ "auto ps-3\">$200.00</span>"
+#~ msgstr ""
+#~ "<span class=\"s_pricelist_cafe_item_name\">ຫ້ອງດີລັກຊ໌</span>\n"
+#~ "                          <span class=\"s_pricelist_cafe_item_line flex-"
+#~ "grow-1 ms-2 border-top\"/>\n"
+#~ "                          <span class=\"s_pricelist_cafe_item_price ms-"
+#~ "auto ps-3\">$200.00</span>"
+
+#~ msgid ""
+#~ "<span class=\"s_pricelist_cafe_item_name\">Executive Suite</span>\n"
+#~ "                          <span class=\"s_pricelist_cafe_item_line flex-"
+#~ "grow-1 ms-2 border-top\"/>\n"
+#~ "                          <span class=\"s_pricelist_cafe_item_price ms-"
+#~ "auto ps-3\">$300.00</span>"
+#~ msgstr ""
+#~ "<span class=\"s_pricelist_cafe_item_name\">ຫ້ອງເອັກເຊັກຄູທີຟສວີດ</span>\n"
+#~ "                          <span class=\"s_pricelist_cafe_item_line flex-"
+#~ "grow-1 ms-2 border-top\"/>\n"
+#~ "                          <span class=\"s_pricelist_cafe_item_price ms-"
+#~ "auto ps-3\">$300.00</span>"
+
+#~ msgid ""
+#~ "<span class=\"s_pricelist_cafe_item_name\">Family Room</span>\n"
+#~ "                          <span class=\"s_pricelist_cafe_item_line flex-"
+#~ "grow-1 ms-2 border-top\"/>\n"
+#~ "                          <span class=\"s_pricelist_cafe_item_price ms-"
+#~ "auto ps-3\">$180.00</span>"
+#~ msgstr ""
+#~ "<span class=\"s_pricelist_cafe_item_name\">ຫ້ອງຄອບຄົວ</span>\n"
+#~ "                          <span class=\"s_pricelist_cafe_item_line flex-"
+#~ "grow-1 ms-2 border-top\"/>\n"
+#~ "                          <span class=\"s_pricelist_cafe_item_price ms-"
+#~ "auto ps-3\">$180.00</span>"
+
+#~ msgid ""
+#~ "<span class=\"s_pricelist_cafe_item_name\">Luxury Suite</span>\n"
+#~ "                          <span class=\"s_pricelist_cafe_item_line flex-"
+#~ "grow-1 ms-2 border-top\"/>\n"
+#~ "                          <span class=\"s_pricelist_cafe_item_price ms-"
+#~ "auto ps-3\">$250.00</span>"
+#~ msgstr ""
+#~ "<span class=\"s_pricelist_cafe_item_name\">ຫ້ອງລັກຊູຣີສວີດ</span>\n"
+#~ "                          <span class=\"s_pricelist_cafe_item_line flex-"
+#~ "grow-1 ms-2 border-top\"/>\n"
+#~ "                          <span class=\"s_pricelist_cafe_item_price ms-"
+#~ "auto ps-3\">$250.00</span>"
+
+#~ msgid ""
+#~ "<span class=\"s_pricelist_cafe_item_name\">Poolside Cabana</span>\n"
+#~ "                          <span class=\"s_pricelist_cafe_item_line flex-"
+#~ "grow-1 ms-2 border-top\"/>\n"
+#~ "                          <span class=\"s_pricelist_cafe_item_price ms-"
+#~ "auto ps-3\">$75.00</span>"
+#~ msgstr ""
+#~ "<span class=\"s_pricelist_cafe_item_name\">ຄາບານາແຄມສະນ້ຳ</span>\n"
+#~ "                          <span class=\"s_pricelist_cafe_item_line flex-"
+#~ "grow-1 ms-2 border-top\"/>\n"
+#~ "                          <span class=\"s_pricelist_cafe_item_price ms-"
+#~ "auto ps-3\">$75.00</span>"
+
+#~ msgid ""
+#~ "<span class=\"s_pricelist_cafe_item_name\">Standard Room</span>\n"
+#~ "                          <span class=\"s_pricelist_cafe_item_line flex-"
+#~ "grow-1 ms-2 border-top\"/>\n"
+#~ "                          <span class=\"s_pricelist_cafe_item_price ms-"
+#~ "auto ps-3\">$150.00</span>"
+#~ msgstr ""
+#~ "<span class=\"s_pricelist_cafe_item_name\">ຫ້ອງມາດຕະຖານ</span>\n"
+#~ "                          <span class=\"s_pricelist_cafe_item_line flex-"
+#~ "grow-1 ms-2 border-top\"/>\n"
+#~ "                          <span class=\"s_pricelist_cafe_item_price ms-"
+#~ "auto ps-3\">$150.00</span>"
+
+#~ msgid "A Journey into Comfort and Luxury"
+#~ msgstr "ການເດີນທາງສູ່ຄວາມສະດວກສະບາຍ ແລະ ຄວາມຫູຫລາ"
+
+#~ msgid "A perfect getaway for families and couples alike"
+#~ msgstr "ສະຖານທີ່ພັກຜ່ອນທີ່ສົມບູນແບບສຳລັບຄອບຄົວ ແລະ ຄູ່ຮັກ"
+
+#~ msgid ""
+#~ "A welcoming atmosphere that makes you feel right at home, no matter where "
+#~ "you are from."
+#~ msgstr "ບັນຍາກາດທີ່ອົບອຸ່ນ ເຮັດໃຫ້ທ່ານຮູ້ສຶກຄືກັບຢູ່ເຮືອນຂອງຕົນເອງ ບໍ່ວ່າທ່ານຈະມາຈາກໃສກໍຕາມ."
+
+#~ msgid "Carousel indicator"
+#~ msgstr "ຕົວບົ່ງຊີ້ຮູບພາບສະໄລ້"
+
+#~ msgid "Comfort and elegance in every room"
+#~ msgstr "ຄວາມສະດວກສະບາຍ ແລະ ຄວາມສະຫງ່າງາມໃນທຸກຫ້ອງພັກ"
+
+#~ msgid ""
+#~ "Contemporary design with a touch of sophistication, ensuring a memorable "
+#~ "stay."
+#~ msgstr "ການອອກແບບທີ່ທັນສະໄໝພ້ອມດ້ວຍຄວາມພິຖີພິຖັນ, ຮັບປະກັນການພັກເຊົາທີ່ໜ້າປະທັບໃຈ."
+
+#~ msgid "Deluxe Room"
+#~ msgstr "ຫ້ອງດີລັກຊ໌"
+
+#~ msgid "Deluxe Suite"
+#~ msgstr "ຫ້ອງດີລັກຊ໌ສວີດ"
+
+#~ msgid ""
+#~ "Discover our luxurious accommodations, exceptional service, and stunning "
+#~ "views. Experience comfort like never before!"
+#~ msgstr ""
+#~ "ພົບກັບທີ່ພັກທີ່ຫູຫລາ, ການບໍລິການທີ່ດີເລີດ ແລະ ວິວທີ່ສວຍງາມ. "
+#~ "ສຳຜັດກັບຄວາມສະດວກສະບາຍແບບທີ່ບໍ່ເຄີຍມີມາກ່ອນ!"
+
+#~ msgid ""
+#~ "Elevate your experience with our luxurious amenities, where comfort meets "
+#~ "style. Enjoy breathtaking views and personalized service that caters to "
+#~ "your every need."
+#~ msgstr ""
+#~ "ຍົກລະດັບປະສົບການຂອງທ່ານດ້ວຍສິ່ງອຳນວຍຄວາມສະດວກທີ່ຫູຫລາ ທີ່ລວມຄວາມສະດວກສະບາຍ ແລະ "
+#~ "ສະໄຕລເຂົ້າກັນ. ເພີດເພີນໄປກັບວິວທີ່ສວຍງາມ ແລະ ການບໍລິການທີ່ເປັນສ່ວນຕົວ "
+#~ "ເພື່ອຕອບສະໜອງທຸກຄວາມຕ້ອງການຂອງທ່ານ."
+
+#~ msgid ""
+#~ "Enjoy the finest in hospitality with our tailored services. Whether "
+#~ "you’re here for business or leisure, our offerings are designed to make "
+#~ "your stay unforgettable.<br/><br/> Experience the warmth of our "
+#~ "hospitality."
+#~ msgstr ""
+#~ "ເພີດເພີນກັບການບໍລິການທີ່ດີທີ່ສຸດດ້ວຍການບໍລິການທີ່ປັບແຕ່ງມາເພື່ອທ່ານໂດຍສະເພາະ. ບໍ່ວ່າທ່ານຈະມານຳວຽກ "
+#~ "ຫຼື ມາພັກຜ່ອນ, ຂໍ້ສະເໜີຂອງພວກເຮົາຖືກອອກແບບມາເພື່ອເຮັດໃຫ້ການພັກເຊົາຂອງທ່ານເປັນທີ່ໜ້າຈົດຈຳ.<br/"
+#~ "><br/> ສຳຜັດກັບຄວາມອົບອຸ່ນຈາກການຕ້ອນຮັບຂອງພວກເຮົາ."
+
+#~ msgid ""
+#~ "Experience a truly exquisite dining experience at our hotel restaurant. I "
+#~ "highly recommend trying our Mustard Sauce, it's out of this world."
+#~ msgstr ""
+#~ "ສຳຜັດກັບປະສົບການການກິນອາຫານທີ່ດີເລີດຢູ່ຮ້ານອາຫານຂອງໂຮງແຮມພວກເຮົາ. "
+#~ "ຂ້ອຍຂໍແນະນຳໃຫ້ລອງຊອດມັດສະຕາດ (Mustard Sauce) ຂອງພວກເຮົາ, ມັນແຊບຫຼາຍແທ້ໆ."
+
+#~ msgid "Experience our commitment to exceptional hospitality"
+#~ msgstr "ສຳຜັດກັບຄວາມຕັ້ງໃຈຂອງພວກເຮົາໃນການມອບການບໍລິການທີ່ດີເລີດ"
+
+#~ msgid "Explore our amenities"
+#~ msgstr "ຄົ້ນຫາສິ່ງອຳນວຍຄວາມສະດວກຂອງພວກເຮົາ"
+
+#~ msgid "Indulge in Our Exquisite Accommodations"
+#~ msgstr "ດື່ມດ່ຳໄປກັບທີ່ພັກທີ່ສວຍງາມຂອງພວກເຮົາ"
+
+#~ msgid "Modern rooms equipped with all the amenities for a comfortable stay."
+#~ msgstr "ຫ້ອງພັກທີ່ທັນສະໄໝ ພ້ອມດ້ວຍສິ່ງອຳນວຍຄວາມສະດວກທຸກຢ່າງເພື່ອການພັກເຊົາທີ່ສະດວກສະບາຍ."
+
+#~ msgid "Next"
+#~ msgstr "ຖັດໄປ"
+
+#~ msgid ""
+#~ "Our hotel restaurant is the perfect spot for groups or a casual date "
+#~ "night."
+#~ msgstr ""
+#~ "ຮ້ານອາຫານໃນໂຮງແຮມຂອງພວກເຮົາແມ່ນສະຖານທີ່ທີ່ສົມບູນແບບສຳລັບກຸ່ມເພື່ອນ ຫຼື ການມາເດດແບບສະບາຍໆ."
+
+#~ msgid "Previous"
+#~ msgstr "ກ່ອນໜ້າ"
+
+#~ msgid "Relax and Unwind in Style"
+#~ msgstr "ພັກຜ່ອນ ແລະ ຜ່ອນຄາຍຢ່າງມີສະໄຕລ"
+
+#~ msgid "Relaxing spaces that cater to your every need"
+#~ msgstr "ພື້ນທີ່ພັກຜ່ອນທີ່ຕອບສະໜອງທຸກຄວາມຕ້ອງການຂອງທ່ານ"
+
+#~ msgid "Spacious family accommodations designed for togetherness and fun."
+#~ msgstr "ທີ່ພັກສຳລັບຄອບຄົວທີ່ກວ້າງຂວາງ ອອກແບບມາເພື່ອການຢູ່ຮ່ວມກັນ ແລະ ຄວາມສະໜຸກສະໜານ."
+
+#~ msgid ""
+#~ "Spacious suites designed for relaxation, featuring plush bedding and "
+#~ "stunning views."
+#~ msgstr ""
+#~ "ຫ້ອງສວີດທີ່ກວ້າງຂວາງອອກແບບມາເພື່ອການພັກຜ່ອນ, ພ້ອມດ້ວຍບ່ອນນອນທີ່ນຸ່ມສະບາຍ ແລະ ວິວທີ່ສວຍງາມ."
+
+#~ msgid "Standard Room"
+#~ msgstr "ຫ້ອງມາດຕະຖານ"
+
+#~ msgid "Stay &amp; Enjoy"
+#~ msgstr "ພັກເຊົາ &amp; ເພີດເພີນ"
+
+#~ msgid ""
+#~ "Stylish and cozy rooms that provide a perfect retreat after a day of "
+#~ "exploration."
+#~ msgstr ""
+#~ "ຫ້ອງພັກທີ່ທັນສະໄໝ ແລະ ອົບອຸ່ນ ເຊິ່ງເປັນບ່ອນພັກຜ່ອນທີ່ສົມບູນແບບຫຼັງຈາກການເດີນທາງທ່ຽວຊົມມາໝົດມື້."
+
+#~ msgid ""
+#~ "Welcome to our cozy and friendly hotel, where you can enjoy a great "
+#~ "atmosphere and delicious food. Don't miss our signature dish, the spiced "
+#~ "fruit crumble."
+#~ msgstr ""
+#~ "ຍິນດີຕ້ອນຮັບສູ່ໂຮງແຮມທີ່ອົບອຸ່ນ ແລະ ເປັນກັນເອງຂອງພວກເຮົາ, ບ່ອນທີ່ທ່ານສາມາດເພີດເພີນກັບບັນຍາກາດທີ່ດີ "
+#~ "ແລະ ອາຫານທີ່ແຊບຊ້ອຍ. ຢ່າພາດເມນູແນະນຳຂອງພວກເຮົາ, spiced fruit crumble."
