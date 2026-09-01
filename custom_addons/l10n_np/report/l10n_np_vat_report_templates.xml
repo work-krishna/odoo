@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_l10n_np_vat_report">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Nepal VAT Report</h2>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <strong>Company:</strong> <span t-out="o.company_id.name"/><br/>
+                                <span t-if="o.company_id.vat">
+                                    <strong>PAN/VAT No.:</strong> <span t-out="o.company_id.vat"/><br/>
+                                </span>
+                            </div>
+                            <div class="col-6 text-end">
+                                <strong>Period:</strong> <span t-out="o.date_from"/> to <span t-out="o.date_to"/><br/>
+                            </div>
+                        </div>
+
+                        <h4>Output VAT (Sales)</h4>
+                        <table class="table table-sm table-borderless">
+                            <thead>
+                                <tr style="border-bottom: 1px solid black;">
+                                    <th>Tax</th>
+                                    <th class="text-end">Taxable Value</th>
+                                    <th class="text-end">VAT Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="o.line_ids.filtered(lambda l: l.tax_type == 'sale')" t-as="line">
+                                    <td><span t-out="line.tax_id.name"/></td>
+                                    <td class="text-end"><span t-out="line.base_amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                                    <td class="text-end"><span t-out="line.tax_amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <h4>Input VAT (Purchases)</h4>
+                        <table class="table table-sm table-borderless">
+                            <thead>
+                                <tr style="border-bottom: 1px solid black;">
+                                    <th>Tax</th>
+                                    <th class="text-end">Taxable Value</th>
+                                    <th class="text-end">VAT Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="o.line_ids.filtered(lambda l: l.tax_type == 'purchase')" t-as="line">
+                                    <td><span t-out="line.tax_id.name"/></td>
+                                    <td class="text-end"><span t-out="line.base_amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                                    <td class="text-end"><span t-out="line.tax_amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <table class="table table-sm table-borderless" style="margin-top: 20px;">
+                            <tr style="border-top: 1px solid black;">
+                                <td><strong>Total Output VAT</strong></td>
+                                <td class="text-end"><span t-out="o.total_output_vat" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Total Input VAT</strong></td>
+                                <td class="text-end"><span t-out="o.total_input_vat" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                            </tr>
+                            <tr style="border-top: 1px solid black;">
+                                <td>
+                                    <strong t-if="o.net_amount >= 0">Net VAT Payable</strong>
+                                    <strong t-else="">Net VAT Refundable / Carried Forward</strong>
+                                </td>
+                                <td class="text-end"><span t-out="abs(o.net_amount)" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                            </tr>
+                        </table>
+
+                        <p class="text-muted mt-4" style="font-size: 10px;">
+                            This is an internal reconciliation report to assist with VAT filing preparation.
+                            It is not an official or certified Inland Revenue Department (IRD) form. Verify
+                            all figures before filing.
+                        </p>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

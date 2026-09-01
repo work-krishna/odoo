@@ -1,0 +1,5 @@
+"id","country_id","name","tax_payable_account_id","tax_receivable_account_id"
+"vat_group_13","base.np","VAT 13%","l10n_np_2110","l10n_np_1210"
+"vat_group_0","base.np","VAT 0% / Exempt","l10n_np_2110","l10n_np_1210"
+"tds_group_payable","base.np","TDS Payable","l10n_np_2130","l10n_np_2130"
+"tds_group_receivable","base.np","TDS Receivable","l10n_np_1230","l10n_np_1230"
