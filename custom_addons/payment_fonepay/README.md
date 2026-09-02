@@ -42,7 +42,6 @@ username:      bijayk
 password:      password
 ```
 
-
 Fonepay only settles in **NPR**, so the provider is automatically hidden at checkout for orders in
 any other currency.
 
