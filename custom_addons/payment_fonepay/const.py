@@ -5,8 +5,8 @@
 # integration samples. Confirm these with Fonepay support if your merchant account was given a
 # different host.
 API_URLS = {
-    'test': 'https://dev-merchantapi.fonepay.com',
-    'enabled': 'https://merchantapi.fonepay.com',
+    'test': 'https://uat-new-merchant-api.fonepay.com',
+    'enabled': 'https://uat-new-merchant-api.fonepay.com',
 }
 
 # Endpoints of the Fonepay Dynamic QR API, relative to the base API URL.
