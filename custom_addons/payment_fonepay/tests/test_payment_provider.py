@@ -2,6 +2,7 @@
 
 from odoo.tests import tagged
 
+from odoo.addons.payment_fonepay import const
 from odoo.addons.payment_fonepay.tests.common import FonepayCommon
 
 
@@ -24,10 +25,14 @@ class TestPaymentProvider(FonepayCommon):
         self.assertIn(self.fonepay, compatible_providers)
 
     def test_build_request_url_switches_on_state(self):
-        """ Test that the API host used depends on whether the provider is live or in test mode.
-        """
+        """ Test that the API host used depends on whether the provider is live or in test mode,
+        following whatever hosts are configured in `const.API_URLS`. """
         self.fonepay.state = 'test'
-        self.assertIn('dev-merchantapi', self.fonepay._build_request_url('/foo'))
+        self.assertEqual(
+            self.fonepay._build_request_url('/foo'), f"{const.API_URLS['test']}/foo"
+        )
 
         self.fonepay.state = 'enabled'
-        self.assertNotIn('dev-merchantapi', self.fonepay._build_request_url('/foo'))
+        self.assertEqual(
+            self.fonepay._build_request_url('/foo'), f"{const.API_URLS['enabled']}/foo"
+        )

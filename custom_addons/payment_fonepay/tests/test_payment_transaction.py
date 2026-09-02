@@ -38,10 +38,24 @@ class TestPaymentTransaction(FonepayCommon):
         self.assertEqual(tx._fonepay_format_amount(14.0), '14')
         self.assertEqual(tx._fonepay_format_amount(14.5), '14.50')
 
-    def test_prn_is_the_transaction_id(self):
-        """ Test that the prn sent to Fonepay is short, stable, and unique. """
-        tx = self._create_transaction('redirect')
-        self.assertEqual(tx._fonepay_get_prn(), str(tx.id))
+    def test_prn_format(self):
+        """ Test that generated prns are hex, dash-separated, and well within the 25 character
+        limit, matching the shape of Fonepay's own examples (e.g. "5d76d323-d1f6"). """
+        prn = self.env['payment.transaction']._fonepay_generate_prn()
+        self.assertRegex(prn, r'^[0-9a-f]{8}-[0-9a-f]{4}$')
+        self.assertLessEqual(len(prn), 25)
+
+    def test_prn_is_unique_per_transaction_and_stable_across_calls(self):
+        """ Test that each transaction gets its own prn, generated once and then reused. """
+        tx1 = self._create_transaction('redirect', reference='Test Transaction 1')
+        tx2 = self._create_transaction('redirect', reference='Test Transaction 2')
+
+        prn1 = tx1._fonepay_get_prn()
+        prn2 = tx2._fonepay_get_prn()
+
+        self.assertNotEqual(prn1, prn2)
+        self.assertEqual(tx1._fonepay_get_prn(), prn1)  # Calling it again reuses the stored value.
+        self.assertEqual(tx1.fonepay_prn, prn1)
 
     def test_rendering_values_stores_qr_message_and_no_redirection_happens(self):
         """ Test that requesting the QR code stores the raw QR data and returns our own

@@ -4,6 +4,7 @@ import base64
 import hashlib
 import hmac
 import io
+import uuid
 
 import qrcode
 
@@ -26,6 +27,13 @@ class PaymentTransaction(models.Model):
         help="The raw string returned by Fonepay that is encoded into the QR code image shown "
              "to the customer.",
         readonly=True,
+    )
+    fonepay_prn = fields.Char(
+        string="Fonepay PRN",
+        help="The Product Number sent to Fonepay to identify this payment request. A fresh one "
+             "is generated for every QR request and reused for the status checks that follow it.",
+        readonly=True,
+        copy=False,
     )
 
     # === BUSINESS METHODS === #
@@ -150,8 +158,9 @@ class PaymentTransaction(models.Model):
     def _fonepay_get_prn(self):
         """ Return the Product Number (prn) used to identify the transaction on Fonepay's side.
 
-        The transaction id is used since it is short, always unique, and stable for the lifetime
-        of the transaction, unlike the reference which can exceed Fonepay's 25 character limit.
+        A new prn is generated the first time this is called for a transaction (i.e. when the QR
+        code is requested) and then persisted, so that the status checks that follow reuse the
+        exact same value Fonepay was given when the QR code was created.
 
         Note: self.ensure_one()
 
@@ -159,7 +168,23 @@ class PaymentTransaction(models.Model):
         :rtype: str
         """
         self.ensure_one()
-        return str(self.id)
+        if not self.fonepay_prn:
+            self.fonepay_prn = self._fonepay_generate_prn()
+        return self.fonepay_prn
+
+    @staticmethod
+    def _fonepay_generate_prn():
+        """ Generate a new, random hexadecimal Product Number (prn).
+
+        Formatted the way Fonepay's own examples are (e.g. "5d76d323-d1f6"): two dash-separated
+        hex groups, well within the 25 character limit, and different on every call so that two
+        QR requests never collide on the same prn.
+
+        :return: The generated prn.
+        :rtype: str
+        """
+        token = uuid.uuid4().hex
+        return f'{token[:8]}-{token[8:12]}'
 
     @staticmethod
     def _fonepay_format_amount(amount):
