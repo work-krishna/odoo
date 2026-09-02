@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from odoo.exceptions import ValidationError
 from odoo.tests import tagged
 
 from odoo.addons.payment_fonepay import const
@@ -36,3 +37,11 @@ class TestPaymentProvider(FonepayCommon):
         self.assertEqual(
             self.fonepay._build_request_url('/foo'), f"{const.API_URLS['enabled']}/foo"
         )
+
+    def test_payment_timeout_must_be_positive(self):
+        """ Test that a zero or negative payment timeout is rejected. """
+        with self.assertRaises(ValidationError):
+            self.fonepay.fonepay_payment_timeout = 0
+
+        with self.assertRaises(ValidationError):
+            self.fonepay.fonepay_payment_timeout = -10

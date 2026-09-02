@@ -30,6 +30,11 @@
                         required="code == 'fonepay' and state != 'disabled'"
                         password="True"
                     />
+                    <field
+                        name="fonepay_payment_timeout"
+                        string="Payment Timeout (seconds)"
+                        required="code == 'fonepay' and state != 'disabled'"
+                    />
                 </group>
             </group>
         </field>

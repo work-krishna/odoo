@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
 from odoo.addons.payment_fonepay import const
 
@@ -36,6 +37,21 @@ class PaymentProvider(models.Model):
         required_if_provider='fonepay',
         groups='base.group_system',
     )
+    fonepay_payment_timeout = fields.Integer(
+        string="Payment Timeout (seconds)",
+        help="How long the customer has to scan and pay the QR code before the payment is "
+             "automatically canceled and they are brought back to the payment screen to retry.",
+        default=300,
+        required_if_provider='fonepay',
+    )
+
+    # === CONSTRAINT METHODS === #
+
+    @api.constrains('fonepay_payment_timeout')
+    def _check_fonepay_payment_timeout(self):
+        for provider in self:
+            if provider.code == 'fonepay' and provider.fonepay_payment_timeout <= 0:
+                raise ValidationError(_("The Fonepay payment timeout must be greater than zero."))
 
     # === COMPUTE METHODS === #
 
@@ -64,13 +80,10 @@ class PaymentProvider(models.Model):
         if self.code != 'fonepay':
             return super()._build_request_url(endpoint, **kwargs)
         base_url = const.API_URLS['enabled' if self.state == 'enabled' else 'test']
-        print(f"fonepay-url => {base_url}{endpoint}")
         return f'{base_url}{endpoint}'
 
     def _parse_response_error(self, response):
         """ Override of `payment` to parse the error message. """
-        print(f"fonepay-response:: {response}")
-        
         if self.code != 'fonepay':
             return super()._parse_response_error(response)
         try:

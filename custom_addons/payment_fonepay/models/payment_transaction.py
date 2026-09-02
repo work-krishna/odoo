@@ -5,10 +5,11 @@ import hashlib
 import hmac
 import io
 import uuid
+from datetime import timedelta
 
 import qrcode
 
-from odoo import _, fields, models
+from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
 from odoo.addons.payment.logging import get_payment_logger
@@ -115,6 +116,12 @@ class PaymentTransaction(models.Model):
         if self.provider_code != 'fonepay' or self.state != 'pending':
             return
 
+        if self._fonepay_has_timed_out():
+            self._set_canceled(state_message=_(
+                "The Fonepay QR code expired before the payment was completed. Please try again."
+            ))
+            return
+
         provider_sudo = self.provider_id.sudo()
         prn = self._fonepay_get_prn()
         message = ','.join((prn, provider_sudo.fonepay_merchant_code))
@@ -135,6 +142,42 @@ class PaymentTransaction(models.Model):
             )
             return
         self._process('fonepay', status_data)
+
+    def _fonepay_has_timed_out(self):
+        """ Return whether this pending transaction has been waiting for payment for longer than
+        the provider's configured timeout.
+
+        The clock starts at `last_state_change`, which is set the moment the transaction becomes
+        'pending' (i.e. as soon as the customer is shown the QR code).
+
+        Note: self.ensure_one()
+
+        :return: Whether the transaction has timed out.
+        :rtype: bool
+        """
+        self.ensure_one()
+        timeout = self.provider_id.sudo().fonepay_payment_timeout
+        if not timeout or not self.last_state_change:
+            return False
+        deadline = self.last_state_change + timedelta(seconds=timeout)
+        return fields.Datetime.now() > deadline
+
+    @api.model
+    def _fonepay_cron_expire_pending(self):
+        """ Cancel pending Fonepay transactions that have timed out.
+
+        This is a backstop for customers who never come back to the payment status page (e.g. they
+        closed the tab): `_fonepay_check_qr_status` already handles the timeout for the customer
+        actively watching the QR code, but nothing would otherwise expire an abandoned one.
+
+        :return: None
+        """
+        pending_txs = self.search([('provider_code', '=', 'fonepay'), ('state', '=', 'pending')])
+        for tx in pending_txs:
+            if tx._fonepay_has_timed_out():
+                tx._set_canceled(state_message=_(
+                    "The Fonepay QR code expired before the payment was completed."
+                ))
 
     def _fonepay_get_qr_code(self):
         """ Return the QR code image of the transaction, as a base64-encoded data URL.

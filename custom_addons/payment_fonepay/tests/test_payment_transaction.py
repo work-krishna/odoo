@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from datetime import timedelta
 from unittest.mock import patch
 
 from odoo.exceptions import ValidationError
@@ -116,3 +117,51 @@ class TestPaymentTransaction(FonepayCommon):
         ) as mock:
             tx._fonepay_check_qr_status()
         self.assertEqual(mock.call_count, 0)
+
+    def test_has_not_timed_out_right_after_becoming_pending(self):
+        """ Test that a freshly pending transaction has not timed out yet. """
+        tx = self._create_transaction('redirect')
+        tx._set_pending()
+        self.assertFalse(tx._fonepay_has_timed_out())
+
+    def test_has_timed_out_past_the_configured_timeout(self):
+        """ Test that a transaction pending for longer than the provider's timeout is flagged. """
+        self.provider.fonepay_payment_timeout = 60
+        tx = self._create_transaction('redirect')
+        tx._set_pending()
+        tx.last_state_change -= timedelta(seconds=61)
+        self.assertTrue(tx._fonepay_has_timed_out())
+
+    def test_check_qr_status_cancels_on_timeout_without_calling_fonepay(self):
+        """ Test that a timed-out transaction is canceled locally, without bothering Fonepay, and
+        that the customer-facing message explains why. """
+        self.provider.fonepay_payment_timeout = 60
+        tx = self._create_transaction('redirect')
+        tx._set_pending()
+        tx.last_state_change -= timedelta(seconds=61)
+
+        with patch(
+            'odoo.addons.payment.models.payment_provider.PaymentProvider._send_api_request',
+        ) as mock:
+            tx._fonepay_check_qr_status()
+
+        self.assertEqual(mock.call_count, 0)
+        self.assertEqual(tx.state, 'cancel')
+        self.assertIn('expired', tx.state_message)
+
+    def test_cron_expires_only_timed_out_transactions(self):
+        """ Test that the expiry cron cancels timed-out transactions and leaves fresh ones alone.
+        """
+        self.provider.fonepay_payment_timeout = 60
+
+        expired_tx = self._create_transaction('redirect', reference='Expired Transaction')
+        expired_tx._set_pending()
+        expired_tx.last_state_change -= timedelta(seconds=61)
+
+        fresh_tx = self._create_transaction('redirect', reference='Fresh Transaction')
+        fresh_tx._set_pending()
+
+        self.env['payment.transaction']._fonepay_cron_expire_pending()
+
+        self.assertEqual(expired_tx.state, 'cancel')
+        self.assertEqual(fresh_tx.state, 'pending')

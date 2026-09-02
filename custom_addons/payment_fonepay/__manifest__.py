@@ -14,6 +14,7 @@
 
         'data/payment_method_data.xml',
         'data/payment_provider_data.xml',  # Depends on payment_fonepay_templates.xml & the method above.
+        'data/payment_cron.xml',
     ],
     'assets': {
         'web.assets_frontend': [
