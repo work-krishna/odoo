@@ -4,6 +4,8 @@
     <t t-name="pos_payment_fonepay.FonepayQrPopup" t-inherit="web.ConfirmationDialog" t-inherit-mode="primary">
         <xpath expr="//p" position="replace">
             <div class="d-flex flex-column align-items-center justify-content-center">
+                <img src="/payment_fonepay/static/description/icon.png" alt="Fonepay"
+                     class="mb-2 rounded" style="width: 48px; height: 48px;"/>
                 <p t-out="props.body" class="text-prewrap" style="font-weight: bold;"/>
                 <img t-att-src="props.qrCode" alt="Fonepay QR Code" style="width: 220px; height: 220px;"/>
                 <div class="mt-2">
