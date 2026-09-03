@@ -9,7 +9,7 @@ from datetime import timedelta
 
 import qrcode
 
-from odoo import _, api, fields, models
+from odoo import Command, _, api, fields, models
 from odoo.exceptions import ValidationError
 
 from odoo.addons.payment.logging import get_payment_logger
@@ -97,6 +97,63 @@ class PaymentTransaction(models.Model):
                 response_data.get('message') or _("Fonepay did not return a QR code.")
             )
         self.fonepay_qr_message = response_data['qrMessage']
+
+    def _fonepay_create_retry_transaction(self):
+        """ Create and return a new transaction that retries this failed/canceled Fonepay
+        payment, with a fresh QR code.
+
+        The new transaction is linked to the exact same originating document(s) (sale order(s)
+        and/or invoice(s), whichever linking fields are installed alongside `payment`) as this
+        one, so that a successful payment on it confirms that same document rather than nothing
+        at all. It otherwise copies the provider, payment method, amount, currency and partner of
+        this transaction, and is created with `operation` set explicitly to `'online_redirect'`
+        to match the flow the original transaction went through (`create()` does not default
+        `operation`, `landing_route` or `tokenize`).
+
+        Note: self.ensure_one()
+
+        :return: The new transaction: in state 'pending' with a fresh QR code if the request to
+                 Fonepay succeeded, or in state 'error' otherwise.
+        :rtype: payment.transaction
+        :raise ValidationError: If this transaction is not a Fonepay transaction in state
+                                 'cancel' or 'error'.
+        """
+        self.ensure_one()
+        if self.provider_code != 'fonepay':
+            raise ValidationError(_("This is not a Fonepay transaction."))
+        if self.state not in ('cancel', 'error'):
+            raise ValidationError(_(
+                "Only a canceled or errored Fonepay payment can be retried (reference: %s).",
+                self.reference,
+            ))
+
+        create_values = {
+            'provider_id': self.provider_id.id,
+            'payment_method_id': self.payment_method_id.id,
+            'reference': self._compute_reference(self.provider_code, prefix=self.reference),
+            'amount': self.amount,
+            'currency_id': self.currency_id.id,
+            'partner_id': self.partner_id.id,
+            'operation': 'online_redirect',
+        }
+        # These fields only exist on `payment.transaction` when the module that adds them
+        # ('sale', 'account_payment') is installed alongside `payment`; `payment_fonepay` itself
+        # only depends on `payment`, so both are optional and checked for before use.
+        if 'sale_order_ids' in self._fields and self.sale_order_ids:
+            create_values['sale_order_ids'] = [Command.set(self.sale_order_ids.ids)]
+        if 'invoice_ids' in self._fields and self.invoice_ids:
+            create_values['invoice_ids'] = [Command.set(self.invoice_ids.ids)]
+
+        new_tx = self.env['payment.transaction'].sudo().create(create_values)
+
+        try:
+            new_tx._fonepay_request_qr()
+        except ValidationError as error:
+            new_tx._set_error(str(error))
+            return new_tx
+
+        new_tx._set_pending()
+        return new_tx
 
     def _fonepay_check_qr_status(self):
         """ Ask Fonepay for the status of the QR payment and update the transaction accordingly.

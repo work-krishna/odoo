@@ -54,6 +54,19 @@
                     </small>
                 </div>
             </div>
+
+            <!-- Same reasoning as the QR card above: a sibling block after the status alert,
+                 never nested inside its flex row. -->
+            <div t-if="tx.provider_id.sudo().code == 'fonepay' and tx.state in ('cancel', 'error')"
+                 name="o_fonepay_retry_actions"
+                 class="mt-3 d-flex gap-2"
+            >
+                <form method="post" t-att-action="'/payment/fonepay/retry'">
+                    <input type="hidden" name="reference" t-att-value="tx.reference"/>
+                    <button type="submit" class="btn btn-primary">Retry Payment</button>
+                </form>
+                <a href="/shop/cart" class="btn btn-secondary">Cancel</a>
+            </div>
         </xpath>
     </template>
 

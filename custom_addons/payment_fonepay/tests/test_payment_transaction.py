@@ -3,6 +3,7 @@
 from datetime import timedelta
 from unittest.mock import patch
 
+from odoo import Command
 from odoo.exceptions import ValidationError
 from odoo.tests import tagged
 
@@ -188,3 +189,75 @@ class TestPaymentTransaction(FonepayCommon):
 
         self.assertEqual(expired_tx.state, 'cancel')
         self.assertEqual(fresh_tx.state, 'pending')
+
+    def test_retry_raises_when_transaction_is_not_cancel_or_error(self):
+        """ Test that retrying is refused for a transaction that hasn't failed or been canceled,
+        so an arbitrary/unrelated/still-active reference can't be replayed. """
+        tx = self._create_transaction('redirect')  # State is 'draft'.
+        with self.assertRaises(ValidationError):
+            tx._fonepay_create_retry_transaction()
+
+        tx._set_pending()
+        with self.assertRaises(ValidationError):
+            tx._fonepay_create_retry_transaction()
+
+    def test_retry_creates_new_pending_transaction_with_fresh_qr(self):
+        """ Test that retrying a canceled transaction creates a distinct new transaction, in
+        state 'pending', with its own fresh QR message, carrying over the amount, currency,
+        partner and provider of the original. """
+        old_tx = self._create_transaction('redirect', reference='Original Transaction')
+        old_tx._set_canceled(state_message="The Fonepay QR code expired.")
+
+        with patch(
+            'odoo.addons.payment.models.payment_provider.PaymentProvider._send_api_request',
+            return_value=self.sample_qr_response,
+        ):
+            new_tx = old_tx._fonepay_create_retry_transaction()
+
+        self.assertNotEqual(new_tx, old_tx)
+        self.assertEqual(new_tx.state, 'pending')
+        self.assertEqual(new_tx.fonepay_qr_message, self.sample_qr_response['qrMessage'])
+        self.assertEqual(new_tx.amount, old_tx.amount)
+        self.assertEqual(new_tx.currency_id, old_tx.currency_id)
+        self.assertEqual(new_tx.partner_id, old_tx.partner_id)
+        self.assertEqual(new_tx.provider_id, old_tx.provider_id)
+        self.assertEqual(new_tx.operation, 'online_redirect')
+        # The old transaction itself is left untouched.
+        self.assertEqual(old_tx.state, 'cancel')
+
+    def test_retry_links_new_transaction_to_same_sale_orders_as_the_original(self):
+        """ Test that the retry transaction is linked to the exact same sale order(s) as the
+        failed one: a successful retry that isn't linked to the right order would silently fail
+        to confirm anything. """
+        if 'sale_order_ids' not in self.env['payment.transaction']._fields:
+            self.skipTest("The `sale` module is not installed.")
+
+        sale_order = self.env['sale.order'].create({'partner_id': self.partner.id})
+        old_tx = self._create_transaction('redirect', reference='Original Transaction')
+        old_tx.sale_order_ids = [Command.set(sale_order.ids)]
+        old_tx._set_canceled(state_message="The Fonepay QR code expired.")
+
+        with patch(
+            'odoo.addons.payment.models.payment_provider.PaymentProvider._send_api_request',
+            return_value=self.sample_qr_response,
+        ):
+            new_tx = old_tx._fonepay_create_retry_transaction()
+
+        self.assertEqual(new_tx.sale_order_ids, sale_order)
+
+    def test_retry_sets_error_state_on_new_transaction_when_qr_request_fails(self):
+        """ Test that a rejected QR request on the retry puts the *new* transaction in an error
+        state instead of crashing, while still returning it so the controller can redirect to a
+        page that shows the error. """
+        old_tx = self._create_transaction('redirect', reference='Original Transaction')
+        old_tx._set_canceled(state_message="The Fonepay QR code expired.")
+
+        with patch(
+            'odoo.addons.payment.models.payment_provider.PaymentProvider._send_api_request',
+            side_effect=ValidationError("Data Validation Failed"),
+        ):
+            new_tx = old_tx._fonepay_create_retry_transaction()
+
+        self.assertNotEqual(new_tx, old_tx)
+        self.assertEqual(new_tx.state, 'error')
+        self.assertEqual(old_tx.state, 'cancel')
