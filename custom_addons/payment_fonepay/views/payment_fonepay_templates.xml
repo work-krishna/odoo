@@ -21,19 +21,36 @@
             <div t-if="fonepay_qr_code"
                  name="o_fonepay_qr_wrapper"
                  t-att-data-reference="tx.reference"
+                 t-att-data-remaining="tx._fonepay_get_remaining_seconds() if tx.provider_id.sudo().fonepay_payment_timeout else None"
                  class="o_fonepay_qr_card card mt-3 mx-auto"
                  style="max-width: 320px;"
             >
                 <div class="card-body d-flex flex-column align-items-center text-center">
+                    <img src="/payment_fonepay/static/description/icon.png" alt="Fonepay"
+                         class="mb-2 rounded" style="height: 48px; width: auto;"
+                    />
+                    <p class="fw-bold mb-2">
+                        Scan this QR code with your mobile banking or wallet app.
+                    </p>
                     <img class="mb-2 border rounded"
                          style="max-width: 220px; width: 100%;"
                          t-att-src="fonepay_qr_code"
                          alt="Fonepay QR Code"
                     />
+                    <div class="mb-2">
+                        <strong>Amount: </strong>
+                        <span t-esc="tx.amount"
+                              t-options="{'widget': 'monetary', 'display_currency': tx.currency_id}"
+                        />
+                    </div>
                     <small class="text-muted lh-sm">
-                        Open your mobile banking or wallet app that supports Fonepay and scan
-                        this QR code to pay. This page will update automatically once the
-                        payment is confirmed.
+                        <i class="fa fa-spinner fa-spin me-1"/>
+                        Waiting for payment confirmation...
+                    </small>
+                    <small name="o_fonepay_countdown" class="text-muted lh-sm">
+                        <t t-if="tx.provider_id.sudo().fonepay_payment_timeout">
+                            Expires in <span name="o_fonepay_countdown_value">-:--</span>
+                        </t>
                     </small>
                 </div>
             </div>

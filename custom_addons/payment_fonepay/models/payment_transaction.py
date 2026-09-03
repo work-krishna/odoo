@@ -160,20 +160,36 @@ class PaymentTransaction(models.Model):
         """ Return whether this pending transaction has been waiting for payment for longer than
         the provider's configured timeout.
 
-        The clock starts at `last_state_change`, which is set the moment the transaction becomes
-        'pending' (i.e. as soon as the customer is shown the QR code).
-
         Note: self.ensure_one()
 
         :return: Whether the transaction has timed out.
         :rtype: bool
         """
         self.ensure_one()
+        if not self.provider_id.sudo().fonepay_payment_timeout:
+            return False
+        return self._fonepay_get_remaining_seconds() <= 0
+
+    def _fonepay_get_remaining_seconds(self):
+        """ Return the number of seconds left before this pending transaction times out.
+
+        The clock starts at `last_state_change`, which is set the moment the transaction becomes
+        'pending' (i.e. as soon as the customer is shown the QR code). Used to seed the countdown
+        shown alongside the QR code, so it stays accurate even if the page is reloaded partway
+        through instead of restarting from the full timeout every time.
+
+        Note: self.ensure_one()
+
+        :return: The remaining seconds, 0 if already timed out or no timeout is configured.
+        :rtype: int
+        """
+        self.ensure_one()
         timeout = self.provider_id.sudo().fonepay_payment_timeout
         if not timeout or not self.last_state_change:
-            return False
+            return 0
         deadline = self.last_state_change + timedelta(seconds=timeout)
-        return fields.Datetime.now() > deadline
+        remaining = (deadline - fields.Datetime.now()).total_seconds()
+        return max(0, int(remaining))
 
     @api.model
     def _fonepay_cron_expire_pending(self):
