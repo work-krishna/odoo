@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="pos_payment_fonepay.FonepayQrPopup" t-inherit="web.ConfirmationDialog" t-inherit-mode="primary">
+        <xpath expr="//p" position="replace">
+            <div class="d-flex flex-column align-items-center justify-content-center">
+                <p t-out="props.body" class="text-prewrap" style="font-weight: bold;"/>
+                <img t-att-src="props.qrCode" alt="Fonepay QR Code" style="width: 220px; height: 220px;"/>
+                <div class="mt-2">
+                    <strong>Amount: </strong>
+                    <t t-out="props.amount"/>
+                </div>
+                <div class="mt-2 text-muted">
+                    <i class="fa fa-spinner fa-spin me-1"/>
+                    Waiting for payment confirmation...
+                </div>
+            </div>
+        </xpath>
+        <xpath expr="//button[@t-on-click='_confirm']" position="attributes">
+            <attribute name="class">d-none</attribute>
+        </xpath>
+    </t>
+
+</templates>

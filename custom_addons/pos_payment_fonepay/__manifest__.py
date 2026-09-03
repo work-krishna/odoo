@@ -2,12 +2,12 @@
 
 {
     'name': "Point of Sale Fonepay Direct QR",
-    'version': '1.0',
+    'version': '2.0',
     'category': 'Point of Sale',
-    'summary': "Show Fonepay's own QR code directly in Point of Sale, instead of a link the "
-               "customer has to open on their own phone first.",
+    'summary': "Pay Point of Sale orders with Fonepay: shows Fonepay's own QR code directly on "
+               "the POS screen and confirms automatically, no link to open on another phone.",
     'description': " ",  # Non-empty string to avoid loading the README file.
-    'depends': ['point_of_sale', 'pos_online_payment', 'payment_fonepay'],
+    'depends': ['point_of_sale', 'payment_fonepay'],
     'data': [],
     'assets': {
         'point_of_sale.assets_prod': [
