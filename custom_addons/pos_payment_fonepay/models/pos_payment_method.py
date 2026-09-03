@@ -54,7 +54,8 @@ class PosPaymentMethod(models.Model):
         :param float amount: The amount to charge.
         :param str reference: A human-readable label for the transaction (e.g. the POS order
                                name), used to build a unique transaction reference.
-        :return: A dict with the transaction `reference` and the base64 `qr_code` image to show.
+        :return: A dict with the transaction `reference`, the base64 `qr_code` image to show, and
+                 the provider's configured `timeout` (in seconds) so the UI can count it down.
         :rtype: dict
         :raise UserError: If Fonepay rejects the request or returns no QR code.
         """
@@ -81,6 +82,7 @@ class PosPaymentMethod(models.Model):
         return {
             'reference': tx_sudo.reference,
             'qr_code': tx_sudo._fonepay_get_qr_code(),
+            'timeout': provider_sudo.fonepay_payment_timeout,
         }
 
     def fonepay_check_status(self, reference):

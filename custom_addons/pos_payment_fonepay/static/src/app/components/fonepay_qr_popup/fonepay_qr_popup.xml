@@ -14,6 +14,9 @@
                     <i class="fa fa-spinner fa-spin me-1"/>
                     Waiting for payment confirmation...
                 </div>
+                <div class="mt-1 text-muted" t-if="props.timeout">
+                    Expires in <t t-out="formattedRemaining"/>
+                </div>
             </div>
         </xpath>
         <xpath expr="//button[@t-on-click='_confirm']" position="attributes">

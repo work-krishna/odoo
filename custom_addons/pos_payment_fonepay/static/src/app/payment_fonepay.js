@@ -35,7 +35,7 @@ export class PaymentFonepay extends PaymentInterface {
             qrData = await this.pos.data.call("pos.payment.method", "fonepay_request_qr", [
                 [this.payment_method_id.id],
                 line.amount,
-                line.pos_order_id.name || line.pos_order_id.uuid,
+                line.pos_order_id.pos_reference || line.pos_order_id.uuid,
             ]);
         } catch (error) {
             this._showError(error?.data?.message || _t("Could not generate the Fonepay QR code."));
@@ -52,6 +52,7 @@ export class PaymentFonepay extends PaymentInterface {
             {
                 qrCode: qrData.qr_code,
                 amount: this.pos.env.utils.formatCurrency(line.amount),
+                timeout: qrData.timeout,
                 cancel: () => this._resolveResult?.(false),
             },
             { onClose: () => this._resolveResult?.(false) }
