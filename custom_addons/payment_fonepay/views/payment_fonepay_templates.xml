@@ -10,6 +10,29 @@
         </form>
     </template>
 
+    <!-- Retry/Cancel actions shown for a failed or canceled Fonepay payment. Factored out as its
+         own callable template (rather than inlined in fonepay_state_header) so that other pages
+         which don't reach payment.state_header at all, e.g. website_sale's own order
+         confirmation page (see website_sale_payment_fonepay), can t-call the exact same markup
+         instead of duplicating it.
+
+         Expected context: `tx` (the failed/canceled payment.transaction) and, optionally,
+         `fonepay_cancel_url` (where "Cancel" should navigate to; defaults to tx.landing_route,
+         which is a reasonable "go back to where this came from" for most flows, but callers that
+         know a more specific destination, e.g. the shop cart, should set it explicitly). -->
+    <template id="retry_cancel_actions">
+        <div t-if="tx.provider_id.sudo().code == 'fonepay' and tx.state in ('cancel', 'error')"
+             name="o_fonepay_retry_actions"
+             class="mt-3 d-flex gap-2"
+        >
+            <form method="post" t-att-action="'/payment/fonepay/retry'">
+                <input type="hidden" name="reference" t-att-value="tx.reference"/>
+                <button type="submit" class="btn btn-primary">Retry Payment</button>
+            </form>
+            <a t-att-href="fonepay_cancel_url or tx.landing_route or '/'" class="btn btn-secondary">Cancel</a>
+        </div>
+    </template>
+
     <template id="fonepay_state_header" inherit_id="payment.state_header">
         <!-- Rendered as a sibling *after* the status alert, not inside it: that alert is a flex
              row (`d-flex gap-3`) for its icon + message, and appending the QR card inside it
@@ -57,16 +80,7 @@
 
             <!-- Same reasoning as the QR card above: a sibling block after the status alert,
                  never nested inside its flex row. -->
-            <div t-if="tx.provider_id.sudo().code == 'fonepay' and tx.state in ('cancel', 'error')"
-                 name="o_fonepay_retry_actions"
-                 class="mt-3 d-flex gap-2"
-            >
-                <form method="post" t-att-action="'/payment/fonepay/retry'">
-                    <input type="hidden" name="reference" t-att-value="tx.reference"/>
-                    <button type="submit" class="btn btn-primary">Retry Payment</button>
-                </form>
-                <a href="/shop/cart" class="btn btn-secondary">Cancel</a>
-            </div>
+            <t t-call="payment_fonepay.retry_cancel_actions"/>
         </xpath>
     </template>
 

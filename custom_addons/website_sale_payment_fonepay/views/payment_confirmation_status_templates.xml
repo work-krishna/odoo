@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- website_sale's order confirmation page (/shop/confirmation) never reaches
+         payment.state_header (it renders its own, self-contained status partial), so
+         payment_fonepay's `fonepay_state_header` override, which only extends
+         payment.state_header, never shows on this page. This adds the same Retry/Cancel
+         actions here too, reusing payment_fonepay's shared `retry_cancel_actions` template
+         rather than duplicating its markup.
+
+         Unlike payment.state_header's status alert (a flex row), this alert div is a plain
+         block-level Bootstrap alert, so appending inside it (position="inside") is safe here:
+         it doesn't have the flex-squeeze issue that payment.state_header's does. -->
+    <template id="payment_confirmation_status" inherit_id="website_sale.payment_confirmation_status">
+        <!-- The alert div's class is built dynamically (t-attf-class), so it can't be xpath-ed
+             on class content; it's the only <div> child of order_confirmation, so target it
+             positionally instead. -->
+        <xpath expr="//div[@name='order_confirmation']/div" position="inside">
+            <t t-set="tx" t-value="tx_sudo"/>
+            <t t-set="fonepay_cancel_url" t-value="'/shop/cart'"/>
+            <t t-call="payment_fonepay.retry_cancel_actions"/>
+        </xpath>
+    </template>
+
+</odoo>

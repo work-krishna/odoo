@@ -105,10 +105,10 @@ class PaymentTransaction(models.Model):
         The new transaction is linked to the exact same originating document(s) (sale order(s)
         and/or invoice(s), whichever linking fields are installed alongside `payment`) as this
         one, so that a successful payment on it confirms that same document rather than nothing
-        at all. It otherwise copies the provider, payment method, amount, currency and partner of
-        this transaction, and is created with `operation` set explicitly to `'online_redirect'`
-        to match the flow the original transaction went through (`create()` does not default
-        `operation`, `landing_route` or `tokenize`).
+        at all. It otherwise copies the provider, payment method, amount, currency, partner and
+        landing route of this transaction, and is created with `operation` set explicitly to
+        `'online_redirect'` to match the flow the original transaction went through (`create()`
+        does not default `operation` or `tokenize`).
 
         Note: self.ensure_one()
 
@@ -135,6 +135,7 @@ class PaymentTransaction(models.Model):
             'currency_id': self.currency_id.id,
             'partner_id': self.partner_id.id,
             'operation': 'online_redirect',
+            'landing_route': self.landing_route,
         }
         # These fields only exist on `payment.transaction` when the module that adds them
         # ('sale', 'account_payment') is installed alongside `payment`; `payment_fonepay` itself
