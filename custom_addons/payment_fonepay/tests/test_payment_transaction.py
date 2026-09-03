@@ -12,6 +12,13 @@ from odoo.addons.payment_fonepay.tests.common import FonepayCommon
 @tagged('post_install', '-at_install')
 class TestPaymentTransaction(FonepayCommon):
 
+    def setUp(self):
+        # `PaymentCommon` mocks `_post_process` (when `account_payment` is installed) to avoid
+        # real accounting side effects in tests. We want the real thing here, since it's exactly
+        # what `test_check_qr_status_post_processes_immediately_on_success` verifies.
+        self.enable_post_process_patcher = False
+        super().setUp()
+
     def test_signature_matches_fonepay_documentation_sample(self):
         """ Test the HMAC_SHA512 signature against the worked examples from Fonepay's technical
         specification document (section 3.1.2 and 3.3.2). """
@@ -148,6 +155,22 @@ class TestPaymentTransaction(FonepayCommon):
         self.assertEqual(mock.call_count, 0)
         self.assertEqual(tx.state, 'cancel')
         self.assertIn('expired', tx.state_message)
+
+    def test_check_qr_status_post_processes_immediately_on_success(self):
+        """ Test that a successful status check triggers post-processing right away, instead of
+        waiting for a page polling `/payment/status` or the slow generic cron. This matters most
+        for flows with no such page open at all, e.g. a Point of Sale online payment. """
+        tx = self._create_transaction('redirect')
+        tx._set_pending()
+
+        with patch(
+            'odoo.addons.payment.models.payment_provider.PaymentProvider._send_api_request',
+            return_value=self.sample_status_success,
+        ):
+            tx._fonepay_check_qr_status()
+
+        self.assertEqual(tx.state, 'done')
+        self.assertTrue(tx.is_post_processed)
 
     def test_cron_expires_only_timed_out_transactions(self):
         """ Test that the expiry cron cancels timed-out transactions and leaves fresh ones alone.

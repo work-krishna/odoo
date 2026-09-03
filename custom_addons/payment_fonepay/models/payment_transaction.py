@@ -143,6 +143,19 @@ class PaymentTransaction(models.Model):
             return
         self._process('fonepay', status_data)
 
+        # Post-process immediately rather than waiting for the generic post-processing cron
+        # (which only runs every 10 minutes) or for a page that happens to be polling
+        # `/payment/status` in parallel. Nothing else is guaranteed to be watching this
+        # transaction, e.g. a Point of Sale online payment has no such page open at all.
+        if self.state in ('authorized', 'done') and not self.is_post_processed:
+            try:
+                self._post_process()
+            except Exception:
+                _logger.exception(
+                    "Encountered an error while post-processing Fonepay transaction %s.",
+                    self.reference,
+                )
+
     def _fonepay_has_timed_out(self):
         """ Return whether this pending transaction has been waiting for payment for longer than
         the provider's configured timeout.
