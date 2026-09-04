@@ -10,7 +10,14 @@
 
          Unlike payment.state_header's status alert (a flex row), this alert div is a plain
          block-level Bootstrap alert, so appending inside it (position="inside") is safe here:
-         it doesn't have the flex-squeeze issue that payment.state_header's does. -->
+         it doesn't have the flex-squeeze issue that payment.state_header's does.
+
+         `fonepay_retry_url` is set to /shop/payment here (rather than left unset, which would
+         regenerate a Fonepay QR immediately): in the shop checkout flow the customer should land
+         back on the payment method selection step and be free to pick a different method too,
+         not be forced straight back into another Fonepay QR. /shop/payment reads the order from
+         the current cart/session, which still resolves to this same order right after a failed
+         checkout attempt. -->
     <template id="payment_confirmation_status" inherit_id="website_sale.payment_confirmation_status">
         <!-- The alert div's class is built dynamically (t-attf-class), so it can't be xpath-ed
              on class content; it's the only <div> child of order_confirmation, so target it
@@ -18,6 +25,7 @@
         <xpath expr="//div[@name='order_confirmation']/div" position="inside">
             <t t-set="tx" t-value="tx_sudo"/>
             <t t-set="fonepay_cancel_url" t-value="'/shop/cart'"/>
+            <t t-set="fonepay_retry_url" t-value="'/shop/payment'"/>
             <t t-call="payment_fonepay.retry_cancel_actions"/>
         </xpath>
     </template>

@@ -16,16 +16,24 @@
          confirmation page (see website_sale_payment_fonepay), can t-call the exact same markup
          instead of duplicating it.
 
-         Expected context: `tx` (the failed/canceled payment.transaction) and, optionally,
-         `fonepay_cancel_url` (where "Cancel" should navigate to; defaults to tx.landing_route,
-         which is a reasonable "go back to where this came from" for most flows, but callers that
-         know a more specific destination, e.g. the shop cart, should set it explicitly). -->
+         Expected context: `tx` (the failed/canceled payment.transaction) and, optionally:
+         - `fonepay_cancel_url`: where "Cancel" should navigate to; defaults to tx.landing_route,
+           which is a reasonable "go back to where this came from" for most flows, but callers
+           that know a more specific destination, e.g. the shop cart, should set it explicitly.
+         - `fonepay_retry_url`: if set, "Retry Payment" becomes a plain link to this URL instead
+           of immediately regenerating a Fonepay QR code. Use this wherever a real "choose a
+           payment method" page exists for the underlying document (e.g. website_sale's
+           /shop/payment) so the customer can pick a different method too, not just Fonepay
+           again. Left unset, the default behaviour applies: retrying goes straight back to a
+           fresh Fonepay QR, which is the only sensible option where no such page exists (e.g. a
+           generic payment link with no shop/portal page behind it). -->
     <template id="retry_cancel_actions">
         <div t-if="tx.provider_id.sudo().code == 'fonepay' and tx.state in ('cancel', 'error')"
              name="o_fonepay_retry_actions"
              class="mt-3 d-flex gap-2"
         >
-            <form method="post" t-att-action="'/payment/fonepay/retry'">
+            <a t-if="fonepay_retry_url" t-att-href="fonepay_retry_url" class="btn btn-primary">Retry Payment</a>
+            <form t-else="" method="post" t-att-action="'/payment/fonepay/retry'">
                 <input type="hidden" name="reference" t-att-value="tx.reference"/>
                 <button type="submit" class="btn btn-primary">Retry Payment</button>
             </form>
