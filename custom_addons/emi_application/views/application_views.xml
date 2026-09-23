@@ -132,7 +132,7 @@
                 <filter string="Pending Finance Approval" name="pending_finance"
                         domain="[('state', '=', 'pending_finance_approval')]"/>
                 <filter string="Active" name="active_loans" domain="[('state', '=', 'active')]"/>
-                <group expand="0" string="Group By">
+                <group>
                     <filter string="State" name="group_state" context="{'group_by': 'state'}"/>
                     <filter string="Finance Company" name="group_finance"
                             context="{'group_by': 'finance_company_id'}"/>

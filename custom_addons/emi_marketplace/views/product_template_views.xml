@@ -10,7 +10,7 @@
                 <field name="listing_state" widget="statusbar"
                        statusbar_visible="draft,pending_review,published"/>
             </xpath>
-            <xpath expr="//group[@name='general']" position="inside">
+            <xpath expr="//group[@name='group_general']" position="inside">
                 <field name="vendor_id"/>
             </xpath>
             <xpath expr="//div[hasclass('oe_button_box')]" position="inside">

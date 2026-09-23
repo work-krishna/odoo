@@ -55,11 +55,14 @@ class EmiFinanceCompany(models.Model):
         'res.partner.bank', string='Disbursement Bank Account',
     )
 
-    _sql_constraints = [
-        ('code_uniq', 'unique(code)', 'Finance company code must be unique.'),
-        ('company_uniq', 'unique(company_id)',
-         'Each Odoo company can only be linked to one finance company record.'),
-    ]
+    _code_uniq = models.Constraint(
+        'unique(code)',
+        'Finance company code must be unique.',
+    )
+    _company_uniq = models.Constraint(
+        'unique(company_id)',
+        'Each Odoo company can only be linked to one finance company record.',
+    )
 
     @api.depends('interest_rate_ids')
     def _compute_interest_rate_count(self):

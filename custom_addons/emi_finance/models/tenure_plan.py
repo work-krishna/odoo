@@ -17,10 +17,14 @@ class EmiTenurePlan(models.Model):
     active = fields.Boolean(default=True)
     sequence = fields.Integer(default=10)
 
-    _sql_constraints = [
-        ('months_uniq', 'unique(months)', 'A tenure plan for this number of months already exists.'),
-        ('months_positive', 'CHECK(months > 0)', 'Tenure months must be a positive number.'),
-    ]
+    _months_uniq = models.Constraint(
+        'unique(months)',
+        'A tenure plan for this number of months already exists.',
+    )
+    _months_positive = models.Constraint(
+        'CHECK(months > 0)',
+        'Tenure months must be a positive number.',
+    )
 
     @api.depends('months')
     def _compute_name(self):
