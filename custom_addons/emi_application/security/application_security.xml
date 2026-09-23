@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- Customers reviewing their own application via the portal -->
+    <!-- Customers reviewing their own application via the portal.
+         Odoo 19: res.groups.category_id was removed in favour of privilege_id
+         (see emi_finance/security/finance_security.xml for privilege_emi_platform). -->
     <record id="group_emi_customer_portal" model="res.groups">
         <field name="name">EMI Customer Portal</field>
-        <field name="category_id" ref="emi_finance.module_category_emi_platform"/>
+        <field name="privilege_id" ref="emi_finance.privilege_emi_platform"/>
         <field name="implied_ids" eval="[(4, ref('base.group_portal'))]"/>
     </record>
 

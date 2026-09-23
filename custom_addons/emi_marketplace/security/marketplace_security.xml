@@ -6,17 +6,25 @@
         <field name="sequence">21</field>
     </record>
 
+    <!-- Odoo 19: res.groups.category_id was removed in favour of privilege_id,
+         a many2one to res.groups.privilege (which itself carries category_id). -->
+    <record id="privilege_emi_marketplace" model="res.groups.privilege">
+        <field name="name">EMI Marketplace</field>
+        <field name="sequence">21</field>
+        <field name="category_id" ref="module_category_emi_marketplace"/>
+    </record>
+
     <!-- Marketplace staff who moderate vendors and product listings -->
     <record id="group_emi_marketplace_admin" model="res.groups">
         <field name="name">Marketplace Admin</field>
-        <field name="category_id" ref="module_category_emi_marketplace"/>
+        <field name="privilege_id" ref="privilege_emi_marketplace"/>
         <field name="comment">Approve/suspend vendors and moderate product listings.</field>
     </record>
 
     <!-- Portal users acting on behalf of a vendor -->
     <record id="group_emi_vendor_portal" model="res.groups">
         <field name="name">Vendor Portal User</field>
-        <field name="category_id" ref="module_category_emi_marketplace"/>
+        <field name="privilege_id" ref="privilege_emi_marketplace"/>
         <field name="implied_ids" eval="[(4, ref('base.group_portal'))]"/>
         <field name="comment">Portal users who manage a vendor's own products and view settlement statements.</field>
     </record>
