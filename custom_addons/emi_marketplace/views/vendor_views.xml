@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_emi_vendor_form" model="ir.ui.view">
+        <field name="name">emi.vendor.form</field>
+        <field name="model">emi.vendor</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_submit" type="object" string="Submit for Review"
+                            invisible="state != 'draft'" class="btn-primary"/>
+                    <button name="action_approve" type="object" string="Approve"
+                            invisible="state not in ('pending', 'suspended')" class="btn-primary"
+                            groups="emi_marketplace.group_emi_marketplace_admin"/>
+                    <button name="action_reject" type="object" string="Reject"
+                            invisible="state != 'pending'"
+                            groups="emi_marketplace.group_emi_marketplace_admin"/>
+                    <button name="action_suspend" type="object" string="Suspend"
+                            invisible="state != 'approved'"
+                            groups="emi_marketplace.group_emi_marketplace_admin"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,pending,approved"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_products" type="object"
+                                class="oe_stat_button" icon="fa-mobile">
+                            <field name="product_count" widget="statinfo" string="Products"/>
+                        </button>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="commission_type"/>
+                            <field name="commission_value"/>
+                            <field name="settlement_frequency"/>
+                            <field name="settlement_bank_account_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Onboarding Documents" name="documents">
+                            <field name="onboarding_document_ids" widget="many2many_binary"/>
+                        </page>
+                        <page string="Portal Access" name="portal_access">
+                            <field name="user_ids"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_emi_vendor_list" model="ir.ui.view">
+        <field name="name">emi.vendor.list</field>
+        <field name="model">emi.vendor</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="commission_type"/>
+                <field name="commission_value"/>
+                <field name="settlement_frequency"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'approved'"
+                       decoration-warning="state == 'pending'"
+                       decoration-danger="state in ('rejected', 'suspended')"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_emi_vendor" model="ir.actions.act_window">
+        <field name="name">Vendors</field>
+        <field name="res_model">emi.vendor</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

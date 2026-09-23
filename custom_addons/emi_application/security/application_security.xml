@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Customers reviewing their own application via the portal -->
+    <record id="group_emi_customer_portal" model="res.groups">
+        <field name="name">EMI Customer Portal</field>
+        <field name="category_id" ref="emi_finance.module_category_emi_platform"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_portal'))]"/>
+    </record>
+
+    <!-- Finance Company Reviewer: only applications for their own finance company -->
+    <record id="rule_application_finance_own_company" model="ir.rule">
+        <field name="name">Finance Company Reviewer: own company's applications only</field>
+        <field name="model_id" ref="model_emi_application"/>
+        <field name="domain_force">[('finance_company_id.company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[(4, ref('emi_finance.group_emi_finance_reviewer'))]"/>
+    </record>
+
+    <record id="rule_kyc_finance_own_company" model="ir.rule">
+        <field name="name">Finance Company Reviewer: own company's KYC only</field>
+        <field name="model_id" ref="model_emi_kyc"/>
+        <field name="domain_force">[('application_id.finance_company_id.company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[(4, ref('emi_finance.group_emi_finance_reviewer'))]"/>
+    </record>
+
+    <!-- EMI Officer sees every application across finance companies -->
+    <record id="rule_application_officer_all" model="ir.rule">
+        <field name="name">EMI Officer: all applications</field>
+        <field name="model_id" ref="model_emi_application"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('emi_finance.group_emi_officer'))]"/>
+    </record>
+
+    <!-- Customers only see their own application and KYC -->
+    <record id="rule_application_customer_own" model="ir.rule">
+        <field name="name">EMI Customer: own applications only</field>
+        <field name="model_id" ref="model_emi_application"/>
+        <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+        <field name="groups" eval="[(4, ref('group_emi_customer_portal'))]"/>
+    </record>
+
+    <record id="rule_kyc_customer_own" model="ir.rule">
+        <field name="name">EMI Customer: own KYC only</field>
+        <field name="model_id" ref="model_emi_kyc"/>
+        <field name="domain_force">[('application_id.partner_id', '=', user.partner_id.id)]</field>
+        <field name="groups" eval="[(4, ref('group_emi_customer_portal'))]"/>
+    </record>
+
+</odoo>

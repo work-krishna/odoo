@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="tenure_plan_6" model="emi.tenure.plan">
+        <field name="months">6</field>
+        <field name="sequence">10</field>
+    </record>
+    <record id="tenure_plan_9" model="emi.tenure.plan">
+        <field name="months">9</field>
+        <field name="sequence">20</field>
+    </record>
+    <record id="tenure_plan_12" model="emi.tenure.plan">
+        <field name="months">12</field>
+        <field name="sequence">30</field>
+    </record>
+    <record id="tenure_plan_18" model="emi.tenure.plan">
+        <field name="months">18</field>
+        <field name="sequence">40</field>
+    </record>
+    <record id="tenure_plan_24" model="emi.tenure.plan">
+        <field name="months">24</field>
+        <field name="sequence">50</field>
+    </record>
+
+</odoo>

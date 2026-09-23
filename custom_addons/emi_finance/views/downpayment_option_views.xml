@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_emi_downpayment_option_list" model="ir.ui.view">
+        <field name="name">emi.downpayment.option.list</field>
+        <field name="model">emi.downpayment.option</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="amount_type"/>
+                <field name="value"/>
+                <field name="is_default"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Embedded on the product form so each phone can define its own
+         down payment tiers. Placed in a dedicated notebook page. -->
+    <record id="view_product_template_downpayment_inherit" model="ir.ui.view">
+        <field name="name">product.template.emi.downpayment.inherit</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="EMI Down Payment Options" name="emi_downpayment">
+                    <field name="downpayment_option_ids">
+                        <list editable="bottom">
+                            <field name="sequence" widget="handle"/>
+                            <field name="name"/>
+                            <field name="amount_type"/>
+                            <field name="value"/>
+                            <field name="is_default"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

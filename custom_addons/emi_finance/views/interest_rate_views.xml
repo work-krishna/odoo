@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_emi_interest_rate_list" model="ir.ui.view">
+        <field name="name">emi.interest.rate.list</field>
+        <field name="model">emi.interest.rate</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="finance_company_id"/>
+                <field name="tenure_plan_id"/>
+                <field name="calc_method"/>
+                <field name="rate_percent"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_emi_interest_rate_form" model="ir.ui.view">
+        <field name="name">emi.interest.rate.form</field>
+        <field name="model">emi.interest.rate</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="finance_company_id"/>
+                            <field name="tenure_plan_id"/>
+                            <field name="calc_method"/>
+                            <field name="rate_percent"/>
+                        </group>
+                        <group>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                            <field name="active"/>
+                            <field name="note"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_emi_interest_rate" model="ir.actions.act_window">
+        <field name="name">Interest Rates</field>
+        <field name="res_model">emi.interest.rate</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'active_test': False}</field>
+    </record>
+
+</odoo>

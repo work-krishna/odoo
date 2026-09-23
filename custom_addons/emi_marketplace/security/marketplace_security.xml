@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="module_category_emi_marketplace" model="ir.module.category">
+        <field name="name">EMI Marketplace</field>
+        <field name="sequence">21</field>
+    </record>
+
+    <!-- Marketplace staff who moderate vendors and product listings -->
+    <record id="group_emi_marketplace_admin" model="res.groups">
+        <field name="name">Marketplace Admin</field>
+        <field name="category_id" ref="module_category_emi_marketplace"/>
+        <field name="comment">Approve/suspend vendors and moderate product listings.</field>
+    </record>
+
+    <!-- Portal users acting on behalf of a vendor -->
+    <record id="group_emi_vendor_portal" model="res.groups">
+        <field name="name">Vendor Portal User</field>
+        <field name="category_id" ref="module_category_emi_marketplace"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_portal'))]"/>
+        <field name="comment">Portal users who manage a vendor's own products and view settlement statements.</field>
+    </record>
+
+    <!-- Vendor portal users only see their own vendor record -->
+    <record id="rule_vendor_own_record" model="ir.rule">
+        <field name="name">Vendor Portal: own vendor record only</field>
+        <field name="model_id" ref="model_emi_vendor"/>
+        <field name="domain_force">[('user_ids', 'in', [user.id])]</field>
+        <field name="groups" eval="[(4, ref('group_emi_vendor_portal'))]"/>
+    </record>
+
+    <!-- Vendor portal users only see their own products -->
+    <record id="rule_product_template_own_vendor" model="ir.rule">
+        <field name="name">Vendor Portal: own products only</field>
+        <field name="model_id" ref="product.model_product_template"/>
+        <field name="domain_force">[('vendor_id.user_ids', 'in', [user.id])]</field>
+        <field name="groups" eval="[(4, ref('group_emi_vendor_portal'))]"/>
+    </record>
+
+</odoo>

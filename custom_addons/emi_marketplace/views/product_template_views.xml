@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_product_template_marketplace_inherit" model="ir.ui.view">
+        <field name="name">product.template.emi.marketplace.inherit</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('oe_title')]" position="before">
+                <field name="listing_state" widget="statusbar"
+                       statusbar_visible="draft,pending_review,published"/>
+            </xpath>
+            <xpath expr="//group[@name='general']" position="inside">
+                <field name="vendor_id"/>
+            </xpath>
+            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                <button name="action_submit_listing" type="object" string="Submit Listing"
+                        invisible="listing_state != 'draft'" class="oe_stat_button" icon="fa-check"/>
+                <button name="action_publish_listing" type="object" string="Publish Listing"
+                        invisible="listing_state != 'pending_review'"
+                        groups="emi_marketplace.group_emi_marketplace_admin"
+                        class="oe_stat_button" icon="fa-globe"/>
+                <button name="action_reject_listing" type="object" string="Reject Listing"
+                        invisible="listing_state != 'pending_review'"
+                        groups="emi_marketplace.group_emi_marketplace_admin"
+                        class="oe_stat_button" icon="fa-ban"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_product_template_marketplace_list" model="ir.ui.view">
+        <field name="name">product.template.emi.marketplace.list</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_tree_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="inside">
+                <field name="vendor_id" optional="show"/>
+                <field name="listing_state" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

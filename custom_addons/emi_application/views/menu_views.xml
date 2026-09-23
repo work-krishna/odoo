@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem id="menu_emi_application_root" name="Applications"
+              parent="emi_finance.menu_emi_root" sequence="5"/>
+
+    <menuitem id="menu_emi_application" name="EMI Applications"
+              parent="menu_emi_application_root" action="action_emi_application"
+              groups="emi_finance.group_emi_officer,emi_finance.group_emi_finance_reviewer"
+              sequence="10"/>
+
+</odoo>

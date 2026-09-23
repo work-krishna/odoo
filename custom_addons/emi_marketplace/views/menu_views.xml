@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Reuses the "EMI Platform" root menu defined in emi_finance
+         (declared as a dependency in __manifest__.py). -->
+    <menuitem id="menu_emi_marketplace_root" name="Marketplace"
+              parent="emi_finance.menu_emi_root" sequence="20"/>
+
+    <menuitem id="menu_emi_vendor" name="Vendors"
+              parent="menu_emi_marketplace_root" action="action_emi_vendor"
+              groups="emi_marketplace.group_emi_marketplace_admin" sequence="10"/>
+
+</odoo>

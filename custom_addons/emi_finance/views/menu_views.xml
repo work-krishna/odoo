@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem id="menu_emi_root" name="EMI Platform" sequence="50"
+              groups="group_emi_officer,group_emi_finance_reviewer"/>
+
+    <menuitem id="menu_emi_finance_root" name="Finance" parent="menu_emi_root" sequence="10"/>
+
+    <menuitem id="menu_emi_finance_company" name="Finance Companies"
+              parent="menu_emi_finance_root" action="action_emi_finance_company"
+              groups="group_emi_officer,group_emi_finance_reviewer" sequence="10"/>
+
+    <menuitem id="menu_emi_interest_rate" name="Interest Rates"
+              parent="menu_emi_finance_root" action="action_emi_interest_rate"
+              groups="group_emi_officer,group_emi_finance_reviewer" sequence="20"/>
+
+    <menuitem id="menu_emi_tenure_plan" name="Tenure Plans"
+              parent="menu_emi_finance_root" action="action_emi_tenure_plan"
+              groups="group_emi_officer" sequence="30"/>
+
+</odoo>
