@@ -1,6 +1,6 @@
 {
     'name': 'EMI Marketplace',
-    'version': '19.0.1.1.0',
+    'version': '19.0.1.2.0',
     'summary': 'Multi-vendor phone marketplace: vendor onboarding, product ownership and listing moderation',
     'description': """
 EMI Marketplace
@@ -25,6 +25,7 @@ Multi-vendor layer for the EMI Platform's phone-only e-commerce catalog.
         'security/marketplace_security.xml',
         'security/ir.model.access.csv',
         'views/vendor_views.xml',
+        'views/phone_brand_views.xml',
         'views/product_template_views.xml',
         'views/menu_views.xml',
     ],

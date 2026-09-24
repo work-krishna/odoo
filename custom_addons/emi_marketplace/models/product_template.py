@@ -6,6 +6,7 @@ from odoo.exceptions import AccessError, UserError, ValidationError
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
+    emi_brand_id = fields.Many2one('emi.phone.brand', string='Brand', index=True, ondelete='restrict')
     vendor_id = fields.Many2one(
         'emi.vendor', string='Vendor', ondelete='restrict', index=True,
         help="Marketplace vendor who owns and is paid out for this listing.",

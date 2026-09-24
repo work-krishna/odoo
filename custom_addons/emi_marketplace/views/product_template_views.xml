@@ -28,6 +28,7 @@
                 </header>
             </xpath>
             <xpath expr="//group[@name='group_general']" position="inside">
+                <field name="emi_brand_id" options="{'no_create': True}"/>
                 <field name="vendor_id" readonly="listing_state == 'published'"
                        options="{'no_create': True}"/>
             </xpath>
@@ -40,6 +41,7 @@
         <field name="inherit_id" ref="product.product_template_tree_view"/>
         <field name="arch" type="xml">
             <xpath expr="//list" position="inside">
+                <field name="emi_brand_id" optional="show"/>
                 <field name="vendor_id" optional="show" readonly="1"/>
                 <field name="listing_state" optional="show" readonly="1" widget="badge"
                        decoration-success="listing_state == 'published'"
@@ -56,6 +58,7 @@
         <field name="arch" type="xml">
             <xpath expr="//search" position="inside">
                 <field name="vendor_id"/>
+                <field name="emi_brand_id"/>
                 <separator/>
                 <filter string="Listing: Pending Review" name="listing_pending"
                         domain="[('listing_state', '=', 'pending_review')]"/>
@@ -65,6 +68,7 @@
                         domain="[('listing_state', '=', 'rejected')]"/>
                 <group>
                     <filter string="Vendor" name="group_vendor" context="{'group_by': 'vendor_id'}"/>
+                    <filter string="Brand" name="group_brand" context="{'group_by': 'emi_brand_id'}"/>
                     <filter string="Listing Status" name="group_listing_state"
                             context="{'group_by': 'listing_state'}"/>
                 </group>

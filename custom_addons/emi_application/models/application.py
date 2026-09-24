@@ -2,6 +2,8 @@
 from odoo import api, fields, models
 from odoo.exceptions import AccessError, UserError, ValidationError
 
+from odoo.addons.emi_finance.tools import emi_math
+
 OFFICER = 'emi_finance.group_emi_officer'
 MANAGER = 'emi_finance.group_emi_manager'
 REVIEWER = 'emi_finance.group_emi_finance_reviewer'
@@ -244,30 +246,13 @@ class EmiApplication(models.Model):
     @api.depends('financed_amount', 'interest_rate_percent', 'interest_calc_method', 'tenure_months')
     def _compute_emi_preview(self):
         for rec in self:
-            principal = rec.financed_amount
-            months = rec.tenure_months or 0
-            annual_rate = rec.interest_rate_percent or 0.0
-            if not principal or not months:
-                rec.total_interest_amount = 0.0
-                rec.total_payable_amount = 0.0
-                rec.emi_amount = 0.0
-                continue
-
-            if not annual_rate:
-                emi = principal / months
-                total_interest = 0.0
-            elif rec.interest_calc_method == 'reducing':
-                monthly_rate = (annual_rate / 100.0) / 12.0
-                factor = (1 + monthly_rate) ** months
-                emi = principal * monthly_rate * factor / (factor - 1)
-                total_interest = (emi * months) - principal
-            else:  # flat
-                total_interest = principal * (annual_rate / 100.0) * (months / 12.0)
-                emi = (principal + total_interest) / months
-
-            rec.total_interest_amount = total_interest
-            rec.total_payable_amount = principal + total_interest
-            rec.emi_amount = emi
+            result = emi_math.quote(
+                rec.financed_amount, rec.interest_rate_percent or 0.0, rec.tenure_months or 0,
+                rec.interest_calc_method,
+            )
+            rec.total_interest_amount = result['total_interest']
+            rec.total_payable_amount = result['total_payable']
+            rec.emi_amount = result['emi']
 
     @api.depends('kyc_ids.verified')
     def _compute_kyc_verified(self):

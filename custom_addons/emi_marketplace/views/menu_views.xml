@@ -20,4 +20,8 @@
               parent="menu_emi_marketplace_root" action="action_emi_listing_all"
               groups="emi_marketplace.group_emi_marketplace_admin" sequence="30"/>
 
+    <menuitem id="menu_emi_phone_brand" name="Phone Brands"
+              parent="menu_emi_marketplace_root" action="action_emi_phone_brand"
+              groups="emi_marketplace.group_emi_marketplace_admin" sequence="40"/>
+
 </odoo>

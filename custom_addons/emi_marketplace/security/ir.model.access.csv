@@ -3,3 +3,7 @@ access_emi_vendor_admin,emi.vendor.admin,model_emi_vendor,group_emi_marketplace_
 access_emi_vendor_officer,emi.vendor.officer,model_emi_vendor,emi_finance.group_emi_officer,1,0,0,0
 access_emi_vendor_portal,emi.vendor.portal,model_emi_vendor,group_emi_vendor_portal,1,0,0,0
 access_product_template_vendor_portal,product.template.vendor.portal,product.model_product_template,group_emi_vendor_portal,1,0,0,0
+access_emi_phone_brand_admin,emi.phone.brand.admin,model_emi_phone_brand,group_emi_marketplace_admin,1,1,1,1
+access_emi_phone_brand_user,emi.phone.brand.user,model_emi_phone_brand,base.group_user,1,0,0,0
+access_emi_phone_brand_portal,emi.phone.brand.portal,model_emi_phone_brand,base.group_portal,1,0,0,0
+access_emi_phone_brand_public,emi.phone.brand.public,model_emi_phone_brand,base.group_public,1,0,0,0
