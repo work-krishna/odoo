@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_company_form_emi_accounting" model="ir.ui.view">
+        <field name="name">res.company.form.emi.accounting</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="EMI Accounting" name="emi_accounting" groups="account.group_account_manager">
+                    <button name="action_emi_setup_accounting" type="object" string="Set Up EMI Accounting"
+                            class="btn-secondary mb-3"
+                            help="Create any missing EMI journal, accounts and commission product."/>
+                    <group>
+                        <group string="All EMI Companies">
+                            <field name="emi_journal_id" options="{'no_create': True}"/>
+                        </group>
+                        <group string="Marketplace" invisible="not emi_is_marketplace">
+                            <field name="emi_vendor_clearing_account_id" options="{'no_create': True}"/>
+                            <field name="emi_commission_product_id" options="{'no_create': True}"/>
+                        </group>
+                        <group string="Finance Company" invisible="emi_is_marketplace">
+                            <field name="emi_loan_account_id" options="{'no_create': True}"/>
+                            <field name="emi_interest_income_account_id" options="{'no_create': True}"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_emi_finance_company_form_accounting" model="ir.ui.view">
+        <field name="name">emi.finance.company.form.accounting</field>
+        <field name="model">emi.finance.company</field>
+        <field name="inherit_id" ref="emi_finance.view_emi_finance_company_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='settlement_bank_account_id']" position="after">
+                <field name="installment_collection"/>
+            </xpath>
+        </field>
+    </record>
+
+    <menuitem id="menu_emi_accounting_root" name="Accounting" parent="emi_finance.menu_emi_root" sequence="30"/>
+
+    <menuitem id="menu_emi_schedule_line" name="Installments"
+              parent="menu_emi_accounting_root" action="action_emi_schedule_line"
+              groups="emi_finance.group_emi_officer,emi_finance.group_emi_finance_reviewer,account.group_account_invoice"
+              sequence="10"/>
+
+    <menuitem id="menu_emi_vendor_settlement" name="Retailer Settlements"
+              parent="menu_emi_accounting_root" action="action_emi_vendor_settlement"
+              groups="account.group_account_invoice,emi_finance.group_emi_officer" sequence="20"/>
+
+</odoo>

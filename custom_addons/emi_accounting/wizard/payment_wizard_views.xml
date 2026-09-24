@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_emi_installment_payment_form" model="ir.ui.view">
+        <field name="name">emi.installment.payment.form</field>
+        <field name="model">emi.installment.payment</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <group>
+                        <field name="application_id" readonly="1"/>
+                        <field name="collecting_company_id"/>
+                        <field name="journal_id" options="{'no_create': True}"/>
+                    </group>
+                    <group>
+                        <field name="amount"/>
+                        <field name="payment_date"/>
+                        <field name="memo"/>
+                        <field name="currency_id" invisible="1"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_confirm" type="object" string="Register Payment" class="btn-primary"/>
+                    <button string="Cancel" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_emi_down_payment_form" model="ir.ui.view">
+        <field name="name">emi.down.payment.form</field>
+        <field name="model">emi.down.payment</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <group>
+                        <field name="application_id" readonly="1"/>
+                        <field name="journal_id" options="{'no_create': True}"/>
+                        <field name="company_id" invisible="1"/>
+                    </group>
+                    <group>
+                        <field name="amount"/>
+                        <field name="payment_date"/>
+                        <field name="currency_id" invisible="1"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_confirm" type="object" string="Register Down Payment" class="btn-primary"/>
+                    <button string="Cancel" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

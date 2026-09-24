@@ -1,0 +1,13 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_emi_schedule_line_officer,emi.schedule.line.officer,model_emi_schedule_line,emi_finance.group_emi_officer,1,0,0,0
+access_emi_schedule_line_reviewer,emi.schedule.line.reviewer,model_emi_schedule_line,emi_finance.group_emi_finance_reviewer,1,0,0,0
+access_emi_schedule_line_billing,emi.schedule.line.billing,model_emi_schedule_line,account.group_account_invoice,1,0,0,0
+access_emi_vendor_settlement_billing,emi.vendor.settlement.billing,model_emi_vendor_settlement,account.group_account_invoice,1,1,1,1
+access_emi_vendor_settlement_officer,emi.vendor.settlement.officer,model_emi_vendor_settlement,emi_finance.group_emi_officer,1,0,0,0
+access_emi_vendor_settlement_mp_admin,emi.vendor.settlement.mp.admin,model_emi_vendor_settlement,emi_marketplace.group_emi_marketplace_admin,1,0,0,0
+access_emi_vendor_billing,emi.vendor.billing,emi_marketplace.model_emi_vendor,account.group_account_invoice,1,0,0,0
+access_emi_installment_payment_officer,emi.installment.payment.officer,model_emi_installment_payment,emi_finance.group_emi_officer,1,1,1,1
+access_emi_installment_payment_reviewer,emi.installment.payment.reviewer,model_emi_installment_payment,emi_finance.group_emi_finance_reviewer,1,1,1,1
+access_emi_installment_payment_billing,emi.installment.payment.billing,model_emi_installment_payment,account.group_account_invoice,1,1,1,1
+access_emi_down_payment_officer,emi.down.payment.officer,model_emi_down_payment,emi_finance.group_emi_officer,1,1,1,1
+access_emi_down_payment_billing,emi.down.payment.billing,model_emi_down_payment,account.group_account_invoice,1,1,1,1

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="rule_schedule_line_finance_own_company" model="ir.rule">
+        <field name="name">Finance Company Reviewer: own company's installments only</field>
+        <field name="model_id" ref="model_emi_schedule_line"/>
+        <field name="domain_force">[('finance_company_id.company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[(4, ref('emi_finance.group_emi_finance_reviewer'))]"/>
+    </record>
+
+    <record id="rule_schedule_line_officer_all" model="ir.rule">
+        <field name="name">EMI Officer: all installments</field>
+        <field name="model_id" ref="model_emi_schedule_line"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('emi_finance.group_emi_officer'))]"/>
+    </record>
+
+    <record id="rule_vendor_settlement_company" model="ir.rule">
+        <field name="name">EMI Retailer Settlement: multi-company</field>
+        <field name="model_id" ref="model_emi_vendor_settlement"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_emi_application_form_accounting" model="ir.ui.view">
+        <field name="name">emi.application.form.accounting</field>
+        <field name="model">emi.application</field>
+        <field name="inherit_id" ref="emi_application.view_emi_application_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/field[@name='state']" position="before">
+                <button name="action_open_down_payment" type="object" string="Register Down Payment"
+                        invisible="state in ('draft', 'rejected', 'closed', 'defaulted') or not down_payment_amount"
+                        groups="emi_finance.group_emi_officer,account.group_account_invoice"/>
+                <button name="action_open_installment_payment" type="object" string="Register Installment Payment"
+                        invisible="state not in ('disbursed', 'active')" class="btn-primary"
+                        groups="emi_finance.group_emi_officer,emi_finance.group_emi_finance_reviewer,account.group_account_invoice"/>
+            </xpath>
+            <xpath expr="//div[hasclass('oe_title')]" position="before">
+                <div class="oe_button_box" name="button_box">
+                    <button name="action_view_journal_entries" type="object" class="oe_stat_button" icon="fa-book"
+                            invisible="not disbursement_date"
+                            groups="account.group_account_invoice,emi_finance.group_emi_finance_reviewer">
+                        <span>Journal Entries</span>
+                    </button>
+                </div>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Installments" name="installments" invisible="not schedule_line_ids">
+                    <group>
+                        <group>
+                            <field name="disbursement_date"/>
+                            <field name="installments_paid"/>
+                            <field name="next_due_date"/>
+                        </group>
+                        <group>
+                            <field name="amount_outstanding"/>
+                            <field name="overdue_amount" decoration-danger="overdue_amount &gt; 0"/>
+                            <field name="commission_amount"/>
+                        </group>
+                    </group>
+                    <field name="schedule_line_ids">
+                        <list create="0" delete="0" decoration-danger="state == 'overdue'"
+                              decoration-success="state == 'paid'" decoration-muted="state == 'upcoming'">
+                            <field name="number"/>
+                            <field name="due_date"/>
+                            <field name="opening_balance" optional="hide"/>
+                            <field name="amount" sum="Total"/>
+                            <field name="principal_amount" sum="Total"/>
+                            <field name="interest_amount" sum="Total"/>
+                            <field name="closing_balance" optional="hide"/>
+                            <field name="amount_residual" sum="Total"/>
+                            <field name="state" widget="badge"/>
+                            <field name="currency_id" column_invisible="1"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_emi_schedule_line_list" model="ir.ui.view">
+        <field name="name">emi.schedule.line.list</field>
+        <field name="model">emi.schedule.line</field>
+        <field name="arch" type="xml">
+            <list create="0" edit="0" delete="0" decoration-danger="state == 'overdue'"
+                  decoration-success="state == 'paid'">
+                <field name="application_id"/>
+                <field name="partner_id"/>
+                <field name="finance_company_id"/>
+                <field name="number"/>
+                <field name="due_date"/>
+                <field name="amount" sum="Total"/>
+                <field name="principal_amount" optional="hide" sum="Total"/>
+                <field name="interest_amount" optional="hide" sum="Total"/>
+                <field name="amount_residual" sum="Total"/>
+                <field name="state" widget="badge"/>
+                <field name="currency_id" column_invisible="1"/>
+                <button name="action_register_payment" type="object" string="Register Payment" icon="fa-money"
+                        invisible="state == 'paid'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_emi_schedule_line_search" model="ir.ui.view">
+        <field name="name">emi.schedule.line.search</field>
+        <field name="model">emi.schedule.line</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="application_id"/>
+                <field name="partner_id"/>
+                <field name="finance_company_id"/>
+                <filter string="Overdue" name="overdue" domain="[('state', '=', 'overdue')]"/>
+                <filter string="Due" name="due" domain="[('state', 'in', ('due', 'partial'))]"/>
+                <filter string="Unpaid" name="unpaid" domain="[('state', '!=', 'paid')]"/>
+                <filter string="Due Date" name="due_date" date="due_date"/>
+                <group>
+                    <filter string="Finance Company" name="group_finance" context="{'group_by': 'finance_company_id'}"/>
+                    <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_emi_schedule_line" model="ir.actions.act_window">
+        <field name="name">Installments</field>
+        <field name="res_model">emi.schedule.line</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'search_default_unpaid': 1}</field>
+    </record>
+
+</odoo>

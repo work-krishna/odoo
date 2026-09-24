@@ -77,6 +77,19 @@ class TestEmiApplicationWorkflow(EmiCommon):
 
         with self.assertRaises(AccessError):
             app.with_user(self.officer).action_disburse()
+        with self.assertRaises(AccessError):
+            app.with_user(self.other_reviewer).action_disburse()
+
+    def test_disburse_to_close_without_accounting(self):
+        if self.env['ir.module.module']._get('emi_accounting').state == 'installed':
+            self.skipTest("emi_accounting posts entries on disbursement; covered by its own tests")
+        app = self._draft_application()
+        officer_app = app.with_user(self.officer)
+        officer_app.action_submit()
+        officer_app.action_start_review()
+        officer_app.action_verify_kyc()
+        officer_app.action_send_to_finance()
+        app.with_user(self.reviewer).action_approve()
         app.with_user(self.reviewer).action_disburse()
         app.with_user(self.officer).action_activate()
         app.with_user(self.officer).action_close()

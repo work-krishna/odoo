@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_emi_vendor_settlement_form" model="ir.ui.view">
+        <field name="name">emi.vendor.settlement.form</field>
+        <field name="model">emi.vendor.settlement</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <header>
+                    <button name="action_refresh" type="object" string="Refresh" invisible="state != 'draft'"/>
+                    <button name="action_post" type="object" string="Post" class="btn-primary"
+                            invisible="state != 'draft'" groups="account.group_account_invoice"/>
+                    <button name="action_cancel" type="object" string="Cancel" invisible="state != 'draft'"
+                            groups="account.group_account_invoice"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,posted"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="vendor_id"/>
+                            <field name="date"/>
+                            <field name="only_collected"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="gross_amount"/>
+                            <field name="commission_amount"/>
+                            <field name="net_amount"/>
+                            <field name="payment_state" widget="badge" invisible="state != 'posted'"/>
+                            <field name="move_id" invisible="not move_id"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Collections" name="collections">
+                            <field name="collection_line_ids">
+                                <list>
+                                    <field name="date"/>
+                                    <field name="move_id"/>
+                                    <field name="name"/>
+                                    <field name="credit" sum="Total"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Commission Invoices" name="commissions">
+                            <field name="commission_line_ids">
+                                <list>
+                                    <field name="date"/>
+                                    <field name="move_id"/>
+                                    <field name="debit" sum="Total"/>
+                                    <field name="amount_residual" sum="Total"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_emi_vendor_settlement_list" model="ir.ui.view">
+        <field name="name">emi.vendor.settlement.list</field>
+        <field name="model">emi.vendor.settlement</field>
+        <field name="arch" type="xml">
+            <list create="0">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="vendor_id"/>
+                <field name="gross_amount" sum="Total"/>
+                <field name="commission_amount" sum="Total"/>
+                <field name="net_amount" sum="Total"/>
+                <field name="state" widget="badge" decoration-success="state == 'posted'"/>
+                <field name="payment_state" widget="badge" optional="show"/>
+                <field name="currency_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_emi_vendor_settlement" model="ir.actions.act_window">
+        <field name="name">Retailer Settlements</field>
+        <field name="res_model">emi.vendor.settlement</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_emi_vendor_form_accounting" model="ir.ui.view">
+        <field name="name">emi.vendor.form.accounting</field>
+        <field name="model">emi.vendor</field>
+        <field name="inherit_id" ref="emi_marketplace.view_emi_vendor_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/field[@name='state']" position="before">
+                <button name="action_create_settlement" type="object" string="Settle Now"
+                        invisible="state != 'approved'" groups="account.group_account_invoice"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
