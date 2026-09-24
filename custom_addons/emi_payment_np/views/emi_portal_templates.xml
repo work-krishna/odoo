@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="portal_my_home_emi" name="EMI Loans" inherit_id="portal.portal_my_home" customize_show="True" priority="40">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="before">
+            <t t-set="portal_client_category_enable" t-value="True"/>
+        </xpath>
+        <div id="portal_client_category" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">Your EMI Loans</t>
+                <t t-set="url" t-value="'/my/emi'"/>
+                <t t-set="text">Follow your applications and pay installments</t>
+                <t t-set="placeholder_count" t-value="'emi_count'"/>
+            </t>
+        </div>
+    </template>
+
+    <template id="portal_my_emi" name="My EMI Loans">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar"><t t-set="title">EMI Loans</t></t>
+            <t t-if="not applications">
+                <p class="alert alert-info">You have no EMI applications yet.</p>
+            </t>
+            <t t-else="" t-call="portal.portal_table">
+                <thead>
+                    <tr>
+                        <th>Application</th>
+                        <th>Phone</th>
+                        <th class="text-end">Monthly EMI</th>
+                        <th class="text-end">Outstanding</th>
+                        <th>Next Due</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr t-foreach="applications" t-as="app">
+                        <td><a t-att-href="app.access_url" t-out="app.name"/></td>
+                        <td t-out="app.product_id.display_name"/>
+                        <td class="text-end" t-out="app.emi_amount" t-options="{'widget': 'monetary', 'display_currency': app.currency_id}"/>
+                        <td class="text-end" t-out="app.amount_outstanding" t-options="{'widget': 'monetary', 'display_currency': app.currency_id}"/>
+                        <td t-out="app.next_due_date" t-options="{'widget': 'date'}"/>
+                        <td><span class="badge text-bg-secondary" t-field="app.state"/></td>
+                    </tr>
+                </tbody>
+            </t>
+        </t>
+    </template>
+
+    <template id="portal_my_emi_detail" name="EMI Loan">
+        <t t-call="portal.portal_layout">
+            <t t-set="app" t-value="application"/>
+            <div class="row mt-3">
+                <div class="col-lg-8">
+                    <h3>EMI <span t-out="app.name"/> <span class="badge text-bg-secondary" t-field="app.state"/></h3>
+                    <p class="text-muted" t-out="app.product_id.display_name"/>
+                    <table class="table table-sm w-auto">
+                        <tr><th>Price</th><td t-out="app.list_price" t-options="{'widget': 'monetary', 'display_currency': app.currency_id}"/></tr>
+                        <tr><th>Down Payment</th><td t-out="app.down_payment_amount" t-options="{'widget': 'monetary', 'display_currency': app.currency_id}"/></tr>
+                        <tr><th>Financed by</th><td t-out="app.finance_company_id.name"/></tr>
+                        <tr><th>Tenure</th><td><t t-out="app.tenure_months"/> months at <t t-out="app.interest_rate_percent"/>%</td></tr>
+                        <tr><th>Monthly EMI</th><td t-out="app.emi_amount" t-options="{'widget': 'monetary', 'display_currency': app.currency_id}"/></tr>
+                    </table>
+                </div>
+                <div class="col-lg-4">
+                    <div t-if="down_payment_link" class="card mb-3">
+                        <div class="card-body">
+                            <h5>Down payment due</h5>
+                            <p class="fs-4" t-out="down_payment_due" t-options="{'widget': 'monetary', 'display_currency': app.currency_id}"/>
+                            <a class="btn btn-primary" t-att-href="down_payment_link">Pay Down Payment</a>
+                        </div>
+                    </div>
+                    <div t-if="installment_link" class="card mb-3">
+                        <div class="card-body">
+                            <h5>Next installment</h5>
+                            <p class="fs-4" t-out="installment_due" t-options="{'widget': 'monetary', 'display_currency': app.currency_id}"/>
+                            <p class="text-muted">Due <t t-out="app.next_due_date" t-options="{'widget': 'date'}"/></p>
+                            <a class="btn btn-primary" t-att-href="installment_link">Pay Installment</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <t t-if="app.schedule_line_ids">
+                <h4 class="mt-4">Installment Schedule</h4>
+                <t t-call="portal.portal_table">
+                    <thead>
+                        <tr><th>#</th><th>Due Date</th><th class="text-end">Installment</th><th class="text-end">Principal</th><th class="text-end">Interest</th><th class="text-end">Outstanding</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="app.schedule_line_ids" t-as="line">
+                            <td t-out="line.number"/>
+                            <td t-out="line.due_date" t-options="{'widget': 'date'}"/>
+                            <td class="text-end" t-out="line.amount" t-options="{'widget': 'monetary', 'display_currency': app.currency_id}"/>
+                            <td class="text-end" t-out="line.principal_amount" t-options="{'widget': 'monetary', 'display_currency': app.currency_id}"/>
+                            <td class="text-end" t-out="line.interest_amount" t-options="{'widget': 'monetary', 'display_currency': app.currency_id}"/>
+                            <td class="text-end" t-out="line.amount_residual" t-options="{'widget': 'monetary', 'display_currency': app.currency_id}"/>
+                            <td><span t-att-class="'badge ' + {'paid': 'text-bg-success', 'overdue': 'text-bg-danger'}.get(line.state, 'text-bg-secondary')" t-field="line.state"/></td>
+                        </tr>
+                    </tbody>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>
