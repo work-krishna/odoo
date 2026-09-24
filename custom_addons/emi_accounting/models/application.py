@@ -6,6 +6,12 @@ from odoo.addons.emi_accounting.tools.amortization import build_schedule
 from odoo.addons.emi_application.models.application import REVIEWER, EmiApplication as BaseApplication
 
 
+def _receivable_line(move, partner):
+    return move.line_ids.filtered(
+        lambda l: l.partner_id == partner and l.account_id.account_type == 'asset_receivable'
+    )
+
+
 class EmiApplication(models.Model):
     _inherit = 'emi.application'
 
@@ -215,6 +221,132 @@ class EmiApplication(models.Model):
     # ------------------------------------------------------------------
     # Collections
     # ------------------------------------------------------------------
+
+    def _emi_payment_company(self, kind):
+        """Company whose bank or gateway receives this kind of payment."""
+        self.ensure_one()
+        if kind == 'down_payment' or self.finance_company_id.installment_collection == 'marketplace':
+            return self.company_id
+        return self.finance_company_id.company_id
+
+    def _emi_amount_due(self, kind):
+        """What the customer can pay now: the unpaid down payment, or the next installment."""
+        self.ensure_one()
+        app = self.sudo()
+        if kind == 'down_payment':
+            if app.state in ('draft', 'rejected', 'closed', 'defaulted'):
+                return 0.0
+            paid = -sum(self.env['account.move.line'].sudo().search([
+                ('move_id.emi_application_id', '=', app.id), ('move_id.origin_payment_id', '!=', False),
+                ('company_id', '=', app.company_id.id), ('partner_id', '=', app.partner_id.commercial_partner_id.id),
+                ('account_id.account_type', '=', 'asset_receivable'), ('parent_state', '=', 'posted'),
+            ]).mapped('balance'))
+            return max(app.currency_id.round(app.down_payment_amount - paid), 0.0)
+        if app.state not in ('disbursed', 'active'):
+            return 0.0
+        open_lines = app.schedule_line_ids.filtered(lambda l: l.state != 'paid').sorted('number')
+        return open_lines[:1].amount_residual
+
+    def _emi_register_down_payment(self, amount, date, journal):
+        """Book a down payment received by the marketplace; returns the account.payment."""
+        self.ensure_one()
+        app = self.sudo()
+        if app.state in ('draft', 'rejected', 'closed', 'defaulted'):
+            raise UserError("Down payments are taken on submitted applications until disbursement.")
+        if not amount or amount <= 0:
+            raise UserError("The down payment must be positive.")
+        marketplace = app.company_id.sudo()
+        customer = app.partner_id.commercial_partner_id
+        payment = app._emi_create_payment(marketplace, customer, amount, date, journal, f"{app.name} down payment")
+        if app.marketplace_move_id:
+            (app.marketplace_move_id | payment.move_id).line_ids.filtered(
+                lambda l: l.partner_id == customer and l.account_id.account_type == 'asset_receivable'
+                and not l.reconciled
+            ).reconcile()
+        return payment
+
+    def _emi_register_installment_payment(self, amount, date, journal, memo=None):
+        """Book an installment payment and reconcile it with the installments
+        it covers, oldest first; returns the customer's account.payment."""
+        self.ensure_one()
+        app = self.sudo()
+        if app.state not in ('disbursed', 'active'):
+            raise UserError("Installments can only be paid on disbursed or active loans.")
+        if not amount or amount <= 0:
+            raise UserError("The payment amount must be positive.")
+        open_lines = app.schedule_line_ids.filtered(lambda l: l.state != 'paid').sorted('number')
+        if app.currency_id.compare_amounts(amount, sum(open_lines.mapped('amount_residual'))) > 0:
+            raise UserError("The payment is larger than the loan's outstanding balance.")
+
+        # Make sure every installment the payment reaches has its entry.
+        remaining, to_cover = amount, self.env['emi.schedule.line']
+        for line in open_lines:
+            if remaining <= 0:
+                break
+            to_cover |= line
+            remaining -= line.amount_residual
+        for line in to_cover.filtered(lambda l: not l.due_move_id):
+            line._post_installment_entry(date=min(line.due_date, date))
+        due_lines = to_cover.due_move_line_id
+
+        memo = memo or f"{app.name} installment"
+        customer = app.partner_id.commercial_partner_id
+        lender = app.finance_company_id.company_id.sudo()
+        if app.finance_company_id.installment_collection == 'marketplace':
+            marketplace = app.company_id.sudo()
+            payment = app._emi_create_payment(marketplace, customer, amount, date, journal, memo)
+            lender_partner = lender.partner_id
+            # Marketplace: the receipt is owed to the lender, not revenue.
+            reclass = app._emi_post_entry(marketplace, date, memo, [
+                (customer, customer.with_company(marketplace).property_account_receivable_id, amount),
+                (lender_partner, lender_partner.with_company(marketplace).property_account_payable_id, -amount),
+            ])
+            (_receivable_line(payment.move_id, customer) | _receivable_line(reclass, customer)).reconcile()
+            # Lender: the customer's installment is settled by the marketplace.
+            marketplace_partner = marketplace.partner_id
+            settle = app._emi_post_entry(lender, date, memo, [
+                (marketplace_partner, marketplace_partner.with_company(lender).property_account_receivable_id,
+                 amount),
+                (customer, customer.with_company(lender).property_account_receivable_id, -amount),
+            ])
+            (_receivable_line(settle, customer) | due_lines).reconcile()
+        else:
+            payment = app._emi_create_payment(lender, customer, amount, date, journal, memo)
+            (_receivable_line(payment.move_id, customer) | due_lines).reconcile()
+        if app.state == 'disbursed':
+            app.write({'state': 'active'})
+        return payment
+
+    def _emi_create_payment(self, company, customer, amount, date, journal, memo):
+        if journal.sudo().company_id != company:
+            raise UserError(f"Use a bank or cash journal of {company.name} for this payment.")
+        payment = self.env['account.payment'].sudo().with_company(company).create({
+            'payment_type': 'inbound',
+            'partner_type': 'customer',
+            'partner_id': customer.id,
+            'amount': amount,
+            'date': date,
+            'journal_id': journal.id,
+            'memo': memo,
+        })
+        payment.action_post()
+        payment.move_id.emi_application_id = self.id
+        return payment
+
+    def _emi_post_entry(self, company, date, memo, lines):
+        move = self.env['account.move'].sudo().with_company(company).create({
+            'move_type': 'entry',
+            'journal_id': company.emi_journal_id.id,
+            'date': date,
+            'ref': memo,
+            'emi_application_id': self.id,
+            'line_ids': [(0, 0, {
+                'name': memo, 'partner_id': partner.id, 'account_id': account.id,
+                'debit': amount if amount > 0 else 0.0, 'credit': -amount if amount < 0 else 0.0,
+            }) for partner, account, amount in lines],
+        })
+        move.action_post()
+        return move
 
     def action_open_installment_payment(self):
         self.ensure_one()
