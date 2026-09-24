@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="report_invoice_document_l10n_np_ird" inherit_id="account.report_invoice_document">
+        <xpath expr="//div[@name='invoice_date']" position="inside">
+            <div t-if="o.l10n_np_date_bs and o.company_id.country_code == 'NP'" class="small">
+                BS <span t-field="o.l10n_np_date_bs"/> (FY <span t-field="o.l10n_np_fiscal_year"/>)
+            </div>
+        </xpath>
+    </template>
+
+</odoo>

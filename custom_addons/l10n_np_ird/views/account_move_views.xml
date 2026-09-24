@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_move_form_l10n_np_ird" model="ir.ui.view">
+        <field name="name">account.move.form.l10n_np_ird</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_l10n_np_cbms_send" type="object" string="Send to IRD CBMS"
+                        invisible="l10n_np_cbms_state not in ('to_send', 'error')"
+                        groups="account.group_account_invoice"/>
+            </xpath>
+            <xpath expr="//group[@id='header_right_group']/field[@name='date']" position="before">
+                <field name="l10n_np_date_bs" invisible="not l10n_np_date_bs or country_code != 'NP'"/>
+                <field name="l10n_np_fiscal_year" invisible="not l10n_np_fiscal_year or country_code != 'NP'"/>
+                <field name="l10n_np_cbms_state" invisible="not l10n_np_cbms_state" widget="badge"
+                       decoration-success="l10n_np_cbms_state == 'sent'"
+                       decoration-warning="l10n_np_cbms_state == 'to_send'"
+                       decoration-danger="l10n_np_cbms_state == 'error'"/>
+                <field name="l10n_np_cbms_response" invisible="l10n_np_cbms_state not in ('error', 'to_send')"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_out_invoice_tree_l10n_np_ird" model="ir.ui.view">
+        <field name="name">account.move.list.l10n_np_ird</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_out_invoice_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='invoice_date']" position="after">
+                <field name="l10n_np_date_bs" optional="show"/>
+                <field name="l10n_np_cbms_state" optional="show" widget="badge"
+                       decoration-success="l10n_np_cbms_state == 'sent'"
+                       decoration-warning="l10n_np_cbms_state == 'to_send'"
+                       decoration-danger="l10n_np_cbms_state == 'error'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_account_invoice_filter_l10n_np_ird" model="ir.ui.view">
+        <field name="name">account.move.search.l10n_np_ird</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <field name="l10n_np_fiscal_year"/>
+                <filter string="CBMS: Not Sent" name="l10n_np_cbms_pending"
+                        domain="[('l10n_np_cbms_state', 'in', ('to_send', 'error'))]"/>
+                <filter string="CBMS: Error" name="l10n_np_cbms_error"
+                        domain="[('l10n_np_cbms_state', '=', 'error')]"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

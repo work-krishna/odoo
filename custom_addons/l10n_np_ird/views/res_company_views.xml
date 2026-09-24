@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_company_form_l10n_np_ird" model="ir.ui.view">
+        <field name="name">res.company.form.l10n_np_ird</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Nepal IRD" name="l10n_np_ird" invisible="country_code != 'NP'">
+                    <group>
+                        <group string="Invoice Numbering">
+                            <field name="l10n_np_bs_invoice_numbering"/>
+                        </group>
+                        <group string="IRD CBMS">
+                            <field name="l10n_np_cbms_enabled"/>
+                            <field name="l10n_np_cbms_url" invisible="not l10n_np_cbms_enabled"
+                                   required="l10n_np_cbms_enabled"/>
+                            <field name="l10n_np_cbms_username" invisible="not l10n_np_cbms_enabled"
+                                   required="l10n_np_cbms_enabled"/>
+                            <field name="l10n_np_cbms_password" password="True" invisible="not l10n_np_cbms_enabled"
+                                   required="l10n_np_cbms_enabled"/>
+                        </group>
+                    </group>
+                    <div class="text-muted">
+                        The seller PAN sent to CBMS is the company's Tax ID. Invoices already
+                        reported to CBMS cannot be reset to draft; correct them with a credit note.
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
