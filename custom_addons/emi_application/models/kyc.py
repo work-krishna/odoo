@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import AccessError, UserError, ValidationError
 
 
 class EmiKyc(models.Model):
@@ -13,6 +13,20 @@ class EmiKyc(models.Model):
     _description = 'EMI KYC Form'
     _inherit = ['mail.thread']
     _rec_name = 'full_name'
+
+    # States in which staff may still correct KYC data. Any change to
+    # identity or document fields clears the verification.
+    _EMI_EDITABLE_STATES = ('draft', 'submitted', 'kyc_review')
+    _EMI_UNVERIFY_FIELDS = frozenset({
+        'full_name', 'date_of_birth', 'citizenship_no', 'citizenship_issue_district',
+        'citizenship_issue_date', 'pan_no', 'permanent_address', 'citizenship_front',
+        'citizenship_back', 'photo', 'income_proof', 'bank_account_no',
+    })
+
+    _application_uniq = models.Constraint(
+        'unique(application_id)',
+        'An application can only have one KYC form.',
+    )
 
     application_id = fields.Many2one(
         'emi.application', required=True, ondelete='cascade', index=True,
@@ -68,9 +82,39 @@ class EmiKyc(models.Model):
     income_proof_filename = fields.Char()
 
     verified = fields.Boolean(
-        default=False, tracking=True,
-        help="Marked by an EMI Officer once identity documents have been visually verified.",
+        default=False, tracking=True, readonly=True, copy=False,
+        help="Set by the 'Verify KYC' step of the application once an EMI Officer has "
+             "checked the identity documents.",
     )
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        if not self.env.su:
+            if any(vals.get('verified') for vals in vals_list):
+                raise AccessError("KYC is verified through the application's 'Verify KYC' step.")
+            apps = self.env['emi.application'].browse(
+                [vals['application_id'] for vals in vals_list if vals.get('application_id')]
+            )
+            if any(app.state != 'draft' for app in apps):
+                raise UserError("KYC can only be added while the application is a draft.")
+        return super().create(vals_list)
+
+    def write(self, vals):
+        if not self.env.su:
+            if 'verified' in vals:
+                raise AccessError("KYC is verified through the application's 'Verify KYC' step.")
+            if any(rec.application_id.state not in self._EMI_EDITABLE_STATES for rec in self):
+                raise UserError("KYC can no longer be changed once the application has left review.")
+            if 'application_id' in vals:
+                raise UserError("A KYC form cannot be moved to another application.")
+            if self._EMI_UNVERIFY_FIELDS & vals.keys():
+                vals = dict(vals, verified=False)
+        return super().write(vals)
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_submitted(self):
+        if any(rec.application_id.state != 'draft' for rec in self):
+            raise UserError("KYC can only be deleted while the application is a draft.")
 
     @api.constrains('date_of_birth')
     def _check_age(self):
@@ -90,6 +134,6 @@ class EmiKyc(models.Model):
         required = [
             self.full_name, self.date_of_birth, self.phone, self.citizenship_no,
             self.permanent_address, self.occupation, self.monthly_income,
-            self.citizenship_front, self.citizenship_back, self.photo,
+            self.citizenship_front, self.citizenship_back, self.photo, self.income_proof,
         ]
         return all(required)

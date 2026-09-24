@@ -8,19 +8,30 @@
             <form>
                 <header>
                     <button name="action_submit" type="object" string="Submit"
-                            invisible="state != 'draft'" class="btn-primary"/>
+                            invisible="state != 'draft'" class="btn-primary"
+                            groups="emi_finance.group_emi_officer"/>
                     <button name="action_start_review" type="object" string="Start KYC Review"
                             invisible="state != 'submitted'" class="btn-primary"
                             groups="emi_finance.group_emi_officer"/>
-                    <button name="action_send_to_finance" type="object" string="Send to Finance Company"
-                            invisible="state != 'kyc_review'" class="btn-primary"
+                    <button name="action_verify_kyc" type="object" string="Verify KYC"
+                            invisible="state != 'kyc_review' or kyc_verified" class="btn-primary"
                             groups="emi_finance.group_emi_officer"/>
+                    <button name="action_send_to_finance" type="object" string="Send to Finance Company"
+                            invisible="state != 'kyc_review' or not kyc_verified" class="btn-primary"
+                            groups="emi_finance.group_emi_officer"/>
+                    <button name="action_return_to_draft" type="object" string="Return to Draft"
+                            invisible="state not in ('submitted', 'kyc_review')"
+                            groups="emi_finance.group_emi_officer"
+                            confirm="Send this application back to draft for corrections? KYC verification will be cleared."/>
                     <button name="action_approve" type="object" string="Approve"
                             invisible="state != 'pending_finance_approval'" class="btn-primary"
                             groups="emi_finance.group_emi_finance_reviewer"/>
-                    <button name="action_reject" type="object" string="Reject"
-                            invisible="state not in ('kyc_review', 'pending_finance_approval')"
-                            groups="emi_finance.group_emi_officer,emi_finance.group_emi_finance_reviewer"/>
+                    <button name="action_open_reject_wizard" type="object" string="Reject"
+                            invisible="state != 'kyc_review'"
+                            groups="emi_finance.group_emi_officer"/>
+                    <button name="action_open_reject_wizard" type="object" string="Reject"
+                            invisible="state != 'pending_finance_approval'"
+                            groups="emi_finance.group_emi_finance_reviewer"/>
                     <button name="action_disburse" type="object" string="Disburse"
                             invisible="state != 'approved'" class="btn-primary"
                             groups="emi_finance.group_emi_finance_reviewer"/>
@@ -42,49 +53,60 @@
                     </div>
                     <group>
                         <group>
-                            <field name="partner_id"/>
-                            <field name="product_id"/>
-                            <field name="vendor_id" readonly="1"/>
+                            <field name="partner_id" readonly="state != 'draft'"/>
+                            <field name="product_id" readonly="state != 'draft'" options="{'no_create': True}"/>
+                            <field name="vendor_id"/>
                             <field name="list_price"/>
-                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="company_id" groups="base.group_multi_company" readonly="state != 'draft'"/>
                             <field name="currency_id" invisible="1"/>
                             <field name="product_tmpl_id_domain" invisible="1"/>
+                            <field name="allowed_tenure_plan_ids" invisible="1"/>
                         </group>
                         <group>
-                            <field name="finance_company_id"/>
-                            <field name="tenure_plan_id"/>
-                            <field name="interest_rate_percent" readonly="1"/>
-                            <field name="interest_calc_method" readonly="1"/>
+                            <field name="finance_company_id" readonly="state != 'draft'" options="{'no_create': True}"/>
+                            <field name="tenure_plan_id" readonly="state != 'draft'" options="{'no_create': True}"/>
+                            <field name="interest_rate_id" invisible="1"/>
+                            <field name="interest_rate_percent"/>
+                            <field name="interest_calc_method"/>
                         </group>
                     </group>
                     <group>
                         <group string="Down Payment">
-                            <field name="downpayment_option_id"/>
-                            <field name="min_down_payment_amount" readonly="1"/>
-                            <field name="down_payment_amount"/>
+                            <field name="downpayment_option_id" readonly="state != 'draft'" options="{'no_create': True}"/>
+                            <field name="min_down_payment_amount"/>
+                            <field name="down_payment_amount" readonly="state != 'draft'"/>
                         </group>
                         <group string="EMI Preview">
-                            <field name="financed_amount" readonly="1"/>
-                            <field name="total_interest_amount" readonly="1"/>
-                            <field name="total_payable_amount" readonly="1"/>
-                            <field name="emi_amount" readonly="1"/>
+                            <field name="tenure_months"/>
+                            <field name="financed_amount"/>
+                            <field name="total_interest_amount"/>
+                            <field name="total_payable_amount"/>
+                            <field name="emi_amount"/>
                         </group>
                     </group>
                     <group string="Delivery">
-                        <field name="delivery_address_id"/>
-                        <field name="delivery_note"/>
+                        <field name="delivery_address_id" readonly="state != 'draft'"
+                               context="{'default_type': 'delivery', 'default_parent_id': partner_id}"/>
+                        <field name="delivery_note" readonly="state != 'draft'"/>
                     </group>
                     <group string="Review" invisible="state == 'draft'">
-                        <field name="reviewed_by" readonly="1"/>
-                        <field name="reviewed_date" readonly="1"/>
-                        <field name="approved_by" readonly="1"/>
-                        <field name="approved_date" readonly="1"/>
-                        <field name="rejection_reason" invisible="state != 'rejected'"/>
+                        <group>
+                            <field name="kyc_verified"/>
+                            <field name="reviewed_by"/>
+                            <field name="reviewed_date"/>
+                        </group>
+                        <group>
+                            <field name="approved_by"/>
+                            <field name="approved_date"/>
+                            <field name="rejection_reason" invisible="state != 'rejected'"/>
+                        </group>
                     </group>
                     <notebook>
                         <page string="KYC" name="kyc">
-                            <field name="kyc_ids">
-                                <list editable="bottom">
+                            <!-- Not editable inline: rows open the full KYC form
+                                 (all required fields and document uploads). -->
+                            <field name="kyc_ids" readonly="state not in ('draft', 'submitted', 'kyc_review')">
+                                <list>
                                     <field name="full_name"/>
                                     <field name="phone"/>
                                     <field name="citizenship_no"/>

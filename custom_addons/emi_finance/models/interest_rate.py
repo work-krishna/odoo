@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
 
 
 class EmiInterestRate(models.Model):
@@ -14,6 +14,13 @@ class EmiInterestRate(models.Model):
     _name = 'emi.interest.rate'
     _description = 'EMI Interest Rate'
     _order = 'finance_company_id, tenure_plan_id, date_from desc'
+
+    # Fields that define the loan terms. Once an application has been
+    # submitted on a rate they are frozen; staff close the period with
+    # date_to and add a new rate instead.
+    _EMI_LOCKED_FIELDS = frozenset({
+        'finance_company_id', 'tenure_plan_id', 'calc_method', 'rate_percent', 'date_from',
+    })
 
     finance_company_id = fields.Many2one(
         'emi.finance.company', required=True, ondelete='cascade', index=True,
@@ -40,11 +47,35 @@ class EmiInterestRate(models.Model):
     active = fields.Boolean(default=True)
     note = fields.Char(help="Internal note, e.g. 'Festival season promo rate'.")
 
+    _rate_percent_range = models.Constraint(
+        'CHECK(rate_percent >= 0 AND rate_percent <= 100)',
+        'The annual interest rate must be between 0% and 100%.',
+    )
+
+    @api.depends('finance_company_id.code', 'tenure_plan_id.name', 'rate_percent', 'calc_method', 'date_from')
+    def _compute_display_name(self):
+        methods = dict(self._fields['calc_method']._description_selection(self.env))
+        for rec in self:
+            method = methods.get(rec.calc_method, '').split(' (')[0]
+            rec.display_name = (
+                f"{rec.finance_company_id.code or '?'} / {rec.tenure_plan_id.name or '?'} / "
+                f"{rec.rate_percent:g}% {method} (from {rec.date_from or '?'})"
+            )
+
     @api.constrains('date_from', 'date_to')
     def _check_dates(self):
         for rec in self:
             if rec.date_to and rec.date_from and rec.date_to < rec.date_from:
                 raise ValidationError("The end date cannot be before the start date.")
+
+    @api.constrains('finance_company_id', 'tenure_plan_id')
+    def _check_tenure_offered(self):
+        for rec in self:
+            if not rec.finance_company_id._offers_tenure(rec.tenure_plan_id):
+                raise ValidationError(
+                    f"{rec.finance_company_id.name} does not offer the {rec.tenure_plan_id.name} "
+                    "tenure. Add it to the finance company's 'Tenure Plans Offered' first."
+                )
 
     @api.constrains('finance_company_id', 'tenure_plan_id', 'date_from', 'date_to', 'active')
     def _check_no_overlap(self):
@@ -67,6 +98,31 @@ class EmiInterestRate(models.Model):
                         "tenure plan cannot overlap. Conflicts with rate dated "
                         f"{other.date_from} to {other.date_to or 'open'}."
                     )
+
+    def _emi_used_records(self):
+        """Return the rates that loan terms depend on. emi_application
+        extends this with rates referenced by submitted applications."""
+        return self.browse()
+
+    def write(self, vals):
+        if self._EMI_LOCKED_FIELDS & vals.keys():
+            used = self._emi_used_records()
+            if used:
+                raise UserError(
+                    "These interest rates are already used by submitted applications, so their "
+                    "terms cannot change: " + ', '.join(used.mapped('display_name')) + ". "
+                    "Set an end date on the current rate and create a new one instead."
+                )
+        return super().write(vals)
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_used(self):
+        used = self._emi_used_records()
+        if used:
+            raise UserError(
+                "These interest rates are used by submitted applications and cannot be deleted: "
+                + ', '.join(used.mapped('display_name')) + ". Archive them instead."
+            )
 
     @api.model
     def get_active_rate(self, finance_company_id, tenure_plan_id, on_date=None):

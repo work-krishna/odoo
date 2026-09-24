@@ -1,5 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_emi_vendor_admin,emi.vendor.admin,model_emi_vendor,group_emi_marketplace_admin,1,1,1,1
-access_emi_vendor_portal,emi.vendor.portal,model_emi_vendor,group_emi_vendor_portal,1,1,0,0
-access_emi_vendor_user,emi.vendor.user,model_emi_vendor,base.group_user,1,0,0,0
-access_product_template_vendor_portal,product.template.vendor.portal,product.model_product_template,group_emi_vendor_portal,1,1,1,0
+access_emi_vendor_officer,emi.vendor.officer,model_emi_vendor,emi_finance.group_emi_officer,1,0,0,0
+access_emi_vendor_portal,emi.vendor.portal,model_emi_vendor,group_emi_vendor_portal,1,0,0,0
+access_product_template_vendor_portal,product.template.vendor.portal,product.model_product_template,group_emi_vendor_portal,1,0,0,0

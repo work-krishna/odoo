@@ -7,6 +7,7 @@
         <field name="arch" type="xml">
             <list editable="bottom">
                 <field name="sequence" widget="handle"/>
+                <field name="product_tmpl_id" options="{'no_create': True}"/>
                 <field name="name"/>
                 <field name="amount_type"/>
                 <field name="value"/>
@@ -14,6 +15,28 @@
                 <field name="active" widget="boolean_toggle"/>
             </list>
         </field>
+    </record>
+
+    <record id="view_emi_downpayment_option_search" model="ir.ui.view">
+        <field name="name">emi.downpayment.option.search</field>
+        <field name="model">emi.downpayment.option</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_tmpl_id"/>
+                <field name="name"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter string="Product" name="group_product" context="{'group_by': 'product_tmpl_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_emi_downpayment_option" model="ir.actions.act_window">
+        <field name="name">Down Payment Options</field>
+        <field name="res_model">emi.downpayment.option</field>
+        <field name="view_mode">list</field>
+        <field name="search_view_id" ref="view_emi_downpayment_option_search"/>
     </record>
 
     <!-- Embedded on the product form so each phone can define its own

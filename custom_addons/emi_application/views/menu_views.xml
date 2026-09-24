@@ -9,4 +9,9 @@
               groups="emi_finance.group_emi_officer,emi_finance.group_emi_finance_reviewer"
               sequence="10"/>
 
+    <menuitem id="menu_emi_kyc" name="KYC Records"
+              parent="menu_emi_application_root" action="action_emi_kyc"
+              groups="emi_finance.group_emi_officer,emi_finance.group_emi_finance_reviewer"
+              sequence="20"/>
+
 </odoo>

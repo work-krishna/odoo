@@ -1,6 +1,6 @@
 {
     'name': 'EMI Application',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.1.0',
     'summary': 'Online EMI application, KYC intake and the approval workflow',
     'description': """
 EMI Application
@@ -34,6 +34,7 @@ draft -> submitted -> kyc_review -> pending_finance_approval
         'security/application_security.xml',
         'security/ir.model.access.csv',
         'data/sequence_data.xml',
+        'wizard/reject_wizard_views.xml',
         'views/kyc_views.xml',
         'views/application_views.xml',
         'views/menu_views.xml',

@@ -6,24 +6,30 @@
         <field name="model">product.template</field>
         <field name="inherit_id" ref="product.product_template_only_form_view"/>
         <field name="arch" type="xml">
-            <xpath expr="//div[hasclass('oe_title')]" position="before">
-                <field name="listing_state" widget="statusbar"
-                       statusbar_visible="draft,pending_review,published"/>
+            <!-- The core product form has no header; moderation actions and
+                 the listing status bar get their own. -->
+            <xpath expr="//sheet" position="before">
+                <header>
+                    <button name="action_submit_listing" type="object" string="Submit Listing"
+                            invisible="listing_state != 'draft' or not vendor_id" class="btn-primary"/>
+                    <button name="action_publish_listing" type="object" string="Publish Listing"
+                            invisible="listing_state != 'pending_review'" class="btn-primary"
+                            groups="emi_marketplace.group_emi_marketplace_admin"/>
+                    <button name="action_reject_listing" type="object" string="Reject Listing"
+                            invisible="listing_state != 'pending_review'"
+                            groups="emi_marketplace.group_emi_marketplace_admin"/>
+                    <button name="action_unpublish_listing" type="object" string="Unpublish"
+                            invisible="listing_state != 'published'"
+                            groups="emi_marketplace.group_emi_marketplace_admin"/>
+                    <button name="action_reset_listing_draft" type="object" string="Reset to Draft"
+                            invisible="listing_state != 'rejected'"/>
+                    <field name="listing_state" widget="statusbar"
+                           statusbar_visible="draft,pending_review,published"/>
+                </header>
             </xpath>
             <xpath expr="//group[@name='group_general']" position="inside">
-                <field name="vendor_id"/>
-            </xpath>
-            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
-                <button name="action_submit_listing" type="object" string="Submit Listing"
-                        invisible="listing_state != 'draft'" class="oe_stat_button" icon="fa-check"/>
-                <button name="action_publish_listing" type="object" string="Publish Listing"
-                        invisible="listing_state != 'pending_review'"
-                        groups="emi_marketplace.group_emi_marketplace_admin"
-                        class="oe_stat_button" icon="fa-globe"/>
-                <button name="action_reject_listing" type="object" string="Reject Listing"
-                        invisible="listing_state != 'pending_review'"
-                        groups="emi_marketplace.group_emi_marketplace_admin"
-                        class="oe_stat_button" icon="fa-ban"/>
+                <field name="vendor_id" readonly="listing_state == 'published'"
+                       options="{'no_create': True}"/>
             </xpath>
         </field>
     </record>
@@ -34,10 +40,52 @@
         <field name="inherit_id" ref="product.product_template_tree_view"/>
         <field name="arch" type="xml">
             <xpath expr="//list" position="inside">
-                <field name="vendor_id" optional="show"/>
-                <field name="listing_state" optional="show"/>
+                <field name="vendor_id" optional="show" readonly="1"/>
+                <field name="listing_state" optional="show" readonly="1" widget="badge"
+                       decoration-success="listing_state == 'published'"
+                       decoration-warning="listing_state == 'pending_review'"
+                       decoration-danger="listing_state == 'rejected'"/>
             </xpath>
         </field>
+    </record>
+
+    <record id="view_product_template_marketplace_search" model="ir.ui.view">
+        <field name="name">product.template.emi.marketplace.search</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_search_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <field name="vendor_id"/>
+                <separator/>
+                <filter string="Listing: Pending Review" name="listing_pending"
+                        domain="[('listing_state', '=', 'pending_review')]"/>
+                <filter string="Listing: Published" name="listing_published"
+                        domain="[('listing_state', '=', 'published')]"/>
+                <filter string="Listing: Rejected" name="listing_rejected"
+                        domain="[('listing_state', '=', 'rejected')]"/>
+                <group>
+                    <filter string="Vendor" name="group_vendor" context="{'group_by': 'vendor_id'}"/>
+                    <filter string="Listing Status" name="group_listing_state"
+                            context="{'group_by': 'listing_state'}"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_emi_listing_review" model="ir.actions.act_window">
+        <field name="name">Listings to Review</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('vendor_id', '!=', False)]</field>
+        <field name="context">{'search_default_listing_pending': 1}</field>
+    </record>
+
+    <record id="action_emi_listing_all" model="ir.actions.act_window">
+        <field name="name">Vendor Listings</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="domain">[('vendor_id', '!=', False)]</field>
+        <field name="context">{'search_default_group_vendor': 1}</field>
     </record>
 
 </odoo>

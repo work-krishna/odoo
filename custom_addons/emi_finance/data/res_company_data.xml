@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!-- Default marketplace company; change the flag on the company form
+         if the marketplace runs under a different company. -->
+    <record id="base.main_company" model="res.company">
+        <field name="emi_is_marketplace" eval="True"/>
+    </record>
+
+</odoo>

@@ -8,7 +8,8 @@
             <form>
                 <header>
                     <button name="action_submit" type="object" string="Submit for Review"
-                            invisible="state != 'draft'" class="btn-primary"/>
+                            invisible="state != 'draft'" class="btn-primary"
+                            groups="emi_marketplace.group_emi_marketplace_admin"/>
                     <button name="action_approve" type="object" string="Approve"
                             invisible="state not in ('pending', 'suspended')" class="btn-primary"
                             groups="emi_marketplace.group_emi_marketplace_admin"/>
@@ -17,6 +18,9 @@
                             groups="emi_marketplace.group_emi_marketplace_admin"/>
                     <button name="action_suspend" type="object" string="Suspend"
                             invisible="state != 'approved'"
+                            groups="emi_marketplace.group_emi_marketplace_admin"/>
+                    <button name="action_reset_draft" type="object" string="Reset to Draft"
+                            invisible="state != 'rejected'"
                             groups="emi_marketplace.group_emi_marketplace_admin"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,pending,approved"/>
                 </header>
@@ -35,8 +39,11 @@
                         <group>
                             <field name="commission_type"/>
                             <field name="commission_value"/>
+                            <field name="currency_id" invisible="commission_type != 'fixed'"
+                                   options="{'no_create': True}"/>
                             <field name="settlement_frequency"/>
-                            <field name="settlement_bank_account_id"/>
+                            <field name="settlement_bank_account_id"
+                                   context="{'default_partner_id': partner_id}"/>
                         </group>
                     </group>
                     <notebook>
@@ -44,7 +51,7 @@
                             <field name="onboarding_document_ids" widget="many2many_binary"/>
                         </page>
                         <page string="Portal Access" name="portal_access">
-                            <field name="user_ids"/>
+                            <field name="user_ids" options="{'no_create': True}"/>
                         </page>
                     </notebook>
                 </sheet>

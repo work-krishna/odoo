@@ -21,6 +21,7 @@
                             <field name="name"/>
                             <field name="code"/>
                             <field name="company_id" options="{'no_create': True}"/>
+                            <field name="company_partner_id" invisible="1"/>
                             <field name="active" invisible="1"/>
                         </group>
                         <group>

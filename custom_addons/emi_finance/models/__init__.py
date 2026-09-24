@@ -1,3 +1,4 @@
+from . import res_company
 from . import finance_company
 from . import tenure_plan
 from . import interest_rate

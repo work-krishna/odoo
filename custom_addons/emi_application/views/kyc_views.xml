@@ -60,6 +60,28 @@
         </field>
     </record>
 
+    <record id="view_emi_kyc_search" model="ir.ui.view">
+        <field name="name">emi.kyc.search</field>
+        <field name="model">emi.kyc</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="full_name"/>
+                <field name="partner_id"/>
+                <field name="citizenship_no"/>
+                <field name="phone"/>
+                <filter string="Not Verified" name="not_verified" domain="[('verified', '=', False)]"/>
+                <filter string="Verified" name="verified" domain="[('verified', '=', True)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_emi_kyc" model="ir.actions.act_window">
+        <field name="name">KYC Records</field>
+        <field name="res_model">emi.kyc</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'create': False}</field>
+    </record>
+
     <record id="view_emi_kyc_list" model="ir.ui.view">
         <field name="name">emi.kyc.list</field>
         <field name="model">emi.kyc</field>
@@ -69,7 +91,8 @@
                 <field name="partner_id"/>
                 <field name="phone"/>
                 <field name="citizenship_no"/>
-                <field name="verified" widget="boolean_toggle"/>
+                <field name="application_id"/>
+                <field name="verified"/>
             </list>
         </field>
     </record>

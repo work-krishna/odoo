@@ -14,27 +14,38 @@
         <field name="category_id" ref="module_category_emi_marketplace"/>
     </record>
 
-    <!-- Marketplace staff who moderate vendors and product listings -->
+    <!-- Marketplace staff who moderate vendors and product listings. They
+         create vendor partners and payout bank accounts and edit phone
+         listings, hence the partner and product manager groups. -->
     <record id="group_emi_marketplace_admin" model="res.groups">
         <field name="name">Marketplace Admin</field>
         <field name="privilege_id" ref="privilege_emi_marketplace"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user')), (4, ref('base.group_partner_manager')), (4, ref('product.group_product_manager'))]"/>
+        <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
         <field name="comment">Approve/suspend vendors and moderate product listings.</field>
     </record>
 
-    <!-- Portal users acting on behalf of a vendor -->
+    <!-- Portal users acting on behalf of a vendor. Portal-type groups carry
+         no privilege (like base.group_portal): membership is synced from
+         emi.vendor.user_ids instead of being picked on the user form. -->
     <record id="group_emi_vendor_portal" model="res.groups">
         <field name="name">Vendor Portal User</field>
-        <field name="privilege_id" ref="privilege_emi_marketplace"/>
+        <field name="privilege_id" eval="False"/>
         <field name="implied_ids" eval="[(4, ref('base.group_portal'))]"/>
         <field name="comment">Portal users who manage a vendor's own products and view settlement statements.</field>
     </record>
 
-    <!-- Vendor portal users only see their own vendor record -->
+    <!-- Vendor portal users only see their own vendor record. Read-only:
+         vendor self-service goes through storefront controllers. -->
     <record id="rule_vendor_own_record" model="ir.rule">
         <field name="name">Vendor Portal: own vendor record only</field>
         <field name="model_id" ref="model_emi_vendor"/>
         <field name="domain_force">[('user_ids', 'in', [user.id])]</field>
         <field name="groups" eval="[(4, ref('group_emi_vendor_portal'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
     </record>
 
     <!-- Vendor portal users only see their own products -->
@@ -43,6 +54,10 @@
         <field name="model_id" ref="product.model_product_template"/>
         <field name="domain_force">[('vendor_id.user_ids', 'in', [user.id])]</field>
         <field name="groups" eval="[(4, ref('group_emi_vendor_portal'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
     </record>
 
 </odoo>

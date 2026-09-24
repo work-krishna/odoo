@@ -1,6 +1,6 @@
 {
     'name': 'EMI Finance',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.1.0',
     'summary': 'Finance company setup, tenure plans, interest rates and down payment options for EMI purchases',
     'description': """
 EMI Finance
@@ -23,6 +23,8 @@ Foundational configuration module for the EMI Platform.
         'security/finance_security.xml',
         'security/ir.model.access.csv',
         'data/tenure_plan_data.xml',
+        'data/res_company_data.xml',
+        'views/res_company_views.xml',
         'views/tenure_plan_views.xml',
         'views/finance_company_views.xml',
         'views/interest_rate_views.xml',

@@ -39,9 +39,18 @@ class EmiDownpaymentOption(models.Model):
             if rec.amount_type == 'percent' and rec.value > 100:
                 raise ValidationError("A percentage down payment option cannot exceed 100%.")
 
+    @api.constrains('is_default', 'active', 'product_tmpl_id')
+    def _check_single_default(self):
+        for tmpl in self.filtered(lambda o: o.is_default and o.active).product_tmpl_id:
+            if self.search_count([
+                ('product_tmpl_id', '=', tmpl.id), ('is_default', '=', True), ('active', '=', True),
+            ]) > 1:
+                raise ValidationError(f"{tmpl.display_name} can only have one default down payment option.")
+
     def compute_min_amount(self, price):
-        """Return the minimum down payment amount in currency for a given price."""
+        """Return the minimum down payment amount in currency for a given
+        price. A fixed option larger than the price is capped at the price."""
         self.ensure_one()
         if self.amount_type == 'percent':
             return price * (self.value / 100.0)
-        return self.value
+        return min(self.value, price)

@@ -6,8 +6,8 @@
         <field name="model">emi.interest.rate</field>
         <field name="arch" type="xml">
             <list editable="bottom">
-                <field name="finance_company_id"/>
-                <field name="tenure_plan_id"/>
+                <field name="finance_company_id" options="{'no_create': True}"/>
+                <field name="tenure_plan_id" options="{'no_create': True}"/>
                 <field name="calc_method"/>
                 <field name="rate_percent"/>
                 <field name="date_from"/>
@@ -25,8 +25,8 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="finance_company_id"/>
-                            <field name="tenure_plan_id"/>
+                            <field name="finance_company_id" options="{'no_create': True}"/>
+                            <field name="tenure_plan_id" options="{'no_create': True}"/>
                             <field name="calc_method"/>
                             <field name="rate_percent"/>
                         </group>
@@ -42,11 +42,34 @@
         </field>
     </record>
 
+    <record id="view_emi_interest_rate_search" model="ir.ui.view">
+        <field name="name">emi.interest.rate.search</field>
+        <field name="model">emi.interest.rate</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="finance_company_id"/>
+                <field name="tenure_plan_id"/>
+                <filter string="Current" name="current"
+                        domain="[('date_from', '&lt;=', context_today().strftime('%Y-%m-%d')),
+                                 '|', ('date_to', '=', False), ('date_to', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <separator/>
+                <filter string="Flat Rate" name="flat" domain="[('calc_method', '=', 'flat')]"/>
+                <filter string="Reducing Balance" name="reducing" domain="[('calc_method', '=', 'reducing')]"/>
+                <group>
+                    <filter string="Finance Company" name="group_finance_company"
+                            context="{'group_by': 'finance_company_id'}"/>
+                    <filter string="Tenure Plan" name="group_tenure_plan" context="{'group_by': 'tenure_plan_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <record id="action_emi_interest_rate" model="ir.actions.act_window">
         <field name="name">Interest Rates</field>
         <field name="res_model">emi.interest.rate</field>
         <field name="view_mode">list,form</field>
-        <field name="context">{'active_test': False}</field>
+        <field name="search_view_id" ref="view_emi_interest_rate_search"/>
     </record>
 
 </odoo>
