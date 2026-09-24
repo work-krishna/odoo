@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="portal_my_home_retailer" name="Retailer Dashboard" inherit_id="portal.portal_my_home" priority="45">
+        <div id="portal_client_category" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">Retailer Dashboard</t>
+                <t t-set="url" t-value="'/my/retailer'"/>
+                <t t-set="text">Your phone listings, EMI sales and settlements</t>
+                <t t-set="placeholder_count" t-value="'retailer_count'"/>
+                <t t-set="show_count" t-value="True"/>
+            </t>
+        </div>
+    </template>
+
+    <template id="retailer_register" name="Retailer Registration">
+        <t t-call="website.layout">
+            <t t-set="title">Sell phones on EMI</t>
+            <div class="container py-4" style="max-width: 760px;">
+                <h1 class="h3">Sell phones on EMI</h1>
+                <p class="text-muted">Register your shop. The marketplace reviews your documents before your phones can be listed.</p>
+                <div t-if="error" class="alert alert-danger" t-out="error"/>
+                <form t-if="not blocked" method="post" action="/retailer/register" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <div class="row g-3">
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'business_name'"/><t t-set="label">Registered business name</t><t t-set="required" t-value="True"/></t>
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'pan'"/><t t-set="label">PAN / VAT number</t><t t-set="required" t-value="True"/></t>
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'email'"/><t t-set="label">Business email</t><t t-set="type" t-value="'email'"/></t>
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'phone'"/><t t-set="label">Phone</t><t t-set="type" t-value="'tel'"/><t t-set="required" t-value="True"/></t>
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'street'"/><t t-set="label">Shop address</t><t t-set="required" t-value="True"/></t>
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'city'"/><t t-set="label">City</t></t>
+                    </div>
+                    <h2 class="h5 mt-4">Payout bank account</h2>
+                    <div class="row g-3">
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'bank_name'"/><t t-set="label">Bank</t></t>
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'account_number'"/><t t-set="label">Account number</t><t t-set="required" t-value="True"/></t>
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'account_holder'"/><t t-set="label">Account holder name</t></t>
+                    </div>
+                    <h2 class="h5 mt-4">Documents</h2>
+                    <label class="form-label" for="emi_documents">Business registration and PAN/VAT certificates <span class="text-danger">*</span></label>
+                    <input id="emi_documents" type="file" name="documents" class="form-control" multiple="multiple"
+                           accept="image/jpeg,image/png,image/webp,application/pdf" required="required"/>
+                    <div class="form-text">JPEG, PNG, WebP or PDF, up to 10 MB each.</div>
+                    <button type="submit" class="btn btn-primary mt-4">Register</button>
+                </form>
+            </div>
+        </t>
+    </template>
+
+    <template id="retailer_dashboard" name="Retailer Dashboard">
+        <t t-call="portal.portal_layout">
+            <div t-if="registered" class="alert alert-success mt-3">
+                Thanks for registering! The marketplace will review your documents shortly.
+            </div>
+            <div class="d-flex flex-wrap align-items-baseline justify-content-between mt-3">
+                <h3 class="mb-0"><t t-out="vendor.name"/> <span class="badge text-bg-secondary" t-field="vendor.state"/></h3>
+                <a t-if="vendor.state == 'approved'" href="/my/retailer/listing/new" class="btn btn-primary">New listing</a>
+            </div>
+            <p t-if="vendor.state == 'pending'" class="text-muted">Your registration is being reviewed. You can prepare listings meanwhile; they can be submitted once you are approved.</p>
+            <p class="small text-muted">Commission: <t t-out="vendor.commission_value"/><t t-if="vendor.commission_type == 'percent'">%</t><t t-else=""> per sale</t> · Payouts: <span t-field="vendor.settlement_frequency"/></p>
+
+            <h4 class="mt-4">Listings</h4>
+            <div t-if="not listings" class="text-muted">No listings yet.</div>
+            <t t-else="" t-call="portal.portal_table">
+                <thead><tr><th>Phone</th><th class="text-end">Price</th><th>Status</th><th/></tr></thead>
+                <tbody>
+                    <tr t-foreach="listings" t-as="listing">
+                        <td t-out="listing.name"/>
+                        <td class="text-end"><t t-call="emi_storefront.emi_money"><t t-set="amount" t-value="listing.list_price"/></t></td>
+                        <td><span class="badge text-bg-secondary" t-field="listing.listing_state"/></td>
+                        <td class="text-end"><a t-att-href="'/my/retailer/listing/%s' % listing.id">Open</a></td>
+                    </tr>
+                </tbody>
+            </t>
+
+            <h4 class="mt-4">EMI sales</h4>
+            <div t-if="not applications" class="text-muted">No EMI applications for your phones yet.</div>
+            <t t-else="" t-call="portal.portal_table">
+                <thead><tr><th>Application</th><th>Phone</th><th class="text-end">Price</th><th>Status</th><th>Deliver to</th></tr></thead>
+                <tbody>
+                    <tr t-foreach="applications" t-as="app">
+                        <td t-out="app.name"/>
+                        <td t-out="app.product_id.display_name"/>
+                        <td class="text-end"><t t-call="emi_storefront.emi_money"><t t-set="amount" t-value="app.list_price"/></t></td>
+                        <td><span class="badge text-bg-secondary" t-field="app.state"/></td>
+                        <td>
+                            <!-- Customer details only once the loan is disbursed and the phone must be delivered. -->
+                            <t t-if="app.state in delivery_states">
+                                <t t-out="app.partner_id.name"/><br/>
+                                <t t-if="app.delivery_address_id" t-out="app.delivery_address_id._display_address(without_company=True)"/>
+                                <t t-if="app.delivery_note" t-out="app.delivery_note"/>
+                            </t>
+                            <span t-else="" class="text-muted">After disbursement</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </t>
+
+            <h4 class="mt-4">Settlements</h4>
+            <div t-if="not settlements" class="text-muted">No settlements yet.</div>
+            <t t-else="" t-call="portal.portal_table">
+                <thead><tr><th>Settlement</th><th>Date</th><th class="text-end">Collected</th><th class="text-end">Commission</th><th class="text-end">Paid out</th><th>Status</th></tr></thead>
+                <tbody>
+                    <tr t-foreach="settlements" t-as="s">
+                        <td t-out="s.name"/>
+                        <td t-out="s.date" t-options="{'widget': 'date'}"/>
+                        <td class="text-end"><t t-call="emi_storefront.emi_money"><t t-set="amount" t-value="s.gross_amount"/></t></td>
+                        <td class="text-end"><t t-call="emi_storefront.emi_money"><t t-set="amount" t-value="s.commission_amount"/></t></td>
+                        <td class="text-end"><t t-call="emi_storefront.emi_money"><t t-set="amount" t-value="s.net_amount"/></t></td>
+                        <td><span class="badge text-bg-secondary" t-field="s.payment_state"/></td>
+                    </tr>
+                </tbody>
+            </t>
+        </t>
+    </template>
+
+    <template id="retailer_listing" name="Retailer Listing">
+        <t t-call="portal.portal_layout">
+            <h3 class="mt-3"><t t-if="listing" t-out="listing.name"/><t t-else="">New listing</t>
+                <span t-if="listing" class="badge text-bg-secondary" t-field="listing.listing_state"/></h3>
+            <div t-if="saved" class="alert alert-success">Saved.</div>
+            <div t-if="error" class="alert alert-danger" t-out="error"/>
+            <p t-if="listing and not editable" class="text-muted">This listing is <span t-field="listing.listing_state"/> and can no longer be edited.</p>
+            <form method="post" enctype="multipart/form-data"
+                  t-att-action="'/my/retailer/listing/%s' % listing.id if listing else '/my/retailer/listing/new'">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                <fieldset t-att-disabled="not editable">
+                    <div class="row g-3">
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'name'"/><t t-set="label">Phone name (model, storage)</t><t t-set="required" t-value="True"/></t>
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'list_price'"/><t t-set="label">Price (VAT included)</t><t t-set="type" t-value="'number'"/><t t-set="required" t-value="True"/></t>
+                        <div class="col-md-6">
+                            <label class="form-label" for="emi_brand_id">Brand</label>
+                            <select id="emi_brand_id" name="brand_id" class="form-select">
+                                <option value="">-</option>
+                                <t t-foreach="brands" t-as="b">
+                                    <option t-att-value="b.id" t-att-selected="str(b.id) == str(values.get('brand_id'))" t-out="b.name"/>
+                                </t>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="emi_image">Photo</label>
+                            <input id="emi_image" type="file" name="image" class="form-control" accept="image/jpeg,image/png,image/webp"/>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="emi_description">Description and specifications</label>
+                            <textarea id="emi_description" name="description" class="form-control" rows="5" t-out="values.get('description', '')"/>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-3">Save</button>
+                </fieldset>
+            </form>
+            <form t-if="listing and listing.listing_state == 'draft' and vendor.state == 'approved'" method="post"
+                  t-att-action="'/my/retailer/listing/%s/submit' % listing.id" class="mt-2">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                <button type="submit" class="btn btn-secondary">Submit for review</button>
+            </form>
+            <a href="/my/retailer" class="d-inline-block mt-3">Back to dashboard</a>
+        </t>
+    </template>
+
+</odoo>

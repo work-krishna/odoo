@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="apply_field" name="EMI form field">
+        <div t-attf-class="#{col or 'col-md-6'}">
+            <label class="form-label" t-att-for="'emi_' + name"><t t-out="label"/><span t-if="required" class="text-danger"> *</span></label>
+            <input t-att-id="'emi_' + name" t-att-name="name" t-att-type="type or 'text'" class="form-control"
+                   t-att-value="values.get(name, '')" t-att-required="required"/>
+        </div>
+    </template>
+
+    <template id="apply" name="Apply for EMI">
+        <t t-call="website.layout">
+            <t t-set="title">Apply for EMI</t>
+            <div class="container py-4" style="max-width: 900px;">
+                <nav aria-label="breadcrumb"><ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/phones">Phones</a></li>
+                    <li class="breadcrumb-item"><a t-att-href="phone_url" t-out="phone.name"/></li>
+                    <li class="breadcrumb-item active">Apply</li>
+                </ol></nav>
+                <h1 class="h3">Apply for EMI: <t t-out="phone.name"/></h1>
+                <div t-if="error" class="alert alert-danger" role="alert">
+                    <t t-out="error"/> Please check the form and upload your documents again.
+                </div>
+                <div t-if="not offers" class="alert alert-warning">No finance company offers EMI on this phone yet.</div>
+                <form t-else="" method="post" t-att-action="phone_url + '/apply'" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+                    <h2 class="h5 mt-4">Your EMI</h2>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="emi_variant_id">Version <span class="text-danger">*</span></label>
+                            <select id="emi_variant_id" name="variant_id" class="form-select" required="required">
+                                <t t-foreach="variants" t-as="v">
+                                    <option t-att-value="v.id" t-att-selected="str(v.id) == str(values.get('variant_id'))">
+                                        <t t-out="v.product_template_attribute_value_ids._get_combination_name() or v.display_name"/> -
+                                        <t t-call="emi_storefront.emi_money"><t t-set="amount" t-value="v.lst_price"/></t>
+                                    </option>
+                                </t>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="emi_offer">Finance company and tenure <span class="text-danger">*</span></label>
+                            <select id="emi_offer" name="finance_company_id" class="form-select" required="required">
+                                <t t-foreach="sorted({o['finance'] for o in offers}, key=lambda f: f.name)" t-as="f">
+                                    <option t-att-value="f.id" t-att-selected="str(f.id) == str(values.get('finance_company_id'))" t-out="f.name"/>
+                                </t>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="emi_tenure">Tenure <span class="text-danger">*</span></label>
+                            <select id="emi_tenure" name="tenure_plan_id" class="form-select" required="required">
+                                <t t-foreach="sorted({o['plan'] for o in offers}, key=lambda p: p.months)" t-as="p">
+                                    <option t-att-value="p.id" t-att-selected="str(p.id) == str(values.get('tenure_plan_id'))"><t t-out="p.months"/> months</option>
+                                </t>
+                            </select>
+                            <div class="form-text">Not every finance company offers every tenure; you will be told if yours does not.</div>
+                        </div>
+                        <div t-if="options" class="col-md-6">
+                            <label class="form-label" for="emi_option">Down payment option <span class="text-danger">*</span></label>
+                            <select id="emi_option" name="downpayment_option_id" class="form-select" required="required">
+                                <t t-foreach="options" t-as="o">
+                                    <option t-att-value="o.id" t-att-selected="str(o.id) == str(values.get('downpayment_option_id'))" t-out="o.name"/>
+                                </t>
+                            </select>
+                        </div>
+                        <t t-call="emi_storefront.apply_field">
+                            <t t-set="name" t-value="'down_payment_amount'"/><t t-set="label">Down payment you will pay</t>
+                            <t t-set="type" t-value="'number'"/><t t-set="required" t-value="True"/>
+                        </t>
+                    </div>
+
+                    <h2 class="h5 mt-4">Personal details (KYC)</h2>
+                    <div class="row g-3">
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'full_name'"/><t t-set="label">Full name (as on citizenship)</t><t t-set="required" t-value="True"/></t>
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'date_of_birth'"/><t t-set="label">Date of birth</t><t t-set="type" t-value="'date'"/><t t-set="required" t-value="True"/></t>
+                        <div class="col-md-6">
+                            <label class="form-label" for="emi_gender">Gender</label>
+                            <select id="emi_gender" name="gender" class="form-select">
+                                <option value="">-</option>
+                                <option value="male" t-att-selected="values.get('gender') == 'male'">Male</option>
+                                <option value="female" t-att-selected="values.get('gender') == 'female'">Female</option>
+                                <option value="other" t-att-selected="values.get('gender') == 'other'">Other</option>
+                            </select>
+                        </div>
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'phone'"/><t t-set="label">Mobile</t><t t-set="type" t-value="'tel'"/><t t-set="required" t-value="True"/></t>
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'email'"/><t t-set="label">Email</t><t t-set="type" t-value="'email'"/></t>
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'citizenship_no'"/><t t-set="label">Citizenship number</t><t t-set="required" t-value="True"/></t>
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'citizenship_issue_district'"/><t t-set="label">Issue district</t></t>
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'citizenship_issue_date'"/><t t-set="label">Issue date</t><t t-set="type" t-value="'date'"/></t>
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'pan_no'"/><t t-set="label">PAN (if any)</t></t>
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'permanent_address'"/><t t-set="label">Permanent address</t><t t-set="required" t-value="True"/></t>
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'temporary_address'"/><t t-set="label">Temporary address</t></t>
+                    </div>
+
+                    <h2 class="h5 mt-4">Income</h2>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="emi_occupation">Occupation <span class="text-danger">*</span></label>
+                            <select id="emi_occupation" name="occupation" class="form-select" required="required">
+                                <option value="salaried" t-att-selected="values.get('occupation') == 'salaried'">Salaried</option>
+                                <option value="self_employed" t-att-selected="values.get('occupation') == 'self_employed'">Self-employed</option>
+                                <option value="business" t-att-selected="values.get('occupation') == 'business'">Business owner</option>
+                                <option value="other" t-att-selected="values.get('occupation') == 'other'">Other</option>
+                            </select>
+                        </div>
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'employer_name'"/><t t-set="label">Employer / business name</t></t>
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'monthly_income'"/><t t-set="label">Monthly income</t><t t-set="type" t-value="'number'"/><t t-set="required" t-value="True"/></t>
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'bank_name'"/><t t-set="label">Bank</t></t>
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'bank_account_no'"/><t t-set="label">Bank account number</t></t>
+                    </div>
+
+                    <h2 class="h5 mt-4">Guarantor (optional)</h2>
+                    <div class="row g-3">
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'guarantor_name'"/><t t-set="label">Name</t><t t-set="col" t-value="'col-md-4'"/></t>
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'guarantor_phone'"/><t t-set="label">Phone</t><t t-set="col" t-value="'col-md-4'"/></t>
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'guarantor_relation'"/><t t-set="label">Relation</t><t t-set="col" t-value="'col-md-4'"/></t>
+                    </div>
+
+                    <h2 class="h5 mt-4">Documents</h2>
+                    <p class="small text-muted">JPEG, PNG, WebP or PDF, up to 10 MB each.</p>
+                    <div class="row g-3">
+                        <t t-foreach="[('citizenship_front', 'Citizenship (front)'), ('citizenship_back', 'Citizenship (back)'), ('photo', 'Passport-size photo'), ('income_proof', 'Proof of income')]" t-as="doc">
+                            <div class="col-md-6">
+                                <label class="form-label" t-att-for="'emi_' + doc[0]"><t t-out="doc[1]"/> <span class="text-danger">*</span></label>
+                                <input t-att-id="'emi_' + doc[0]" type="file" t-att-name="doc[0]" class="form-control"
+                                       accept="image/jpeg,image/png,image/webp,application/pdf" required="required"/>
+                            </div>
+                        </t>
+                    </div>
+
+                    <h2 class="h5 mt-4">Delivery</h2>
+                    <div class="row g-3">
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'delivery_street'"/><t t-set="label">Street address</t></t>
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'delivery_city'"/><t t-set="label">City</t></t>
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'delivery_phone'"/><t t-set="label">Contact phone</t><t t-set="type" t-value="'tel'"/></t>
+                        <div class="col-12">
+                            <label class="form-label" for="emi_delivery_note">Delivery instructions</label>
+                            <textarea id="emi_delivery_note" name="delivery_note" class="form-control" rows="2" t-out="values.get('delivery_note', '')"/>
+                            <div class="form-text">Give a street address or instructions (e.g. pick up at the retailer's shop).</div>
+                        </div>
+                    </div>
+
+                    <div class="form-check mt-4">
+                        <input class="form-check-input" type="checkbox" id="emi_consent" name="consent" required="required"/>
+                        <label class="form-check-label" for="emi_consent">
+                            I confirm these details are true and agree that the marketplace and the selected finance company may verify them.
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg mt-3">Submit application</button>
+                </form>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_emi_submitted_notice" inherit_id="emi_payment_np.portal_my_emi_detail" name="Application submitted notice">
+        <xpath expr="//div[hasclass('row')]" position="before">
+            <div t-if="request.params.get('submitted')" class="alert alert-success mt-3">
+                Thank you! Your application has been submitted. We will review your KYC and contact you.
+            </div>
+        </xpath>
+    </template>
+
+</odoo>

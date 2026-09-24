@@ -13,6 +13,7 @@ Nepal localization they are built for.
 * emi_application - online applications, KYC and the approval workflow
 * emi_accounting - disbursement, installments, commission, retailer settlements
 * emi_payment_np - customer portal and online payments
+* emi_storefront - public phone catalog, online applications, retailer dashboard
 * payment_esewa / payment_khalti / payment_connectips / payment_fonepay - Nepali gateways
 * l10n_np / l10n_np_ird - Nepal chart of accounts, VAT, BS calendar,
   fiscal-year numbering and IRD CBMS sync
@@ -22,6 +23,7 @@ Nepal localization they are built for.
     'license': 'LGPL-3',
     'depends': [
         'emi_finance', 'emi_marketplace', 'emi_application', 'emi_accounting', 'emi_payment_np',
+        'emi_storefront',
         'l10n_np_ird',
         'payment_esewa', 'payment_khalti', 'payment_connectips', 'payment_fonepay',
     ],

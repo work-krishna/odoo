@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="emi_money" name="EMI money">
+        <t t-out="amount" t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+    </template>
+
+    <template id="catalog" name="Phones on EMI">
+        <t t-call="website.layout">
+            <t t-set="title">Phones on EMI</t>
+            <div class="container py-4">
+                <div class="d-flex flex-wrap align-items-baseline justify-content-between mb-3">
+                    <h1 class="h2 mb-0">Phones on EMI</h1>
+                    <a href="/retailer/register" class="small">Sell your phones here</a>
+                </div>
+                <form method="get" action="/phones" class="row g-2 align-items-end mb-4">
+                    <div class="col-12 col-md-4">
+                        <label class="form-label small" for="emi_search">Search</label>
+                        <input id="emi_search" type="search" name="search" class="form-control" t-att-value="search"
+                               placeholder="Model or brand"/>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small" for="emi_brand">Brand</label>
+                        <select id="emi_brand" name="brand" class="form-select">
+                            <option value="">All brands</option>
+                            <t t-foreach="brands" t-as="b">
+                                <option t-att-value="b.id" t-att-selected="b.id == brand_id" t-out="b.name"/>
+                            </t>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small" for="emi_retailer">Retailer</label>
+                        <select id="emi_retailer" name="retailer" class="form-select">
+                            <option value="">All retailers</option>
+                            <t t-foreach="retailers" t-as="r">
+                                <option t-att-value="r.id" t-att-selected="r.id == retailer_id" t-out="r.name"/>
+                            </t>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-1">
+                        <label class="form-label small" for="emi_min">Min price</label>
+                        <input id="emi_min" type="number" min="0" name="min_price" class="form-control" t-att-value="min_price"/>
+                    </div>
+                    <div class="col-6 col-md-1">
+                        <label class="form-label small" for="emi_max">Max price</label>
+                        <input id="emi_max" type="number" min="0" name="max_price" class="form-control" t-att-value="max_price"/>
+                    </div>
+                    <div class="col-8 col-md-1">
+                        <label class="form-label small" for="emi_order">Sort</label>
+                        <select id="emi_order" name="order" class="form-select">
+                            <option value="price_asc" t-att-selected="order == 'price_asc'">Price: low to high</option>
+                            <option value="price_desc" t-att-selected="order == 'price_desc'">Price: high to low</option>
+                            <option value="newest" t-att-selected="order == 'newest'">Newest</option>
+                            <option value="name" t-att-selected="order == 'name'">Name</option>
+                        </select>
+                    </div>
+                    <div class="col-4 col-md-1">
+                        <button type="submit" class="btn btn-primary w-100">Filter</button>
+                    </div>
+                </form>
+
+                <div t-if="not phones" class="alert alert-info">No phones match your filters.</div>
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
+                    <div t-foreach="phones" t-as="phone" class="col">
+                        <t t-set="quote" t-value="quotes.get(phone.id)"/>
+                        <a t-att-href="phone_url(phone)" class="card h-100 text-decoration-none text-reset">
+                            <img t-att-src="'/web/image/product.template/%s/image_512' % phone.id"
+                                 class="card-img-top p-3 object-fit-contain" style="height: 200px;" t-att-alt="phone.name"
+                                 loading="lazy"/>
+                            <div class="card-body">
+                                <div class="small text-muted" t-out="phone.emi_brand_id.name"/>
+                                <h2 class="h6 card-title" t-out="phone.name"/>
+                                <div class="fw-bold">
+                                    <t t-call="emi_storefront.emi_money"><t t-set="amount" t-value="phone.list_price"/></t>
+                                </div>
+                                <div t-if="quote" class="small text-success">
+                                    EMI from <t t-call="emi_storefront.emi_money"><t t-set="amount" t-value="quote['emi']"/></t>/month
+                                </div>
+                                <div class="small text-muted">Sold by <t t-out="phone.vendor_id.name"/></div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="mt-4 d-flex justify-content-center">
+                    <t t-call="website.pager"/>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="phone_detail" name="Phone">
+        <t t-call="website.layout">
+            <t t-set="title" t-value="phone.name"/>
+            <div class="container py-4">
+                <nav aria-label="breadcrumb"><ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/phones">Phones</a></li>
+                    <li class="breadcrumb-item active" t-out="phone.name"/>
+                </ol></nav>
+                <div class="row g-4">
+                    <div class="col-md-5">
+                        <img t-att-src="'/web/image/product.product/%s/image_1024' % variant.id" class="img-fluid"
+                             t-att-alt="phone.name"/>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="text-muted" t-out="phone.emi_brand_id.name"/>
+                        <h1 class="h2" t-out="phone.name"/>
+                        <p class="fs-4 fw-bold mb-1">
+                            <t t-call="emi_storefront.emi_money"><t t-set="amount" t-value="price"/></t>
+                        </p>
+                        <p class="text-muted small">Price includes VAT. Sold and invoiced by <t t-out="phone.vendor_id.name"/>.</p>
+                        <p t-if="phone.description_sale" class="text-pre-wrap" t-out="phone.description_sale"/>
+
+                        <form t-if="len(variants) &gt; 1" method="get" t-att-action="phone_url" class="mb-3">
+                            <label class="form-label" for="emi_variant">Version</label>
+                            <div class="input-group">
+                                <select id="emi_variant" name="variant" class="form-select">
+                                    <t t-foreach="variants" t-as="v">
+                                        <option t-att-value="v.id" t-att-selected="v == variant"
+                                                t-out="v.product_template_attribute_value_ids._get_combination_name() or v.display_name"/>
+                                    </t>
+                                </select>
+                                <button type="submit" class="btn btn-outline-secondary">Show</button>
+                            </div>
+                        </form>
+                        <table t-if="phone.attribute_line_ids" class="table table-sm w-auto">
+                            <tr t-foreach="phone.attribute_line_ids" t-as="line">
+                                <th class="pe-4" t-out="line.attribute_id.name"/>
+                                <td t-out="', '.join(line.value_ids.mapped('name'))"/>
+                            </tr>
+                        </table>
+
+                        <h2 class="h5 mt-4">EMI plans</h2>
+                        <div t-if="not rows" class="alert alert-warning">No finance company offers EMI on this phone yet.</div>
+                        <table t-else="" class="table table-sm">
+                            <thead><tr>
+                                <th>Finance company</th><th>Tenure</th><th>Interest</th>
+                                <th class="text-end">Min. down payment</th><th class="text-end">Monthly EMI</th>
+                            </tr></thead>
+                            <tbody>
+                                <tr t-foreach="rows" t-as="row">
+                                    <td t-out="row['finance'].name"/>
+                                    <td><t t-out="row['plan'].months"/> months</td>
+                                    <td><t t-out="row['rate'].rate_percent"/>% <span class="text-muted small" t-field="row['rate'].calc_method"/></td>
+                                    <td class="text-end"><t t-call="emi_storefront.emi_money"><t t-set="amount" t-value="row['minimum']"/></t></td>
+                                    <td class="text-end fw-bold"><t t-call="emi_storefront.emi_money"><t t-set="amount" t-value="row['emi']"/></t></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div t-if="rows" class="card mt-3">
+                            <div class="card-body">
+                                <h3 class="h6">EMI calculator</h3>
+                                <form method="get" t-att-action="phone_url" class="row g-2 align-items-end">
+                                    <input type="hidden" name="variant" t-att-value="variant.id"/>
+                                    <div class="col-sm-4">
+                                        <label class="form-label small" for="emi_calc_finance">Finance company</label>
+                                        <select id="emi_calc_finance" name="finance" class="form-select">
+                                            <t t-foreach="sorted(finance_companies, key=lambda f: f.name)" t-as="f">
+                                                <option t-att-value="f.id" t-att-selected="f.id == selected_finance" t-out="f.name"/>
+                                            </t>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <label class="form-label small" for="emi_calc_tenure">Tenure</label>
+                                        <select id="emi_calc_tenure" name="tenure" class="form-select">
+                                            <t t-foreach="sorted({r['plan'] for r in rows}, key=lambda p: p.months)" t-as="p">
+                                                <option t-att-value="p.id" t-att-selected="p.id == selected_tenure"><t t-out="p.months"/> months</option>
+                                            </t>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <label class="form-label small" for="emi_calc_down">Down payment</label>
+                                        <input id="emi_calc_down" type="number" min="0" step="any" name="down_payment"
+                                               class="form-control" t-att-value="down_payment"/>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <button type="submit" class="btn btn-secondary w-100">Calculate</button>
+                                    </div>
+                                </form>
+                                <div t-if="calc_error" class="alert alert-warning mt-3 mb-0" t-out="calc_error"/>
+                                <div t-if="calculation" class="mt-3">
+                                    <p class="mb-1">
+                                        <strong><t t-call="emi_storefront.emi_money"><t t-set="amount" t-value="calculation['emi']"/></t>/month</strong>
+                                        for <t t-out="calculation['plan'].months"/> months with <t t-out="calculation['finance'].name"/>
+                                    </p>
+                                    <p class="small text-muted mb-0">
+                                        Financed <t t-call="emi_storefront.emi_money"><t t-set="amount" t-value="calculation['principal']"/></t>,
+                                        interest <t t-call="emi_storefront.emi_money"><t t-set="amount" t-value="calculation['total_interest']"/></t>,
+                                        total repaid <t t-call="emi_storefront.emi_money"><t t-set="amount" t-value="calculation['total_payable']"/></t>.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <a t-if="rows" class="btn btn-primary btn-lg mt-4"
+                           t-att-href="'%s/apply?variant_id=%s%s%s' % (phone_url, variant.id,
+                                        ('&amp;finance_company_id=%s' % calculation['finance'].id) if calculation else '',
+                                        ('&amp;tenure_plan_id=%s&amp;down_payment_amount=%s' % (calculation['plan'].id, calculation['down_payment'])) if calculation else '')">
+                            Apply for EMI
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+</odoo>
