@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="payment_provider_form_esewa" model="ir.ui.view">
+        <field name="name">eSewa Provider Form</field>
+        <field name="model">payment.provider</field>
+        <field name="inherit_id" ref="payment.payment_provider_form"/>
+        <field name="arch" type="xml">
+            <group name="provider_credentials" position="inside">
+                <group invisible="code != 'esewa'">
+                    <field name="esewa_product_code" string="Product Code"
+                           required="code == 'esewa' and state != 'disabled'"/>
+                    <field name="esewa_secret_key" string="Secret Key" password="True"
+                           required="code == 'esewa' and state != 'disabled'"/>
+                </group>
+            </group>
+        </field>
+    </record>
+
+</odoo>

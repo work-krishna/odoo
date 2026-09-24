@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="payment_provider_esewa" model="payment.provider">
+        <field name="name">eSewa</field>
+        <field name="code">esewa</field>
+        <field name="module_id" ref="base.module_payment_esewa"/>
+        <field name="redirect_form_view_id" ref="redirect_form"/>
+        <field name="payment_method_ids" eval="[Command.set([ref('payment_method_esewa')])]"/>
+        <!-- eSewa's public test merchant, so the provider works in test mode out of the box. -->
+        <field name="esewa_product_code">EPAYTEST</field>
+        <field name="esewa_secret_key">8gBm/:&amp;EnhH.1/q</field>
+    </record>
+
+</odoo>
