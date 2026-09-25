@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import re
+
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tests import tagged
 
@@ -123,7 +125,7 @@ class TestEmiFinanceConfig(EmiCommon):
             self.env['emi.finance.company'].create({'code': 'MKT', 'company_id': self.marketplace.id})
 
     def test_only_one_marketplace_company(self):
-        with self.assertRaises(ValidationError):
+        with self.assertRaisesRegex(ValidationError, re.escape(f"{self.marketplace.name} is already")):
             self.lender_company.emi_is_marketplace = True
 
     def test_marketplace_flag_cannot_move_to_finance_company(self):

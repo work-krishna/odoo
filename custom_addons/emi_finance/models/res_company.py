@@ -15,8 +15,13 @@ class ResCompany(models.Model):
 
     @api.constrains('emi_is_marketplace')
     def _check_single_emi_marketplace(self):
-        if self.sudo().search_count([('emi_is_marketplace', '=', True)]) > 1:
-            raise ValidationError("Only one company can be the EMI marketplace company.")
+        marketplaces = self.sudo().search([('emi_is_marketplace', '=', True)])
+        if len(marketplaces) > 1:
+            current = (marketplaces - self) or marketplaces
+            raise ValidationError(
+                f"{', '.join(current.mapped('name'))} is already the EMI marketplace company, and only one "
+                "company can be. To move the marketplace, untick 'EMI Marketplace Company' on it first."
+            )
         flagged = self.filtered('emi_is_marketplace')
         if flagged and self.env['emi.finance.company'].sudo().with_context(active_test=False).search_count(
             [('company_id', 'in', flagged.ids)], limit=1,
