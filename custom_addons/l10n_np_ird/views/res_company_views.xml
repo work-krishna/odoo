@@ -23,8 +23,9 @@
                         </group>
                     </group>
                     <div class="text-muted">
-                        The seller PAN sent to CBMS is the company's Tax ID. Invoices already
-                        reported to CBMS cannot be reset to draft; correct them with a credit note.
+                        The seller PAN sent to CBMS is the company's Tax ID. Invoices reported to
+                        CBMS, or possibly received by it after a send with an unknown outcome, cannot
+                        be reset to draft, cancelled or renamed; correct them with a credit note.
                     </div>
                 </page>
             </xpath>

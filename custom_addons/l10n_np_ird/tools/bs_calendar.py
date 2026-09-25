@@ -12,6 +12,8 @@ from .bs_calendar_data import BS_MONTH_DAYS
 
 MIN_YEAR = min(BS_MONTH_DAYS)
 MAX_YEAR = max(BS_MONTH_DAYS)
+# A fiscal year ends in the next BS year, so the last full one is FY 2099/00.
+MAX_FISCAL_YEAR = MAX_YEAR - 1
 REFERENCE_AD = date(1918, 4, 13)  # == BS MIN_YEAR-01-01
 FISCAL_YEAR_START_MONTH = 4  # Shrawan
 
@@ -71,6 +73,11 @@ def fiscal_year_start(ad_date):
 
 def fiscal_year_bounds(start_year):
     """Gregorian (first_day, last_day) of the BS fiscal year starting in ``start_year``."""
+    if start_year > MAX_FISCAL_YEAR:
+        raise ValueError(
+            f"Nepali fiscal year {fiscal_year_label(start_year)} ends after the supported "
+            f"Bikram Sambat range; the last supported one is {fiscal_year_label(MAX_FISCAL_YEAR)}."
+        )
     first = bs_to_ad(start_year, FISCAL_YEAR_START_MONTH, 1)
     last = bs_to_ad(start_year + 1, FISCAL_YEAR_START_MONTH, 1) - timedelta(days=1)
     return first, last
