@@ -4,7 +4,7 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.http import request
 
 from odoo.addons.emi_storefront.controllers.common import (
-    UploadError, get_phone, phone_url, read_upload, to_float, to_int,
+    UploadError, get_phone, phone_url, read_upload, text, to_float, to_int,
 )
 
 KYC_TEXT_FIELDS = (
@@ -77,9 +77,13 @@ class EmiApply(http.Controller):
             lambda o: o.active and o.id == to_int(post.get('downpayment_option_id'))
         )
 
+        down_payment = to_float(post.get('down_payment_amount'), None)
+        if down_payment is None:
+            raise UserError("Enter the down payment you will pay.")
+
         kyc = {}
         for name in KYC_TEXT_FIELDS:
-            value = (post.get(name) or '').strip()
+            value = text(post, name)
             if value:
                 kyc[name] = value
         missing = [name.replace('_', ' ') for name in KYC_REQUIRED if not kyc.get(name)]
@@ -102,18 +106,21 @@ class EmiApply(http.Controller):
         for field, label in KYC_DOCUMENTS:
             kyc[field] = read_upload(request.httprequest.files.get(field), label)
             kyc[f'{field}_filename'] = request.httprequest.files[field].filename
+        if post.get('consent') != 'on':
+            raise UserError("Please confirm your details and agree to their verification.")
+        kyc['consent_date'] = fields.Datetime.now()
 
         partner = request.env.user.partner_id
-        delivery_street = (post.get('delivery_street') or '').strip()
+        delivery_street = text(post, 'delivery_street')
         delivery_vals = {}
         if delivery_street:
             delivery_vals['delivery_address_id'] = request.env['res.partner'].sudo().create({
                 'type': 'delivery', 'parent_id': partner.commercial_partner_id.id,
                 'name': kyc['full_name'], 'street': delivery_street,
-                'city': (post.get('delivery_city') or '').strip(),
-                'phone': (post.get('delivery_phone') or kyc['phone']).strip(),
+                'city': text(post, 'delivery_city'),
+                'phone': text(post, 'delivery_phone') or kyc['phone'],
             }).id
-        note = (post.get('delivery_note') or '').strip()
+        note = text(post, 'delivery_note')
         if note:
             delivery_vals['delivery_note'] = note
         return request.env['emi.application'].sudo().create({
@@ -122,7 +129,7 @@ class EmiApply(http.Controller):
             'finance_company_id': finance.id,
             'tenure_plan_id': plan.id,
             'downpayment_option_id': option.id or False,
-            'down_payment_amount': to_float(post.get('down_payment_amount')),
+            'down_payment_amount': down_payment,
             'kyc_ids': [(0, 0, kyc)],
             **delivery_vals,
         })

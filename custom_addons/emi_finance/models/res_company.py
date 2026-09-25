@@ -17,6 +17,13 @@ class ResCompany(models.Model):
     def _check_single_emi_marketplace(self):
         if self.sudo().search_count([('emi_is_marketplace', '=', True)]) > 1:
             raise ValidationError("Only one company can be the EMI marketplace company.")
+        flagged = self.filtered('emi_is_marketplace')
+        if flagged and self.env['emi.finance.company'].sudo().with_context(active_test=False).search_count(
+            [('company_id', 'in', flagged.ids)], limit=1,
+        ):
+            raise ValidationError(
+                "A finance company cannot also be the EMI marketplace company; flag a separate company."
+            )
 
     @api.model
     def _emi_get_marketplace_company(self):

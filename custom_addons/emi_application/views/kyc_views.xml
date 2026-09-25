@@ -21,6 +21,7 @@
                             <field name="citizenship_issue_date"/>
                             <field name="pan_no"/>
                             <field name="verified"/>
+                            <field name="consent_date" invisible="not consent_date"/>
                         </group>
                     </group>
                     <group>

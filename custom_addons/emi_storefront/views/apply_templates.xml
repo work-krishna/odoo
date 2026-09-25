@@ -60,7 +60,8 @@
                             <label class="form-label" for="emi_option">Down payment option <span class="text-danger">*</span></label>
                             <select id="emi_option" name="downpayment_option_id" class="form-select" required="required">
                                 <t t-foreach="options" t-as="o">
-                                    <option t-att-value="o.id" t-att-selected="str(o.id) == str(values.get('downpayment_option_id'))" t-out="o.name"/>
+                                    <option t-att-value="o.id" t-out="o.name"
+                                            t-att-selected="str(o.id) == str(values['downpayment_option_id']) if values.get('downpayment_option_id') else o.is_default"/>
                                 </t>
                             </select>
                         </div>

@@ -79,6 +79,55 @@ class TestEmiStorefront(EmiCommon, HttpCase):
         self.vendor.with_user(self.mp_admin).action_suspend()
         self.assertEqual(self.url_open(f'/phones/{self.slug}').status_code, 404)
 
+    def test_archived_phone_is_not_found(self):
+        self.phone_tmpl.active = False
+        self.assertEqual(self.phone_tmpl.listing_state, 'published')
+        self.assertEqual(self.url_open(f'/phones/{self.slug}').status_code, 404)
+        self.assertNotIn('Galaxy Test 128GB', self.url_open('/phones').text)
+
+    def test_phone_photos_are_served_to_visitors(self):
+        self.phone_tmpl.image_1920 = base64.b64encode(PNG)
+        self.draft_phone.image_1920 = base64.b64encode(PNG)
+        tmpl_image = base64.b64decode(self.phone_tmpl.image_512)
+        variant_image = base64.b64decode(self.phone.image_1024)
+        for login in (None, self.customer_user.login):
+            if login:
+                self.authenticate(login, login + 'x' * max(0, 8 - len(login)))
+            page = self.url_open(f'/web/image/product.template/{self.phone_tmpl.id}/image_512')
+            self.assertEqual(page.content, tmpl_image, login)
+            page = self.url_open(f'/web/image/product.product/{self.phone.id}/image_1024')
+            self.assertEqual(page.content, variant_image, login)
+            # Drafts keep the placeholder.
+            page = self.url_open(f'/web/image/product.template/{self.draft_phone.id}/image_512')
+            self.assertNotEqual(page.content, base64.b64decode(self.draft_phone.image_512), login)
+        public = self.env.ref('base.public_user')
+        self.assertFalse(self.phone_tmpl.with_user(public)._can_return_content('name'))
+
+    def test_malformed_numbers_do_not_break_the_calculator(self):
+        for value in ('nan', 'inf', '1e309'):
+            page = self.url_open(
+                f'/phones/{self.slug}?finance={self.finance.id}&tenure={self.plan_18.id}&down_payment={value}')
+            self.assertEqual(page.status_code, 200, value)
+            self.assertIn('for 18 months with Lender Co', page.text)
+
+    def test_calculator_passes_the_down_payment_option_it_used(self):
+        Option = self.env['emi.downpayment.option']
+        Option.create({'product_tmpl_id': self.phone_tmpl.id, 'name': 'Min 20%', 'value': 20.0, 'sequence': 1})
+        ten = Option.create({'product_tmpl_id': self.phone_tmpl.id, 'name': 'Min 10%', 'value': 10.0,
+                             'sequence': 2, 'is_default': True})
+        page = self.url_open(f'/phones/{self.slug}?finance={self.finance.id}&tenure={self.plan_18.id}&down_payment=10000')
+        self.assertIn(f'downpayment_option_id={ten.id}', page.text)
+
+        self.authenticate(self.customer_user.login, self.customer_user.login + 'x' * max(0, 8 - len(self.customer_user.login)))
+        form = self.url_open(f'/phones/{self.slug}/apply')
+        # The default option, not the first one.
+        self.assertRegex(form.text, rf'<option value="{ten.id}" selected="[^"]+">Min 10%</option>')
+        self.assertNotRegex(form.text, r'<option value="\d+" selected="[^"]+">Min 20%</option>')
+        token = re.search(r'name="csrf_token" value="([^"]+)"', form.text).group(1)
+        response = self.url_open(f'/phones/{self.slug}/apply', files=self._files(),
+                                 data=self._apply_data(token, downpayment_option_id=ten.id))
+        self.assertIn('submitted', response.url)
+
     # ------------------------------------------------------------------
     # Online application
     # ------------------------------------------------------------------
@@ -120,6 +169,39 @@ class TestEmiStorefront(EmiCommon, HttpCase):
         self.assertIn('at least 18', response.text)
         self.assertFalse(self.env['emi.application'].search([('partner_id', '=', self.customer.id)]))
 
+    def test_malformed_application_input_is_a_form_error(self):
+        self.authenticate(self.customer_user.login, self.customer_user.login + 'x' * max(0, 8 - len(self.customer_user.login)))
+        token, _page = self._csrf(f'/phones/{self.slug}/apply')
+        url = f'/phones/{self.slug}/apply'
+        for field in ('down_payment_amount', 'monthly_income'):
+            response = self.url_open(url, data=self._apply_data(token, **{field: 'nan'}), files=self._files())
+            self.assertEqual(response.status_code, 200, field)
+            self.assertIn('alert-danger', response.text, field)
+        # A file sent under a text field's name counts as an empty field.
+        data = self._apply_data(token)
+        del data['full_name']
+        response = self.url_open(url, data=data, files=self._files(full_name=('name.txt', b'Ram', 'text/plain')))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Please fill in: full name', response.text)
+        self.assertFalse(self.env['emi.application'].search([('partner_id', '=', self.customer.id)]))
+        response = self.url_open(url, data=self._apply_data(token),
+                                 files=self._files(delivery_street=('street.txt', b'Lakeside', 'text/plain')))
+        self.assertIn('submitted', response.url)
+
+    def test_application_requires_and_records_consent(self):
+        self.authenticate(self.customer_user.login, self.customer_user.login + 'x' * max(0, 8 - len(self.customer_user.login)))
+        token, _page = self._csrf(f'/phones/{self.slug}/apply')
+        data = self._apply_data(token)
+        del data['consent']
+        response = self.url_open(f'/phones/{self.slug}/apply', data=data, files=self._files())
+        self.assertIn('agree to their verification', response.text)
+        self.assertFalse(self.env['emi.application'].search([('partner_id', '=', self.customer.id)]))
+
+        self.url_open(f'/phones/{self.slug}/apply', data=self._apply_data(token), files=self._files())
+        app = self.env['emi.application'].search([('partner_id', '=', self.customer.id)])
+        self.assertEqual(app.state, 'submitted')
+        self.assertTrue(app.kyc_ids.consent_date)
+
     # ------------------------------------------------------------------
     # Retailers
     # ------------------------------------------------------------------
@@ -139,6 +221,61 @@ class TestEmiStorefront(EmiCommon, HttpCase):
         self.assertEqual(len(vendor.onboarding_document_ids), 2)
         self.assertEqual(vendor.settlement_bank_account_id.acc_number, 'ACC-1')
         self.assertIn(user, self.env.ref('emi_marketplace.group_emi_vendor_portal').user_ids)
+
+    def test_archived_retailer_cannot_register_again(self):
+        self.vendor.active = False
+        self.authenticate(self.vendor_user.login, self.vendor_user.login)
+        page = self.url_open('/retailer/register')
+        self.assertIn('has been closed', page.text)
+        self.assertNotIn('name="business_name"', page.text)
+        token, _page = self._csrf('/my/security')
+        self.url_open('/retailer/register', data={
+            'csrf_token': token, 'business_name': 'Second Shop', 'pan': '600000001', 'phone': '01-555',
+            'street': 'New Road', 'account_number': 'ACC-2',
+        }, files=[('documents', ('reg.pdf', b'%PDF-1.4 test', 'application/pdf'))])
+        Vendor = self.env['emi.vendor'].with_context(active_test=False)
+        self.assertEqual(Vendor.search([('user_ids', 'in', self.vendor_user.id)]), self.vendor)
+        self.assertIn('has been closed', self.url_open('/my/retailer').text)
+
+    def test_retailer_registration_ignores_files_in_text_fields(self):
+        new_test_user(self.env, 'file_retailer', groups='base.group_portal')
+        self.authenticate('file_retailer', 'file_retailer')
+        token, _page = self._csrf('/retailer/register')
+        response = self.url_open('/retailer/register', data={
+            'csrf_token': token, 'pan': '612345678', 'phone': '061-555', 'street': 'Lakeside', 'account_number': 'ACC-1',
+        }, files=[('business_name', ('name.txt', b'Shop', 'text/plain')),
+                  ('documents', ('reg.pdf', b'%PDF-1.4 test', 'application/pdf'))])
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Please fill in: business name', response.text)
+
+    def test_listing_price_must_be_a_real_number(self):
+        self.authenticate(self.vendor_user.login, self.vendor_user.login)
+        token, _page = self._csrf('/my/retailer/listing/new')
+        for price in ('nan', 'inf', 'infinity', '1e309'):
+            response = self.url_open('/my/retailer/listing/new', data={
+                'csrf_token': token, 'name': f'Bad Price {price}', 'list_price': price,
+            })
+            self.assertEqual(response.status_code, 200, price)
+            self.assertIn('price (VAT included)', response.text, price)
+        response = self.url_open('/my/retailer/listing/new', data={'csrf_token': token, 'list_price': '100'},
+                                 files={'name': ('name.txt', b'Phone', 'text/plain')})
+        self.assertIn('Give the phone a name', response.text)
+        self.assertFalse(self.env['product.template'].search([('name', 'like', 'Bad Price')]))
+        self.assertEqual(self.url_open('/my/retailer').status_code, 200)
+
+    def test_listing_errors_are_fixed_messages(self):
+        self.authenticate(self.vendor_user.login, self.vendor_user.login)
+        spoof = 'Your payouts are frozen, call 9800000000'
+        page = self.url_open(f'/my/retailer/listing/{self.phone_tmpl.id}?error={spoof}')
+        self.assertEqual(page.status_code, 200)
+        self.assertNotIn(spoof, page.text)
+        self.assertNotIn('alert-danger', page.text)
+
+        token = re.search(r'name="csrf_token" value="([^"]+)"', page.text).group(1)
+        # Already published: submitting fails and the page explains why.
+        response = self.url_open(f'/my/retailer/listing/{self.phone_tmpl.id}/submit', data={'csrf_token': token})
+        self.assertIn('error=not_draft', response.url)
+        self.assertIn('Only draft listings can be submitted for review.', response.text)
 
     def test_retailer_listings_are_their_own_and_start_as_drafts(self):
         self.authenticate(self.vendor_user.login, self.vendor_user.login)

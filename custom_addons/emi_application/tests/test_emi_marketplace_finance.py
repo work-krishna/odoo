@@ -43,6 +43,35 @@ class TestEmiMarketplaceSecurity(EmiCommon):
         tmpl.with_user(self.mp_admin).action_publish_listing()
         self.assertEqual(tmpl.listing_state, 'published')
 
+    def test_defaults_cannot_publish_new_listing(self):
+        product_manager = self.env['res.users'].create({
+            'name': 'Product Manager', 'login': 'emi_prod_mgr',
+            'group_ids': [(6, 0, [self.env.ref('base.group_user').id, self.env.ref('product.group_product_manager').id])],
+        })
+        Product = self.env['product.template'].with_user(product_manager)
+        published = Product.with_context(default_listing_state='published')
+        self.assertEqual(published.create({'name': 'Sneaky', 'vendor_id': self.vendor.id}).listing_state, 'draft')
+        self.assertEqual(self.phone_tmpl.with_user(product_manager).with_context(
+            default_listing_state='published').copy().listing_state, 'draft')
+        self.env['ir.default'].with_user(product_manager).set(
+            'product.template', 'listing_state', 'published', user_id=True)
+        self.assertEqual(Product.create({'name': 'Sneaky 2', 'vendor_id': self.vendor.id}).listing_state, 'draft')
+        # A Marketplace Admin's own defaults still apply.
+        admin_listing = self.env['product.template'].with_user(self.mp_admin).with_context(
+            default_listing_state='published').create({'name': 'Admin Phone', 'vendor_id': self.vendor.id})
+        self.assertEqual(admin_listing.listing_state, 'published')
+
+    def test_listing_price_must_be_real(self):
+        for price in (float('nan'), float('inf')):
+            with self.assertRaises(ValidationError):
+                self.env['product.template'].create({'name': 'Bad Price', 'list_price': price, 'vendor_id': self.vendor.id})
+        with self.assertRaises(ValidationError):
+            self.phone_tmpl.list_price = 0.0  # published
+        tmpl = self.env['product.template'].create({'name': 'Free Phone', 'list_price': 0.0, 'vendor_id': self.vendor.id})
+        tmpl.with_user(self.mp_admin).action_submit_listing()
+        with self.assertRaises(ValidationError):
+            tmpl.with_user(self.mp_admin).action_publish_listing()
+
     def test_copy_of_published_listing_is_draft(self):
         self.assertEqual(self.phone_tmpl.copy().listing_state, 'draft')
 
@@ -94,6 +123,14 @@ class TestEmiFinanceConfig(EmiCommon):
             self.env['emi.finance.company'].create({'code': 'MKT', 'company_id': self.marketplace.id})
 
     def test_only_one_marketplace_company(self):
+        with self.assertRaises(ValidationError):
+            self.lender_company.emi_is_marketplace = True
+
+    def test_marketplace_flag_cannot_move_to_finance_company(self):
+        self.marketplace.emi_is_marketplace = False
+        with self.assertRaises(ValidationError):
+            self.lender_company.emi_is_marketplace = True
+        self.finance.active = False  # an archived finance company still has its books
         with self.assertRaises(ValidationError):
             self.lender_company.emi_is_marketplace = True
 

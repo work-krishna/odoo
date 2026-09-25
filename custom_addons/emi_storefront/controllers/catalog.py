@@ -22,7 +22,7 @@ class EmiCatalog(http.Controller):
         Product = request.env['product.template'].sudo()
         base_domain = Product._emi_storefront_domain()
         domain = list(base_domain)
-        search = (search or '').strip()
+        search = search.strip() if isinstance(search, str) else ''
         if search:
             domain += ['|', ('name', 'ilike', search), ('emi_brand_id.name', 'ilike', search)]
         brand_id, retailer_id = to_int(brand), to_int(retailer)
@@ -67,9 +67,10 @@ class EmiCatalog(http.Controller):
         offers = phone._emi_active_offers()
         rows = []
         for finance_company, plan, rate in offers:
-            minimum = phone._emi_min_down_payment(finance_company, price)
+            minimum, option = phone._emi_min_down_payment_option(finance_company, price)
             result = emi_math.quote(price - minimum, rate.rate_percent, plan.months, rate.calc_method)
-            rows.append({'finance': finance_company, 'plan': plan, 'rate': rate, 'minimum': minimum, **result})
+            rows.append({'finance': finance_company, 'plan': plan, 'rate': rate, 'minimum': minimum,
+                         'option': option, **result})
 
         # Calculator: the customer's own choice of lender, tenure and down payment.
         chosen = next((r for r in rows if r['finance'].id == to_int(finance) and r['plan'].id == to_int(tenure)),
@@ -85,7 +86,7 @@ class EmiCatalog(http.Controller):
                 calculation = dict(
                     emi_math.quote(price - amount, chosen['rate'].rate_percent, chosen['plan'].months,
                                    chosen['rate'].calc_method),
-                    finance=chosen['finance'], plan=chosen['plan'], rate=chosen['rate'],
+                    finance=chosen['finance'], plan=chosen['plan'], rate=chosen['rate'], option=chosen['option'],
                     down_payment=amount, principal=price - amount,
                 )
         return request.render('emi_storefront.phone_detail', {

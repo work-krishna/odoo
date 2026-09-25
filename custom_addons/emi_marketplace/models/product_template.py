@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import math
+
 from odoo import api, fields, models
 from odoo.exceptions import AccessError, UserError, ValidationError
 
@@ -30,15 +32,25 @@ class ProductTemplate(models.Model):
                     f"{rec.display_name} cannot be published: its vendor is not approved."
                 )
 
+    @api.constrains('list_price', 'listing_state', 'vendor_id')
+    def _check_listing_price(self):
+        for rec in self:
+            if rec.vendor_id and not math.isfinite(rec.list_price):
+                raise ValidationError(f"{rec.display_name} needs a valid price.")
+            if rec.listing_state == 'published' and not rec.list_price > 0:
+                raise ValidationError(f"{rec.display_name} cannot be published without a price.")
+
     def _is_marketplace_admin(self):
         return self.env.su or self.env.user.has_group('emi_marketplace.group_emi_marketplace_admin')
 
     @api.model_create_multi
     def create(self, vals_list):
-        if not self._is_marketplace_admin() and any(
-            vals.get('listing_state', 'draft') != 'draft' for vals in vals_list
-        ):
-            raise AccessError("New listings start as drafts; only a Marketplace Admin can set another status.")
+        if not self._is_marketplace_admin():
+            if any(vals.get('listing_state', 'draft') != 'draft' for vals in vals_list):
+                raise AccessError("New listings start as drafts; only a Marketplace Admin can set another status.")
+            for vals in vals_list:
+                # Explicit, so context or user defaults cannot publish a listing.
+                vals['listing_state'] = 'draft'
         return super().create(vals_list)
 
     def write(self, vals):

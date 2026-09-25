@@ -1,6 +1,6 @@
 {
     'name': 'EMI Marketplace',
-    'version': '19.0.1.2.0',
+    'version': '19.0.1.3.0',
     'summary': 'Multi-vendor phone marketplace: vendor onboarding, product ownership and listing moderation',
     'description': """
 EMI Marketplace

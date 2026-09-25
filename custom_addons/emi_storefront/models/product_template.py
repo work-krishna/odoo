@@ -3,6 +3,8 @@ from odoo import api, models
 
 from odoo.addons.emi_finance.tools import emi_math
 
+IMAGE_FIELDS = ('image_1920', 'image_1024', 'image_512', 'image_256', 'image_128')
+
 
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
@@ -11,6 +13,7 @@ class ProductTemplate(models.Model):
     def _emi_storefront_domain(self):
         """Phones customers may see and apply for."""
         return [
+            ('active', '=', True),
             ('listing_state', '=', 'published'),
             ('vendor_id.state', '=', 'approved'),
             ('vendor_id.active', '=', True),
@@ -20,6 +23,13 @@ class ProductTemplate(models.Model):
     def _emi_is_on_storefront(self):
         self.ensure_one()
         return bool(self.sudo().filtered_domain(self._emi_storefront_domain()))
+
+    def _can_return_content(self, field_name=None, access_token=None):
+        # Visitors have no read access to products (no website_sale), so
+        # /web/image would serve the placeholder for storefront phones.
+        if field_name in IMAGE_FIELDS and self._emi_is_on_storefront():
+            return True
+        return super()._can_return_content(field_name, access_token)
 
     @api.model
     def _emi_active_offers(self):
@@ -36,11 +46,17 @@ class ProductTemplate(models.Model):
 
     def _emi_min_down_payment(self, finance, price):
         """Smallest down payment the customer may make for this phone and lender."""
+        return self._emi_min_down_payment_option(finance, price)[0]
+
+    def _emi_min_down_payment_option(self, finance, price):
+        """(smallest down payment, the down payment option allowing it); the
+        option is empty when the phone has none and the lender's default applies."""
         self.ensure_one()
         options = self.sudo().downpayment_option_ids.filtered('active')
         if options:
-            return min(option.compute_min_amount(price) for option in options)
-        return price * finance.min_down_payment_percent / 100.0
+            option = min(options, key=lambda o: (o.compute_min_amount(price), not o.is_default))
+            return option.compute_min_amount(price), option
+        return price * finance.min_down_payment_percent / 100.0, options
 
     def _emi_best_quote(self, offers=None, price=None):
         """Lowest monthly EMI across today's offers, with the minimum down payment."""
@@ -55,3 +71,13 @@ class ProductTemplate(models.Model):
             if best is None or result['emi'] < best['emi']:
                 best = dict(result, finance=finance, plan=plan, rate=rate, principal=principal)
         return best
+
+
+class ProductProduct(models.Model):
+    _inherit = 'product.product'
+
+    def _can_return_content(self, field_name=None, access_token=None):
+        variant = self.sudo()
+        if field_name in IMAGE_FIELDS and variant.active and variant.product_tmpl_id._emi_is_on_storefront():
+            return True
+        return super()._can_return_content(field_name, access_token)
