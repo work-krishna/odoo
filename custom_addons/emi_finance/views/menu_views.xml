@@ -4,7 +4,8 @@
     <!-- No groups on the root or folder menus: a folder is shown whenever one
          of its children is visible, so each role sees only its own branches
          (including Marketplace, added under this root by emi_marketplace). -->
-    <menuitem id="menu_emi_root" name="EMI Platform" sequence="50"/>
+    <menuitem id="menu_emi_root" name="EMI Platform" sequence="50"
+              web_icon="emi_finance,static/description/icon.png"/>
     <!-- <menuitem> only ever links groups, so databases that installed the
          earlier version (root limited to officer/reviewer) need an explicit clear. -->
     <record id="menu_emi_root" model="ir.ui.menu">
