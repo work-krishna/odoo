@@ -1,6 +1,6 @@
 {
     'name': 'EMI Accounting',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.1.0',
     'summary': 'Double-entry accounting for EMI loans: disbursement, installments, commissions and retailer settlements',
     'description': """
 EMI Accounting
@@ -24,9 +24,16 @@ Disbursement (by the finance company's reviewer):
 Installments: posted on their due date (Dr customer / Cr loan principal,
 Cr interest income) and settled by payments registered by the finance
 company, or collected by the marketplace and remitted, per finance company.
+Payments ahead of schedule are held as the customer's advance and applied as
+each installment falls due; early settlement bills the principal left plus
+the interest accrued to date.
 
 Retailer settlements: weekly / bi-weekly / monthly per retailer, netting the
 collections against unpaid commission invoices.
+
+EMI entries and receipts are undone only through Cancel Disbursement,
+Reverse EMI Receipt and settlement Reverse, which keep the schedule and the
+settlements consistent.
 """,
     'category': 'Accounting/Finance',
     'author': 'EMI Platform',

@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models
+from odoo import _, fields, models
+from odoo.exceptions import ValidationError
 
 from odoo.addons.payment_khalti import const
 
@@ -37,7 +38,9 @@ class PaymentProvider(models.Model):
         """ Override of `payment` to build the request URL. """
         if self.code != 'khalti':
             return super()._build_request_url(endpoint, **kwargs)
-        return const.API_URLS['enabled' if self.state == 'enabled' else 'test'] + endpoint
+        if self.state == 'disabled':  # Never the sandbox by default: a disabled provider is not used.
+            raise ValidationError(_("The Khalti payment provider %s is disabled.", self.name))
+        return const.API_URLS[self.state] + endpoint
 
     def _build_request_headers(self, method, endpoint, payload, **kwargs):
         """ Override of `payment` to authenticate with the secret key. """

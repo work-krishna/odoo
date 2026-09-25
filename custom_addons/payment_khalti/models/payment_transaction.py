@@ -56,8 +56,9 @@ class PaymentTransaction(models.Model):
                 'POST', const.INITIATE_ENDPOINT, json=payload, reference=self.reference,
             )
         except ValidationError as error:
+            # Keep the error state (the payment form shows its message): render an empty form.
             self._set_error(str(error))
-            return {}
+            return {'api_url': '', 'khalti_params': {}}
         self.khalti_pidx = response.get('pidx')
         # A GET form drops the action's query string, so pass pidx as a field.
         url = urlsplit(response.get('payment_url', ''))

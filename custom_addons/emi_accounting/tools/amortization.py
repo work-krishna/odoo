@@ -36,6 +36,16 @@ def flat_effective_monthly_rate(principal, emi, months, tolerance=1e-12):
     return (low + high) / 2
 
 
+def effective_monthly_rate(principal, annual_rate, months, method):
+    """Monthly rate the schedule of ``build_schedule`` splits interest with."""
+    if not annual_rate or principal <= 0 or months <= 0:
+        return 0.0
+    if method == 'reducing':
+        return annual_rate / 100.0 / 12.0
+    total_interest = principal * annual_rate / 100.0 * months / 12.0
+    return flat_effective_monthly_rate(principal, (principal + total_interest) / months, months)
+
+
 def build_schedule(principal, annual_rate, months, method, start_date, round_fn=None):
     """Return a list of installments (dicts) for a loan disbursed on
     ``start_date``; the first installment is due one month later.

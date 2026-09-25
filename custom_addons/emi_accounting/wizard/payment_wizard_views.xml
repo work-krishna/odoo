@@ -52,4 +52,62 @@
         </field>
     </record>
 
+    <record id="view_emi_down_payment_refund_form" model="ir.ui.view">
+        <field name="name">emi.down.payment.refund.form</field>
+        <field name="model">emi.down.payment.refund</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <group>
+                        <field name="application_id" readonly="1"/>
+                        <field name="journal_id" options="{'no_create': True}"/>
+                        <field name="company_id" invisible="1"/>
+                    </group>
+                    <group>
+                        <field name="amount"/>
+                        <field name="payment_date"/>
+                        <field name="currency_id" invisible="1"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_confirm" type="object" string="Refund" class="btn-primary"/>
+                    <button string="Cancel" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_emi_foreclosure_form" model="ir.ui.view">
+        <field name="name">emi.foreclosure.form</field>
+        <field name="model">emi.foreclosure</field>
+        <field name="arch" type="xml">
+            <form>
+                <div class="alert alert-warning" role="alert" invisible="not note">
+                    <field name="note"/>
+                </div>
+                <p class="text-muted">
+                    The installments not billed yet are replaced by one payoff due today: their principal plus
+                    the interest accrued since the last due date. Installments already due are collected as usual.
+                </p>
+                <group>
+                    <group>
+                        <field name="application_id" readonly="1"/>
+                        <field name="date"/>
+                    </group>
+                    <group>
+                        <field name="principal_amount"/>
+                        <field name="interest_amount"/>
+                        <field name="amount"/>
+                        <field name="currency_id" invisible="1"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_confirm" type="object" string="Settle Early" class="btn-primary"
+                            invisible="note"/>
+                    <button string="Cancel" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
 </odoo>

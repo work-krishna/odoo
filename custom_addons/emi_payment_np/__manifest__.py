@@ -1,6 +1,6 @@
 {
     'name': 'EMI Online Payments (Nepal)',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.1.0',
     'summary': 'Customers pay EMI down payments and installments online (eSewa, Khalti, connectIPS, Fonepay...)',
     'description': """
 EMI Online Payments

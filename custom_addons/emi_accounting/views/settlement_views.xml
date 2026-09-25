@@ -12,6 +12,9 @@
                             invisible="state != 'draft'" groups="account.group_account_invoice"/>
                     <button name="action_cancel" type="object" string="Cancel" invisible="state != 'draft'"
                             groups="account.group_account_invoice"/>
+                    <button name="action_reverse" type="object" string="Reverse" invisible="state != 'posted'"
+                            groups="account.group_account_invoice"
+                            confirm="Reverse this settlement? Its collections and commission invoices become open again for the next settlement."/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,posted"/>
                 </header>
                 <sheet>

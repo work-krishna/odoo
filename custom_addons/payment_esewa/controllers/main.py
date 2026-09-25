@@ -8,6 +8,7 @@ import pprint
 from odoo import http
 from odoo.http import request
 
+from odoo.addons.payment.controllers.post_processing import PaymentPostProcessing
 from odoo.addons.payment.logging import get_payment_logger
 
 
@@ -37,14 +38,17 @@ class EsewaController(http.Controller):
 
     @http.route(_failure_url, type='http', auth='public', methods=['GET', 'POST'], csrf=False)
     def esewa_failure(self, uuid=None, **kwargs):
-        """ eSewa's failure redirect: confirm with the status API before canceling. """
+        """ eSewa's failure redirect, which anyone can call: only for the payer's own
+        transaction (the one monitored in their session), and only eSewa's status API
+        decides whether it is canceled. """
         tx_sudo = request.env['payment.transaction'].sudo()._search_by_reference(
             'esewa', {'transaction_uuid': uuid},
         )
-        if tx_sudo:
+        if tx_sudo and tx_sudo.id == request.session.get(PaymentPostProcessing.MONITORED_TX_ID_KEY):
             tx_sudo._esewa_sync_status()
-            if tx_sudo.state in ('draft', 'pending'):
-                tx_sudo._set_canceled(state_message="The payment was canceled on eSewa.")
+        elif tx_sudo:
+            _logger.warning("eSewa failure redirect for transaction %s outside its payment session: ignored.",
+                            tx_sudo.reference)
         return request.redirect('/payment/status')
 
     @staticmethod

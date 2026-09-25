@@ -81,6 +81,7 @@ class TestEmiAccountingFlow(EmiAccountingCommon):
         app = self._approved_application()
         app.with_user(self.reviewer).action_disburse()
         first = app.schedule_line_ids[0]
+        self._bill(app, 1)
         self._pay_installment(app, first.amount)
         self.assertEqual(first.state, 'paid')
         self.assertEqual(app.state, 'active')
@@ -90,6 +91,7 @@ class TestEmiAccountingFlow(EmiAccountingCommon):
 
         with self.assertRaises(UserError):
             app.with_user(self.officer).action_close()
+        self._bill(app)
         self._pay_installment(app, app.amount_outstanding)
         self.assertTrue(all(line.state == 'paid' for line in app.schedule_line_ids))
         self.assertAlmostEqual(self._balance(self.lender.emi_loan_account_id, self.customer), 0.0)
@@ -102,6 +104,7 @@ class TestEmiAccountingFlow(EmiAccountingCommon):
         app = self._approved_application()
         app.with_user(self.reviewer).action_disburse()
         first = app.schedule_line_ids[0]
+        self._bill(app, 1)
         with self.assertRaises(AccessError):  # reviewer does not work for the marketplace
             self._pay_installment(app, first.amount, user=self.reviewer)
         self._pay_installment(app, first.amount, user=self.officer, journal=self.company_data['default_journal_bank'])

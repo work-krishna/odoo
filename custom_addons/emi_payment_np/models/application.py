@@ -39,3 +39,14 @@ class EmiApplication(models.Model):
     def _emi_portal_can_access(self, partner):
         self.ensure_one()
         return self.sudo().partner_id.commercial_partner_id == partner.commercial_partner_id
+
+    def _emi_staff_user(self, company):
+        """Internal user to follow up an online payment booked in ``company``:
+        whoever handled the application for that company, else its creator."""
+        self.ensure_one()
+        app = self.sudo()
+        handler = app.approved_by if company == app.finance_company_id.company_id else app.reviewed_by
+        for user in (handler, app.create_uid):
+            if user and user.active and not user.share and company in user.company_ids:
+                return user
+        return self.env.ref('base.user_admin')

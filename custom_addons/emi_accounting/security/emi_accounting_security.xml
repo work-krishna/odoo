@@ -15,10 +15,35 @@
         <field name="groups" eval="[(4, ref('emi_finance.group_emi_officer'))]"/>
     </record>
 
+    <!-- Accountants of every company hold the billing group: limit them to
+         the loans of their own companies (as lender, or as the marketplace). -->
+    <record id="rule_schedule_line_billing_company" model="ir.rule">
+        <field name="name">Billing: installments of own companies' loans</field>
+        <field name="model_id" ref="model_emi_schedule_line"/>
+        <field name="domain_force">['|', ('finance_company_id.company_id', 'in', company_ids), ('application_id.company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[(4, ref('account.group_account_invoice'))]"/>
+    </record>
+
     <record id="rule_vendor_settlement_company" model="ir.rule">
         <field name="name">EMI Retailer Settlement: multi-company</field>
         <field name="model_id" ref="model_emi_vendor_settlement"/>
         <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <!-- Retailers' commission terms: marketplace accountants only. EMI staff
+         keep seeing every retailer when they also hold the billing group. -->
+    <record id="rule_vendor_billing_marketplace" model="ir.rule">
+        <field name="name">Billing: marketplace retailers only</field>
+        <field name="model_id" ref="emi_marketplace.model_emi_vendor"/>
+        <field name="domain_force">[('marketplace_company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[(4, ref('account.group_account_invoice'))]"/>
+    </record>
+
+    <record id="rule_vendor_emi_staff_all" model="ir.rule">
+        <field name="name">EMI Officer / Marketplace Admin: all retailers</field>
+        <field name="model_id" ref="emi_marketplace.model_emi_vendor"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('emi_finance.group_emi_officer')), (4, ref('emi_marketplace.group_emi_marketplace_admin'))]"/>
     </record>
 
 </odoo>

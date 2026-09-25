@@ -3,8 +3,8 @@
 import base64
 import hashlib
 import hmac
-import re
 from datetime import timedelta
+from uuid import uuid4
 
 from werkzeug.urls import url_encode
 
@@ -24,8 +24,13 @@ class PaymentTransaction(models.Model):
 
     esewa_transaction_uuid = fields.Char(
         string="eSewa Transaction UUID",
-        help="The transaction_uuid sent to eSewa (letters, digits and hyphens only).",
-        readonly=True, copy=False, index='btree_not_null',
+        help="The transaction_uuid sent to eSewa: random, unique, letters, digits and hyphens only.",
+        readonly=True, copy=False,
+    )
+
+    _esewa_transaction_uuid_unique = models.UniqueIndex(
+        '(esewa_transaction_uuid) WHERE esewa_transaction_uuid IS NOT NULL',
+        "An eSewa transaction UUID can only be used once.",
     )
 
     # === BUSINESS METHODS - PAYMENT FLOW === #
@@ -39,6 +44,7 @@ class PaymentTransaction(models.Model):
             return super()._get_specific_rendering_values(processing_values)
 
         provider_sudo = self.provider_id.sudo()
+        form_url = provider_sudo._esewa_get_form_url()  # Refuses disabled providers.
         uuid = self._esewa_get_transaction_uuid()
         total = self._esewa_format_amount(self.amount)
         base_url = provider_sudo.get_base_url()
@@ -57,12 +63,14 @@ class PaymentTransaction(models.Model):
         values['signature'] = self._esewa_sign(
             provider_sudo.esewa_secret_key, const.REQUEST_SIGNED_FIELDS, values,
         )
-        return {'api_url': provider_sudo._esewa_get_form_url(), 'esewa_values': values}
+        return {'api_url': form_url, 'esewa_values': values}
 
     def _esewa_get_transaction_uuid(self):
+        """ The uuid is the only thing tying eSewa's status to this transaction: keep it
+        unguessable (the failure URL is public) and independent of the reference. """
         self.ensure_one()
         if not self.esewa_transaction_uuid:
-            self.esewa_transaction_uuid = re.sub(r'[^A-Za-z0-9-]', '-', self.reference)
+            self.esewa_transaction_uuid = f'{self.id}-{uuid4().hex[:12]}'
         return self.esewa_transaction_uuid
 
     @staticmethod
@@ -82,9 +90,10 @@ class PaymentTransaction(models.Model):
         """ Check the signature of the data eSewa redirected back with. """
         self.ensure_one()
         field_names = (data.get('signed_field_names') or '').split(',')
-        if not data.get('signature') or not field_names or field_names == ['']:
+        secret_key = self.provider_id.sudo().esewa_secret_key
+        if not secret_key or not data.get('signature') or not field_names or field_names == ['']:
             return False
-        expected = self._esewa_sign(self.provider_id.sudo().esewa_secret_key, field_names, data)
+        expected = self._esewa_sign(secret_key, field_names, data)
         return hmac.compare_digest(expected, data['signature'])
 
     def _esewa_fetch_status(self):
@@ -98,22 +107,35 @@ class PaymentTransaction(models.Model):
         }, reference=self.reference)
 
     def _esewa_sync_status(self):
-        """ Refresh a pending transaction from the status API (errors are logged, not raised). """
-        for tx in self.filtered(lambda t: t.provider_code == 'esewa' and t.state in ('draft', 'pending')):
+        """ Refresh transactions from the status API (errors are logged, not raised).
+
+        Canceled transactions are checked too: a payment completed on eSewa after Odoo
+        gave up on it must still be recorded. """
+        for tx in self.filtered(lambda t: t.provider_code == 'esewa' and t.esewa_transaction_uuid
+                                and t.state in ('draft', 'pending', 'cancel')):
+            if tx.provider_id.state == 'disabled':
+                _logger.warning("eSewa provider %s is disabled: transaction %s not checked.",
+                                tx.provider_id.id, tx.reference)
+                continue
             try:
                 status_data = tx._esewa_fetch_status()
             except ValidationError:
                 _logger.warning("Could not fetch the eSewa status of transaction %s.", tx.reference)
                 continue
+            if tx.state == 'cancel' and status_data.get('status') not in const.STATUS_MAPPING['done']:
+                continue  # Still not paid.
             tx._process('esewa', status_data)
 
     @api.model
     def _esewa_cron_check_pending(self):
-        """ Settle eSewa payments whose customer never came back to Odoo. """
-        cutoff = fields.Datetime.now() - timedelta(minutes=5)
+        """ Settle eSewa payments whose customer never came back to Odoo, and recover
+        recently canceled ones that eSewa completed after all. """
+        now = fields.Datetime.now()
         self.search([
-            ('provider_code', '=', 'esewa'), ('state', 'in', ('draft', 'pending')),
-            ('esewa_transaction_uuid', '!=', False), ('create_date', '<=', cutoff),
+            ('provider_code', '=', 'esewa'), ('esewa_transaction_uuid', '!=', False),
+            ('create_date', '<=', now - timedelta(minutes=5)),
+            '|', ('state', 'in', ('draft', 'pending')),
+            '&', ('state', '=', 'cancel'), ('create_date', '>=', now - const.RECOVERY_WINDOW),
         ], limit=100)._esewa_sync_status()
 
     # === OVERRIDES - NOTIFICATION PROCESSING === #
@@ -124,10 +146,14 @@ class PaymentTransaction(models.Model):
         if provider_code != 'esewa':
             return super()._search_by_reference(provider_code, payment_data)
         uuid = payment_data.get('transaction_uuid')
-        tx = uuid and self.search([('esewa_transaction_uuid', '=', uuid), ('provider_code', '=', 'esewa')])
+        tx = uuid and self.search([('esewa_transaction_uuid', '=', uuid), ('provider_code', '=', 'esewa')], limit=2)
         if not tx:
             _logger.warning("No eSewa transaction found for transaction_uuid %s.", uuid)
-        return tx or self
+            return self
+        if len(tx) > 1:
+            _logger.warning("Several eSewa transactions share transaction_uuid %s: ignored.", uuid)
+            return self
+        return tx
 
     def _extract_amount_data(self, payment_data):
         """ Override of `payment` to return the amount eSewa confirmed. """
@@ -143,15 +169,25 @@ class PaymentTransaction(models.Model):
         if self.provider_code != 'esewa':
             return super()._apply_updates(payment_data)
 
+        status = payment_data.get('status')
+        if self.state == 'cancel':
+            # Only a completed payment of the right amount brings a canceled transaction back
+            # (the generic amount check cannot flag a canceled transaction as an error).
+            amount = self._extract_amount_data(payment_data)['amount']
+            if status not in const.STATUS_MAPPING['done'] or self.currency_id.compare_amounts(amount, self.amount):
+                return
         reference = payment_data.get('transaction_code') or payment_data.get('ref_id')
         if reference:
             self.provider_reference = reference
-        status = payment_data.get('status')
         if status in const.STATUS_MAPPING['done']:
-            self._set_done()
+            self._set_done(extra_allowed_states=('cancel',))
         elif status in const.STATUS_MAPPING['pending']:
             self._set_pending()
         elif status in const.STATUS_MAPPING['cancel']:
+            if status == 'NOT_FOUND' and self.create_date > fields.Datetime.now() - const.NOT_FOUND_GRACE:
+                # eSewa also answers NOT_FOUND while the customer is still on its payment page.
+                _logger.info("eSewa has no payment yet for transaction %s; checking again later.", self.reference)
+                return
             self._set_canceled(state_message=_("The payment was not completed on eSewa."))
         elif status in const.STATUS_MAPPING['error']:
             self._set_error(_("eSewa reports the payment as refunded (%s).", status))
