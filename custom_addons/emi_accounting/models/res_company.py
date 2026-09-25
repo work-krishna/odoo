@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import fields, models
-from odoo.exceptions import UserError
+from odoo.exceptions import AccessError, UserError
 
 
 class ResCompany(models.Model):
@@ -51,8 +51,16 @@ class ResCompany(models.Model):
     def action_emi_setup_accounting(self):
         """Create whatever EMI journal, accounts and product this company
         is missing, depending on whether it is the marketplace or a lender."""
-        Journal = self.env['account.journal']
+        if not self.env.su:
+            if not self.env.user.has_group('account.group_account_manager'):
+                raise AccessError("Only accounting administrators can set up EMI accounting.")
+            if self - self.env.user.company_ids:
+                raise AccessError("You can only set up EMI accounting for companies you have access to.")
         for company in self.sudo():
+            # Work inside the target company: it is usually not among the
+            # user's active companies (e.g. a lender company just created).
+            company = company.with_company(company)
+            Journal = company.env['account.journal']
             if not company.chart_template and not Journal.search_count([('company_id', '=', company.id)]):
                 raise UserError(f"Install a chart of accounts for {company.name} first.")
             if not company.emi_journal_id:
@@ -68,7 +76,7 @@ class ResCompany(models.Model):
                         '2150', 'EMI Collections Payable to Retailers', 'liability_current', reconcile=True,
                     )
                 if not company.emi_commission_product_id:
-                    company.emi_commission_product_id = self.env['product.product'].with_company(company).create({
+                    company.emi_commission_product_id = company.env['product.product'].create({
                         'name': 'Marketplace Commission',
                         'type': 'service',
                         'sale_ok': True,

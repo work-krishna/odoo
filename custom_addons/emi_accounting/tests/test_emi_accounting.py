@@ -5,6 +5,7 @@ from dateutil.relativedelta import relativedelta
 
 from odoo.exceptions import AccessError, UserError
 from odoo.tests import tagged
+from odoo.tests.common import new_test_user
 
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.addons.emi_accounting.tools.amortization import build_schedule, flat_effective_monthly_rate
@@ -175,3 +176,47 @@ class TestEmiAccountingFlow(EmiAccountingCommon):
         with self.assertRaisesRegex(UserError, 'EMI Loans Receivable'):
             app.with_user(self.reviewer).action_disburse()
         self.assertEqual(app.state, 'approved')
+
+
+@tagged('post_install', '-at_install')
+class TestEmiAccountingSetup(AccountTestInvoicingCommon):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        env = cls.env(su=True)
+        cls.marketplace = cls.company_data['company']
+        env['res.company'].search([('emi_is_marketplace', '=', True)]).emi_is_marketplace = False
+        cls.marketplace.emi_is_marketplace = True
+        cls.lender = cls.setup_other_company(name='Goodwill Finance')['company']
+        env['emi.finance.company'].create({'code': 'GWF', 'company_id': cls.lender.id})
+        cls.accountant = new_test_user(
+            env, 'emi_setup_accountant', groups='base.group_user,account.group_account_manager',
+            company_id=cls.marketplace.id, company_ids=[(6, 0, (cls.marketplace | cls.lender).ids)],
+        )
+
+    def test_setup_works_for_a_company_that_is_not_active(self):
+        # As right after creating a company: only the other company is active.
+        as_accountant = self.env(user=self.accountant, context={'allowed_company_ids': self.marketplace.ids})
+        as_accountant['res.company'].browse(self.lender.id).action_emi_setup_accounting()
+        self.assertEqual(self.lender.emi_journal_id.company_id, self.lender)
+        self.assertTrue(self.lender.emi_loan_account_id)
+        self.assertTrue(self.lender.emi_interest_income_account_id)
+
+        as_accountant = self.env(user=self.accountant, context={'allowed_company_ids': self.lender.ids})
+        as_accountant['res.company'].browse(self.marketplace.id).action_emi_setup_accounting()
+        self.assertEqual(self.marketplace.emi_journal_id.company_id, self.marketplace)
+        self.assertEqual(self.marketplace.emi_commission_product_id.company_id, self.marketplace)
+        self.assertTrue(self.marketplace.emi_vendor_clearing_account_id)
+
+    def test_setup_needs_an_accounting_manager_of_that_company(self):
+        env = self.env(su=True)
+        both = (self.marketplace | self.lender).ids
+        clerk = new_test_user(env, 'emi_setup_clerk', groups='base.group_user',
+                              company_id=self.marketplace.id, company_ids=[(6, 0, both)])
+        outsider = new_test_user(env, 'emi_setup_outsider', groups='base.group_user,account.group_account_manager',
+                                 company_id=self.marketplace.id, company_ids=[(6, 0, self.marketplace.ids)])
+        for user in (clerk, outsider):
+            with self.assertRaises(AccessError):
+                self.lender.with_user(user).action_emi_setup_accounting()
+        self.assertFalse(self.lender.emi_journal_id)
