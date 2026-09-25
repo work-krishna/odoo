@@ -35,5 +35,10 @@ class TestBsCalendar(BaseCase):
     def test_out_of_range(self):
         with self.assertRaises(ValueError):
             bs.bs_to_ad(2101, 1, 1)
+        # FY 2100/01 ends in BS 2101, beyond the table: FY 2099/00 is the last full year.
+        self.assertEqual(bs.MAX_FISCAL_YEAR, 2099)
+        self.assertEqual(bs.fiscal_year_bounds(2099), (date(2042, 7, 17), date(2043, 7, 16)))
+        with self.assertRaises(ValueError):
+            bs.fiscal_year_bounds(2100)
         with self.assertRaises(ValueError):
             bs.bs_to_ad(2083, 3, 33)
