@@ -10,6 +10,7 @@ from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives.serialization import pkcs12
 from cryptography.x509.oid import NameOID
 
+from odoo.exceptions import ValidationError
 from odoo.tests import tagged
 
 from odoo.addons.payment.tests.common import PaymentCommon
@@ -70,11 +71,18 @@ class TestConnectips(ConnectipsCommon):
         message = ','.join(f'{k}={values[k]}' for k in const.LOGIN_TOKEN_FIELDS) + ',TOKEN=TOKEN'
         self._verify(values['TOKEN'], message)  # raises if the signature is wrong
 
-    def test_missing_certificate_sets_error(self):
-        self.connectips.connectips_certificate = False
+    def test_certificate_is_required(self):
+        with self.assertRaises(ValidationError):
+            self.connectips.connectips_certificate = False
+
+    def test_signing_error_reaches_the_payment_form(self):
+        """ The redirect form still renders, so the error state and message reach the customer. """
+        self.connectips.connectips_certificate_password = 'wrong'
         tx = self._create_transaction('redirect')
-        self.assertEqual(tx._get_specific_rendering_values(None), {})
-        self.assertEqual(tx.state, 'error')
+        processing_values = tx._get_processing_values()
+        self.assertEqual(processing_values['state'], 'error')
+        self.assertIn("certificate", processing_values['state_message'])
+        self.assertEqual(tx._get_specific_rendering_values(None), {'api_url': '', 'connectips_values': {}})
 
     def test_validation_request_and_success(self):
         tx = self._create_transaction('redirect')
@@ -94,6 +102,14 @@ class TestConnectips(ConnectipsCommon):
 
     def test_basic_auth(self):
         self.assertEqual(self.connectips._build_request_auth(), ('MER-550-APP-1', 'api-pass'))
+
+    def test_disabled_provider_does_not_use_uat(self):
+        self.connectips.state = 'enabled'
+        self.assertEqual(self.connectips._build_request_url(const.VALIDATE_ENDPOINT),
+                         const.DEFAULT_BASE_URLS['enabled'] + const.VALIDATE_ENDPOINT)
+        self.connectips.state = 'disabled'
+        with self.assertRaises(ValidationError):
+            self.connectips._build_request_url(const.VALIDATE_ENDPOINT)
 
     def test_failed_and_error_statuses(self):
         tx = self._create_transaction('redirect', reference='tx-failed')

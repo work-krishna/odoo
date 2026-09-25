@@ -60,6 +60,7 @@
                         <tr><th>Financed by</th><td t-out="app.finance_company_id.name"/></tr>
                         <tr><th>Tenure</th><td><t t-out="app.tenure_months"/> months at <t t-out="app.interest_rate_percent"/>%</td></tr>
                         <tr><th>Monthly EMI</th><td t-out="app.emi_amount" t-options="{'widget': 'monetary', 'display_currency': app.currency_id}"/></tr>
+                        <tr t-if="app.advance_amount"><th>Paid in Advance</th><td t-out="app.advance_amount" t-options="{'widget': 'monetary', 'display_currency': app.currency_id}"/></tr>
                     </table>
                 </div>
                 <div class="col-lg-4">
@@ -94,7 +95,7 @@
                             <td class="text-end" t-out="line.principal_amount" t-options="{'widget': 'monetary', 'display_currency': app.currency_id}"/>
                             <td class="text-end" t-out="line.interest_amount" t-options="{'widget': 'monetary', 'display_currency': app.currency_id}"/>
                             <td class="text-end" t-out="line.amount_residual" t-options="{'widget': 'monetary', 'display_currency': app.currency_id}"/>
-                            <td><span t-att-class="'badge ' + {'paid': 'text-bg-success', 'overdue': 'text-bg-danger'}.get(line.state, 'text-bg-secondary')" t-field="line.state"/></td>
+                            <td><span t-att-class="'badge ' + {'paid': 'text-bg-success', 'settled': 'text-bg-light', 'overdue': 'text-bg-danger'}.get(line.state, 'text-bg-secondary')" t-field="line.state"/></td>
                         </tr>
                     </tbody>
                 </t>

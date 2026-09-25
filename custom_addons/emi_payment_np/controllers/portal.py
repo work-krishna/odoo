@@ -82,16 +82,28 @@ class EmiPaymentPortal(payment_portal.PaymentPortal):
                 'emi_application_id': app_id,
                 'emi_kind': emi_kind,
             })
+            # The link's token is proven here; the payment page may be shown
+            # to another logged-in user, whose own token would not match.
+            request.update_context(emi_payment_link_application_id=app_id)
         return super().payment_pay(*args, amount=amount, access_token=access_token, **kwargs)
 
     def _get_extra_payment_form_values(self, emi_application_id=None, emi_kind=None, access_token=None, **kwargs):
-        """ Override of `payment` to route the transaction through the EMI application. """
+        """ Override of `payment` to route the transaction through the EMI application.
+
+        Core pages (invoices, payment methods) pass their query string here as
+        well: the EMI values, which carry the application's portal token, are
+        only added once access to that application is proven. """
         form_values = super()._get_extra_payment_form_values(
             emi_application_id=emi_application_id, emi_kind=emi_kind, access_token=access_token, **kwargs
         )
         app_id = self._cast_as_int(emi_application_id)
-        if app_id:
-            app_sudo = request.env['emi.application'].sudo().browse(app_id)
+        if app_id and emi_kind in PAYMENT_KINDS:
+            try:
+                app_sudo = _get_application(app_id, access_token)
+            except (AccessError, MissingError):
+                app_sudo = request.env['emi.application'].sudo().browse(app_id).exists()
+                if not app_sudo or request.env.context.get('emi_payment_link_application_id') != app_id:
+                    return form_values
             form_values.update({
                 'amount': app_sudo._emi_amount_due(emi_kind),  # never more than is due now
                 'transaction_route': f'/emi/transaction/{app_id}/{emi_kind}',
@@ -113,6 +125,7 @@ class EmiPaymentPortal(payment_portal.PaymentPortal):
         if not amount:
             raise ValidationError(_("Nothing is due on this application right now."))
         self._validate_transaction_kwargs(kwargs)
+        self._emi_check_payment_option(app_sudo, kind, amount, kwargs)
         kwargs.update({
             'amount': amount,  # server-side amount, whatever the form posted
             'currency_id': app_sudo.currency_id.id,
@@ -126,3 +139,31 @@ class EmiPaymentPortal(payment_portal.PaymentPortal):
         if tx_sudo.company_id != app_sudo._emi_payment_company(kind):
             raise ValidationError(_("This payment method is not available for this payment."))
         return tx_sudo._get_processing_values()
+
+    def _emi_check_payment_option(self, app_sudo, kind, amount, kwargs):
+        """ Only what the payment form offers for this loan: an active,
+        published provider of the collecting company (test mode for internal
+        users only) and one of its payment methods or the customer's tokens. """
+        unavailable = ValidationError(_("This payment method is not available for this payment."))
+        if kwargs.get('is_validation'):
+            raise unavailable
+        company = app_sudo._emi_payment_company(kind)
+        partner = app_sudo.partner_id
+        providers_sudo = request.env['payment.provider'].sudo()._get_compatible_providers(
+            company.id, partner.id, amount, currency_id=app_sudo.currency_id.id,
+        )
+        if not request.env.user._is_internal():
+            providers_sudo = providers_sudo.filtered(lambda p: p.state == 'enabled')
+        provider_sudo = providers_sudo.filtered(lambda p: p.id == self._cast_as_int(kwargs.get('provider_id')))
+        if not provider_sudo or provider_sudo.company_id != company:
+            raise unavailable
+        if kwargs.get('flow') == 'token':
+            tokens_sudo = request.env['payment.token'].sudo()._get_available_tokens(provider_sudo.ids, partner.id)
+            if self._cast_as_int(kwargs.get('token_id')) not in tokens_sudo.ids:
+                raise unavailable
+        else:
+            methods_sudo = request.env['payment.method'].sudo()._get_compatible_payment_methods(
+                provider_sudo.ids, partner.id, currency_id=app_sudo.currency_id.id,
+            )
+            if self._cast_as_int(kwargs.get('payment_method_id')) not in methods_sudo.ids:
+                raise unavailable

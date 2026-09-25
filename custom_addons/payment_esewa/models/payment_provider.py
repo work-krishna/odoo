@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models
+from odoo import _, fields, models
+from odoo.exceptions import ValidationError
 
 from odoo.addons.payment_esewa import const
 
@@ -14,12 +15,14 @@ class PaymentProvider(models.Model):
         help="Merchant (product) code given by eSewa. The public test merchant is EPAYTEST.",
         required_if_provider='esewa',
         groups='base.group_system',
+        copy=False,
     )
     esewa_secret_key = fields.Char(
         string="eSewa Secret Key",
         help="Secret key used to sign the ePay v2 requests and verify eSewa's responses.",
         required_if_provider='esewa',
         groups='base.group_system',
+        copy=False,
     )
 
     # === COMPUTE METHODS === #
@@ -44,12 +47,19 @@ class PaymentProvider(models.Model):
 
     # === BUSINESS METHODS === #
 
+    def _esewa_environment(self):
+        """ 'enabled' (production) or 'test' (eSewa's UAT); a disabled provider is never used. """
+        self.ensure_one()
+        if self.state == 'disabled':
+            raise ValidationError(_("The eSewa payment provider %s is disabled.", self.name))
+        return self.state
+
     def _esewa_get_form_url(self):
         self.ensure_one()
-        return const.FORM_URLS['enabled' if self.state == 'enabled' else 'test']
+        return const.FORM_URLS[self._esewa_environment()]
 
     def _build_request_url(self, endpoint, **kwargs):
         """ Override of `payment` to build the status API URL. """
         if self.code != 'esewa':
             return super()._build_request_url(endpoint, **kwargs)
-        return const.STATUS_URLS['enabled' if self.state == 'enabled' else 'test']
+        return const.STATUS_URLS[self._esewa_environment()]

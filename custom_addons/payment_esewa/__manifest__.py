@@ -2,7 +2,7 @@
 
 {
     'name': "Payment Provider: eSewa",
-    'version': '1.0',
+    'version': '1.1',
     'category': 'Accounting/Payment Providers',
     'sequence': 351,
     'summary': "A payment provider for eSewa ePay v2 (Nepal).",

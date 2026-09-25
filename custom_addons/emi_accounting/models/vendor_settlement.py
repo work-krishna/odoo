@@ -16,8 +16,10 @@ class EmiVendorSettlement(models.Model):
     of the marketplace commission invoices the retailer has not paid yet.
 
     Posting books: Dr Collections Payable to Retailers (gross) /
-    Cr retailer receivable (open commission invoices) / Cr retailer
-    payable (net). The net payable is then paid like any vendor payable.
+    Cr retailer receivable (open commission invoices, up to the gross) /
+    Cr retailer payable (net). The net payable is then paid like any vendor
+    payable; commission the gross does not cover stays open for the next
+    settlement.
     """
     _name = 'emi.vendor.settlement'
     _description = 'EMI Retailer Settlement'
@@ -50,7 +52,8 @@ class EmiVendorSettlement(models.Model):
     # Plain fields: set when the settlement is drafted/refreshed and frozen
     # at posting (the lines' residuals drop to zero once reconciled).
     gross_amount = fields.Monetary(readonly=True, help="Collections held for the retailer.")
-    commission_amount = fields.Monetary(readonly=True, help="Unpaid commission invoices netted off.")
+    commission_amount = fields.Monetary(
+        readonly=True, help="Unpaid commission invoices netted off, never more than the collections.")
     net_amount = fields.Monetary(readonly=True, help="Amount to pay the retailer.")
     move_id = fields.Many2one('account.move', string='Settlement Entry', readonly=True, copy=False)
     payable_line_id = fields.Many2one('account.move.line', readonly=True, copy=False)
@@ -62,7 +65,9 @@ class EmiVendorSettlement(models.Model):
     @api.model
     def _lines_vals(self, collections, commissions):
         gross = -sum(collections.mapped('amount_residual'))
-        commission = sum(commissions.mapped('amount_residual'))
+        # Never net more than the gross: a negative payout would leave the
+        # retailer owing on its payable account, which later runs ignore.
+        commission = min(sum(commissions.mapped('amount_residual')), gross)
         return {
             'collection_line_ids': [(6, 0, collections.ids)],
             'commission_line_ids': [(6, 0, commissions.ids)],
@@ -71,12 +76,14 @@ class EmiVendorSettlement(models.Model):
             'net_amount': gross - commission,
         }
 
-    @api.depends('payable_line_id.amount_residual')
+    @api.depends('state', 'net_amount', 'payable_line_id.amount_residual')
     def _compute_payment_state(self):
         for rec in self:
             line = rec.payable_line_id
-            if not line or not rec.net_amount:
-                rec.payment_state = 'paid' if rec.state == 'posted' and not rec.net_amount else 'not_paid'
+            if rec.state != 'posted':
+                rec.payment_state = 'not_paid'
+            elif not line or not rec.net_amount:
+                rec.payment_state = 'paid' if not rec.net_amount else 'not_paid'
             elif rec.currency_id.is_zero(line.amount_residual):
                 rec.payment_state = 'paid'
             elif rec.currency_id.compare_amounts(-line.amount_residual, rec.net_amount) < 0:
@@ -177,8 +184,26 @@ class EmiVendorSettlement(models.Model):
     def action_cancel(self):
         for rec in self:
             if rec.state != 'draft':
-                raise UserError("Posted settlements are reversed from their journal entry, not cancelled.")
+                raise UserError("Posted settlements are reversed with Reverse, not cancelled.")
         self.write({'state': 'cancel'})
+
+    def action_reverse(self):
+        """Reverse a posted settlement that was not paid out yet: the
+        collections and commission invoices it matched are open again for the
+        next settlement."""
+        self.check_access('write')
+        date = fields.Date.context_today(self)
+        for rec in self:
+            if rec.state != 'posted':
+                raise UserError("Only posted settlements can be reversed.")
+            if rec.net_amount and rec.payment_state != 'not_paid':
+                raise UserError(f"{rec.name} is already paid to the retailer: cancel or unreconcile that "
+                                "payment first.")
+            rec.move_id.sudo().with_context(emi_reversal=True)._reverse_moves(
+                [{'date': date, 'ref': f"Reversal of {rec.name}"}], cancel=True,
+            )
+            rec.write({'state': 'cancel'})
+            rec.message_post(body=f"Reversed by {self.env.user.name}.")
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_posted(self):

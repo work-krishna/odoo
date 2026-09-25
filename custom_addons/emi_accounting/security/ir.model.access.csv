@@ -11,3 +11,6 @@ access_emi_installment_payment_reviewer,emi.installment.payment.reviewer,model_e
 access_emi_installment_payment_billing,emi.installment.payment.billing,model_emi_installment_payment,account.group_account_invoice,1,1,1,1
 access_emi_down_payment_officer,emi.down.payment.officer,model_emi_down_payment,emi_finance.group_emi_officer,1,1,1,1
 access_emi_down_payment_billing,emi.down.payment.billing,model_emi_down_payment,account.group_account_invoice,1,1,1,1
+access_emi_down_payment_refund_officer,emi.down.payment.refund.officer,model_emi_down_payment_refund,emi_finance.group_emi_officer,1,1,1,1
+access_emi_down_payment_refund_billing,emi.down.payment.refund.billing,model_emi_down_payment_refund,account.group_account_invoice,1,1,1,1
+access_emi_foreclosure_reviewer,emi.foreclosure.reviewer,model_emi_foreclosure,emi_finance.group_emi_finance_reviewer,1,1,1,1

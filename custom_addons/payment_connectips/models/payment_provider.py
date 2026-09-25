@@ -35,7 +35,8 @@ class PaymentProvider(models.Model):
         help="Password for the transaction validation API (basic authentication with the App ID).",
     )
     connectips_certificate = fields.Binary(
-        string="Creditor Certificate (.pfx)", attachment=True, groups='base.group_system',
+        string="Creditor Certificate (.pfx)", attachment=True, required_if_provider='connectips',
+        groups='base.group_system',
         help="The CREDITOR.pfx file from NCHL used to sign requests.",
     )
     connectips_certificate_password = fields.Char(
@@ -78,8 +79,10 @@ class PaymentProvider(models.Model):
 
     def _connectips_base_url(self):
         self.ensure_one()
+        if self.state == 'disabled':  # Never the UAT by default: a disabled provider is not used.
+            raise ValidationError(_("The connectIPS payment provider %s is disabled.", self.name))
         url = self.connectips_live_base_url if self.state == 'enabled' else self.connectips_test_base_url
-        return (url or const.DEFAULT_BASE_URLS['enabled' if self.state == 'enabled' else 'test']).rstrip('/')
+        return (url or const.DEFAULT_BASE_URLS[self.state]).rstrip('/')
 
     def _build_request_url(self, endpoint, **kwargs):
         """ Override of `payment` to build the request URL. """

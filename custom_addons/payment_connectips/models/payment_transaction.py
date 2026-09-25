@@ -48,8 +48,9 @@ class PaymentTransaction(models.Model):
         try:
             values['TOKEN'] = provider_sudo._connectips_sign(message)
         except ValidationError as error:
+            # Keep the error state (the payment form shows its message): render an empty form.
             self._set_error(str(error))
-            return {}
+            return {'api_url': '', 'connectips_values': {}}
         return {
             'api_url': provider_sudo._build_request_url(const.LOGIN_PAGE_ENDPOINT),
             'connectips_values': values,

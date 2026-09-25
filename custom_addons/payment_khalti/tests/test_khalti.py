@@ -68,12 +68,26 @@ class TestKhalti(KhaltiCommon):
         self.assertEqual(self.khalti._build_request_headers('POST', 'x', {}), {'Authorization': 'Key test_secret'})
         self.assertEqual(self.khalti._build_request_url(const.LOOKUP_ENDPOINT),
                          'https://dev.khalti.com/api/v2/epayment/lookup/')
+        self.khalti.state = 'enabled'
+        self.assertEqual(self.khalti._build_request_url(const.LOOKUP_ENDPOINT),
+                         'https://khalti.com/api/v2/epayment/lookup/')
+        self.khalti.state = 'disabled'  # not the sandbox
+        with self.assertRaises(ValidationError):
+            self.khalti._build_request_url(const.LOOKUP_ENDPOINT)
 
     def test_initiate_error_sets_error(self):
         tx = self._create_transaction('redirect')
         with patch(SEND, side_effect=ValidationError("amount: Amount should be greater than Rs. 10")):
-            self.assertEqual(tx._get_specific_rendering_values(None), {})
+            self.assertEqual(tx._get_specific_rendering_values(None), {'api_url': '', 'khalti_params': {}})
         self.assertEqual(tx.state, 'error')
+
+    def test_initiate_error_reaches_the_payment_form(self):
+        """ The redirect form still renders, so the error state and message reach the customer. """
+        tx = self._create_transaction('redirect')
+        with patch(SEND, side_effect=ValidationError("Invalid token.")):
+            processing_values = tx._get_processing_values()
+        self.assertEqual(processing_values['state'], 'error')
+        self.assertIn("Invalid token.", processing_values['state_message'])
 
     def test_lookup_completed(self):
         tx, _rendering = self._initiated_tx()
