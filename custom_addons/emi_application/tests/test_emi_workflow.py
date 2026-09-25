@@ -140,6 +140,65 @@ class TestEmiApplicationWorkflow(EmiCommon):
                 'state': 'approved',
             })
 
+    def test_defaults_cannot_prefill_workflow_fields(self):
+        """Context keys and user defaults must not create an application
+        that skips submission, KYC review or the lender's approval."""
+        vals = {
+            'partner_id': self.customer.id, 'product_id': self.phone.id,
+            'finance_company_id': self.finance.id, 'tenure_plan_id': self.plan_18.id,
+            'down_payment_amount': 10000.0, 'delivery_note': 'Deliver to office',
+        }
+        defaults = {
+            'default_state': 'pending_finance_approval', 'default_approved_by': self.reviewer.id,
+            'default_approved_date': '2024-01-01 00:00:00', 'default_reviewed_by': self.officer.id,
+            'default_sent_to_finance_date': '2024-01-01 00:00:00', 'default_rejection_reason': 'x',
+            'default_financed_amount': 5000.0, 'default_interest_rate_percent': 0.0,
+        }
+        App = self.env['emi.application'].with_user(self.officer)
+        if 'disbursement_date' in App._fields:  # emi_accounting's server fields
+            defaults.update(default_disbursement_date='2024-01-01', default_commission_amount=1.0)
+        app = App.with_context(**defaults).create(dict(vals))
+        self.assertEqual(app.state, 'draft')
+        self.assertFalse(app.approved_by or app.approved_date or app.reviewed_by or app.sent_to_finance_date)
+        self.assertFalse(app.rejection_reason)
+        self.assertEqual(app.financed_amount, 90000.0)
+        self.assertEqual(app.interest_rate_percent, 7.0)
+        if 'disbursement_date' in App._fields:
+            self.assertFalse(app.disbursement_date)
+            self.assertFalse(app.commission_amount)
+
+        self.env['ir.default'].with_user(self.officer).set('emi.application', 'state', 'approved', user_id=True)
+        self.assertEqual(App.create(dict(vals)).state, 'draft')
+
+    def test_computed_amounts_cannot_be_written(self):
+        app = self._draft_application()
+        app.with_user(self.officer).action_submit()
+        app.with_user(self.officer).action_start_review()
+        eur = self.env.ref('base.EUR')
+        for vals in ({'financed_amount': 5000.0}, {'emi_amount': 1.0}, {'total_payable_amount': 1.0},
+                     {'total_interest_amount': 0.0}, {'currency_id': eur.id}, {'sent_to_finance_date': False}):
+            with self.assertRaises(AccessError):
+                app.with_user(self.officer).write(vals)
+        self.assertEqual(app.financed_amount, 90000.0)
+
+    def test_kyc_defaults_cannot_verify_or_attach_late(self):
+        app = self._draft_application(kyc_ids=[])
+        Kyc = self.env['emi.kyc'].with_user(self.officer)
+        kyc = Kyc.with_context(default_verified=True, default_consent_date='2024-01-01 00:00:00').create(
+            dict(self._kyc_vals(), application_id=app.id))
+        self.assertFalse(kyc.verified)
+        self.assertFalse(kyc.consent_date)
+        with self.assertRaises(AccessError):
+            kyc.write({'consent_date': '2024-01-01 00:00:00'})
+
+        late = self._draft_application(kyc_ids=[])
+        late.sudo().write({'state': 'kyc_review'})
+        with self.assertRaises(UserError):
+            Kyc.with_context(default_application_id=late.id).create(self._kyc_vals())
+        self.env['ir.default'].with_user(self.officer).set('emi.kyc', 'application_id', late.id, user_id=True)
+        with self.assertRaises(UserError):
+            Kyc.create(self._kyc_vals())
+
     def test_portal_customer_is_read_only(self):
         app = self._draft_application()
         as_customer = app.with_user(self.customer_user)
@@ -164,6 +223,20 @@ class TestEmiApplicationWorkflow(EmiCommon):
         app.kyc_ids.with_user(self.officer).write({'citizenship_no': '99-99-99'})
         self.assertFalse(app.kyc_verified)
 
+    def test_kyc_income_and_guarantor_edits_reset_verification(self):
+        app = self._draft_application()
+        officer_app = app.with_user(self.officer)
+        officer_app.action_submit()
+        officer_app.action_start_review()
+        for vals in ({'monthly_income': 500000}, {'occupation': 'business'}, {'employer_name': 'Other Co'},
+                     {'bank_name': 'Other Bank'}, {'guarantor_name': 'Someone Else'}):
+            officer_app.action_verify_kyc()
+            app.kyc_ids.with_user(self.officer).write(vals)
+            self.assertFalse(app.kyc_verified, vals)
+        officer_app.action_verify_kyc()
+        app.kyc_ids.with_user(self.officer).write({'temporary_address': 'Lalitpur', 'email': 'ram@example.com'})
+        self.assertTrue(app.kyc_verified)
+
     def test_one_kyc_per_application(self):
         app = self._draft_application()
         with self.assertRaises(Exception):
@@ -180,8 +253,38 @@ class TestEmiApplicationWorkflow(EmiCommon):
 
     def test_reviewer_scoped_to_own_finance_company(self):
         app = self._draft_application()
+        app.with_user(self.officer).action_submit()
+        app.with_user(self.officer).action_start_review()
+        app.with_user(self.officer).action_verify_kyc()
+        app.with_user(self.officer).action_send_to_finance()
         self.assertFalse(self.env['emi.application'].with_user(self.other_reviewer).search([('id', '=', app.id)]))
         self.assertTrue(self.env['emi.application'].with_user(self.reviewer).search([('id', '=', app.id)]))
+
+    def test_reviewer_sees_only_applications_sent_to_them(self):
+        """Lender staff get an application and its KYC documents only once the
+        marketplace sends it; their own rejections stay visible."""
+        App = self.env['emi.application'].with_user(self.reviewer)
+        Kyc = self.env['emi.kyc'].with_user(self.reviewer)
+        draft = self._draft_application()
+        kyc_rejected = self._draft_application()
+        kyc_rejected.with_user(self.officer).action_submit()
+        kyc_rejected.with_user(self.officer).action_start_review()
+        kyc_rejected.with_user(self.officer).action_reject('Citizenship photo unreadable')
+        for app in (draft, kyc_rejected):
+            self.assertFalse(App.search([('id', '=', app.id)]))
+            self.assertFalse(Kyc.search([('application_id', '=', app.id)]))
+            with self.assertRaises(AccessError):
+                app.kyc_ids.with_user(self.reviewer).read(['photo'])
+
+        sent = self._draft_application()
+        sent.with_user(self.officer).action_submit()
+        sent.with_user(self.officer).action_start_review()
+        sent.with_user(self.officer).action_verify_kyc()
+        sent.with_user(self.officer).action_send_to_finance()
+        self.assertTrue(sent.sent_to_finance_date)
+        sent.with_user(self.reviewer).action_reject('Income too low')
+        self.assertEqual(App.search([('id', '=', sent.id)]).state, 'rejected')
+        self.assertTrue(Kyc.search([('application_id', '=', sent.id)]).photo)
 
     # ------------------------------------------------------------------
     # Submission validation
@@ -218,6 +321,37 @@ class TestEmiApplicationWorkflow(EmiCommon):
         self.vendor.with_user(self.mp_admin).action_suspend()
         with self.assertRaises(UserError):
             app.with_user(self.officer).action_submit()
+
+    def test_submit_rejects_archived_terms(self):
+        zero_down = self.env['emi.downpayment.option'].create({
+            'product_tmpl_id': self.phone_tmpl.id, 'name': '0% Down', 'value': 0.0,
+        })
+        self.env['emi.downpayment.option'].create({
+            'product_tmpl_id': self.phone_tmpl.id, 'name': '20% Down', 'value': 20.0,
+        })
+        app = self._draft_application(down_payment_amount=0.0, downpayment_option_id=zero_down.id)
+        zero_down.active = False
+        with self.assertRaises(UserError):
+            app.with_user(self.officer).action_submit()
+        zero_down.active = True
+
+        # other_finance offers every tenure, so only the archive check stops it.
+        self.env['emi.interest.rate'].create({
+            'finance_company_id': self.other_finance.id, 'tenure_plan_id': self.plan_18.id,
+            'rate_percent': 7.0, 'date_from': '2020-01-01',
+        })
+        any_tenure = self._draft_application(finance_company_id=self.other_finance.id)
+        self.plan_18.active = False
+        with self.assertRaises(UserError):
+            any_tenure.with_user(self.officer).action_submit()
+        self.plan_18.active = True
+
+        self.phone_tmpl.active = False
+        with self.assertRaises(UserError):
+            app.with_user(self.officer).action_submit()
+        self.phone_tmpl.active = True
+        app.with_user(self.officer).action_submit()
+        self.assertEqual(app.state, 'submitted')
 
     def test_submit_requires_active_rate(self):
         self.rate_18.date_to = '2020-12-31'

@@ -15,12 +15,14 @@ class EmiKyc(models.Model):
     _rec_name = 'full_name'
 
     # States in which staff may still correct KYC data. Any change to
-    # identity or document fields clears the verification.
+    # identity, income, bank, guarantor or document fields clears the verification.
     _EMI_EDITABLE_STATES = ('draft', 'submitted', 'kyc_review')
     _EMI_UNVERIFY_FIELDS = frozenset({
-        'full_name', 'date_of_birth', 'citizenship_no', 'citizenship_issue_district',
-        'citizenship_issue_date', 'pan_no', 'permanent_address', 'citizenship_front',
-        'citizenship_back', 'photo', 'income_proof', 'bank_account_no',
+        'full_name', 'date_of_birth', 'phone', 'citizenship_no', 'citizenship_issue_district',
+        'citizenship_issue_date', 'pan_no', 'permanent_address', 'occupation', 'employer_name',
+        'monthly_income', 'currency_id', 'bank_name', 'bank_account_no', 'guarantor_name',
+        'guarantor_phone', 'guarantor_relation', 'citizenship_front', 'citizenship_back', 'photo',
+        'income_proof',
     })
 
     _application_uniq = models.Constraint(
@@ -86,23 +88,34 @@ class EmiKyc(models.Model):
         help="Set by the 'Verify KYC' step of the application once an EMI Officer has "
              "checked the identity documents.",
     )
+    consent_date = fields.Datetime(
+        string='Consent Given On', readonly=True, copy=False,
+        help="When the applicant agreed, on the online application, that the marketplace and the "
+             "finance company may verify these details.",
+    )
 
     @api.model_create_multi
     def create(self, vals_list):
         if not self.env.su:
             if any(vals.get('verified') for vals in vals_list):
                 raise AccessError("KYC is verified through the application's 'Verify KYC' step.")
-            apps = self.env['emi.application'].browse(
-                [vals['application_id'] for vals in vals_list if vals.get('application_id')]
-            )
-            if any(app.state != 'draft' for app in apps):
-                raise UserError("KYC can only be added while the application is a draft.")
-        return super().create(vals_list)
+            if any(vals.get('consent_date') for vals in vals_list):
+                raise AccessError("The applicant's consent is recorded by the online application.")
+            for vals in vals_list:
+                # Explicit, so context or user defaults cannot supply them.
+                vals.update(verified=False, consent_date=False)
+        records = super().create(vals_list)
+        # After create, so an application_id from context or user defaults is checked too.
+        if not self.env.su and any(rec.application_id.state != 'draft' for rec in records):
+            raise UserError("KYC can only be added while the application is a draft.")
+        return records
 
     def write(self, vals):
         if not self.env.su:
             if 'verified' in vals:
                 raise AccessError("KYC is verified through the application's 'Verify KYC' step.")
+            if 'consent_date' in vals:
+                raise AccessError("The applicant's consent is recorded by the online application.")
             if any(rec.application_id.state not in self._EMI_EDITABLE_STATES for rec in self):
                 raise UserError("KYC can no longer be changed once the application has left review.")
             if 'application_id' in vals:

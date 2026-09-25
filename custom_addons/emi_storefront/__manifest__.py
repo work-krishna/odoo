@@ -1,6 +1,6 @@
 {
     'name': 'EMI Storefront',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.1.0',
     'summary': 'Public phone catalog with EMI calculator, online EMI applications with KYC, retailer dashboard',
     'description': """
 EMI Storefront

@@ -193,9 +193,10 @@
                         </div>
 
                         <a t-if="rows" class="btn btn-primary btn-lg mt-4"
-                           t-att-href="'%s/apply?variant_id=%s%s%s' % (phone_url, variant.id,
+                           t-att-href="'%s/apply?variant_id=%s%s%s%s' % (phone_url, variant.id,
                                         ('&amp;finance_company_id=%s' % calculation['finance'].id) if calculation else '',
-                                        ('&amp;tenure_plan_id=%s&amp;down_payment_amount=%s' % (calculation['plan'].id, calculation['down_payment'])) if calculation else '')">
+                                        ('&amp;tenure_plan_id=%s&amp;down_payment_amount=%s' % (calculation['plan'].id, calculation['down_payment'])) if calculation else '',
+                                        ('&amp;downpayment_option_id=%s' % calculation['option'].id) if calculation and calculation['option'] else '')">
                             Apply for EMI
                         </a>
                     </div>

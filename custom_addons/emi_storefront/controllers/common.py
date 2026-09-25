@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import base64
+import math
 
 from werkzeug.exceptions import NotFound
 
@@ -19,7 +20,7 @@ def get_phone(slug):
     """Published phone for a '/phones/<slug>' URL, or 404."""
     _name, tmpl_id = request.env['ir.http']._unslug(slug)
     phone = request.env['product.template'].sudo().browse(tmpl_id or 0).exists()
-    if not phone or not phone._emi_is_on_storefront():
+    if not phone or not phone._emi_is_on_storefront() or not phone.product_variant_ids:
         raise NotFound()
     return phone
 
@@ -45,11 +46,19 @@ def read_upload(upload, label, allowed=DOCUMENT_MIMETYPES, required=True):
     return base64.b64encode(data)
 
 
+def text(post, key):
+    """Stripped text of a form field; a file sent under a text field's name counts as empty."""
+    value = post.get(key)
+    return value.strip() if isinstance(value, str) else ''
+
+
 def to_float(value, default=0.0):
     try:
-        return float(str(value).replace(',', '')) if value not in (None, '') else default
+        number = float(str(value).replace(',', '')) if value not in (None, '') else default
     except ValueError:
         return default
+    # float() also accepts 'nan', 'inf' and '1e309'.
+    return number if number is None or math.isfinite(number) else default
 
 
 def to_int(value):
@@ -59,9 +68,11 @@ def to_int(value):
         return None
 
 
-def current_vendor():
-    """The approved-or-pending retailer the logged-in portal user works for."""
+def current_vendor(include_archived=False):
+    """The retailer the logged-in portal user works for, whatever its review
+    state. Archived (offboarded) retailers only with include_archived."""
     user = request.env.user
     if user._is_public():
         return request.env['emi.vendor']
-    return request.env['emi.vendor'].sudo().search([('user_ids', 'in', user.id)], limit=1)
+    Vendor = request.env['emi.vendor'].sudo().with_context(active_test=not include_archived)
+    return Vendor.search([('user_ids', 'in', user.id)], limit=1)

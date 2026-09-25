@@ -94,6 +94,7 @@
                             <field name="kyc_verified"/>
                             <field name="reviewed_by"/>
                             <field name="reviewed_date"/>
+                            <field name="sent_to_finance_date"/>
                         </group>
                         <group>
                             <field name="approved_by"/>

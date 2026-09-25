@@ -22,9 +22,10 @@ class EmiApplication(models.Model):
     })
     # Set by the server (computes, snapshots, workflow actions) only.
     _EMI_SERVER_FIELDS = frozenset({
-        'name', 'state', 'vendor_id', 'list_price', 'interest_rate_id', 'interest_rate_percent',
-        'interest_calc_method', 'tenure_months', 'rejection_reason',
-        'reviewed_by', 'reviewed_date', 'approved_by', 'approved_date',
+        'name', 'state', 'currency_id', 'vendor_id', 'list_price', 'interest_rate_id', 'interest_rate_percent',
+        'interest_calc_method', 'tenure_months', 'financed_amount', 'total_interest_amount',
+        'total_payable_amount', 'emi_amount', 'rejection_reason', 'reviewed_by', 'reviewed_date',
+        'sent_to_finance_date', 'approved_by', 'approved_date',
     })
 
     name = fields.Char(default='New', copy=False, readonly=True)
@@ -140,12 +141,31 @@ class EmiApplication(models.Model):
     rejection_reason = fields.Text(copy=False, readonly=True, tracking=True)
     reviewed_by = fields.Many2one('res.users', readonly=True, copy=False)
     reviewed_date = fields.Datetime(readonly=True, copy=False)
+    sent_to_finance_date = fields.Datetime(
+        readonly=True, copy=False,
+        help="When the application was sent to the finance company. Its reviewers only see "
+             "applications (and their KYC) from then on.",
+    )
     approved_by = fields.Many2one('res.users', readonly=True, copy=False)
     approved_date = fields.Datetime(readonly=True, copy=False)
 
     # ------------------------------------------------------------------
     # CRUD guards
     # ------------------------------------------------------------------
+
+    @api.model
+    def default_get(self, fields):
+        defaults = super().default_get(fields)
+        if not self.env.su:
+            # Context keys (default_state=...) and user defaults (ir.default)
+            # must not pre-fill what only the workflow sets.
+            for fname in self._EMI_SERVER_FIELDS & defaults.keys():
+                field = self._fields[fname]
+                if field.default:
+                    defaults[fname] = field.default(self)
+                else:
+                    del defaults[fname]
+        return defaults
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -334,11 +354,17 @@ class EmiApplication(models.Model):
 
     def _check_submittable(self):
         self.ensure_one()
-        product_tmpl = self.product_id.sudo().product_tmpl_id
-        if product_tmpl.listing_state != 'published' or product_tmpl.vendor_id.state != 'approved':
+        product = self.product_id.sudo()
+        product_tmpl = product.product_tmpl_id
+        if (not (product.active and product_tmpl.active) or product_tmpl.listing_state != 'published'
+                or product_tmpl.vendor_id.state != 'approved'):
             raise UserError(f"{self.product_id.display_name} is not currently published by an approved vendor.")
         if not self.finance_company_id.active:
             raise UserError(f"{self.finance_company_id.name} is no longer accepting applications.")
+        if not self.tenure_plan_id.sudo().active:
+            raise UserError(f"The {self.tenure_plan_id.name} tenure is no longer offered.")
+        if self.downpayment_option_id and not self.downpayment_option_id.sudo().active:
+            raise UserError("The selected down payment option is no longer offered; choose another one.")
         if not self.finance_company_id._offers_tenure(self.tenure_plan_id):
             raise UserError(f"{self.finance_company_id.name} does not offer the {self.tenure_plan_id.name} tenure.")
         if not (self.delivery_address_id or self.delivery_note):
@@ -402,7 +428,7 @@ class EmiApplication(models.Model):
             if not rec.kyc_verified:
                 raise UserError("KYC documents must be marked as verified before sending "
                                  "this application to the finance company.")
-        self.sudo().write({'state': 'pending_finance_approval'})
+        self.sudo().write({'state': 'pending_finance_approval', 'sent_to_finance_date': fields.Datetime.now()})
 
     def action_return_to_draft(self):
         """Send an application back to the customer/officer for corrections."""
