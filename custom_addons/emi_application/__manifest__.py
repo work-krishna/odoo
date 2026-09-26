@@ -1,6 +1,6 @@
 {
     'name': 'EMI Application',
-    'version': '19.0.1.4.0',
+    'version': '19.0.1.5.0',
     'summary': 'Online EMI application, KYC intake and the approval workflow',
     'description': """
 EMI Application
@@ -15,9 +15,8 @@ draft -> submitted -> kyc_review -> pending_finance_approval
        -> approved -> disbursed -> active -> closed
                     \\-> rejected                    \\-> defaulted
 
-* KYC intake with document uploads for the applicant and the guarantor, plus
-  extra items (documents, answers, confirmations) an EMI Manager can add at
-  any time under Applications > KYC Requirements
+* KYC intake with document uploads for the applicant and the guarantor, and
+  the signed EMI application form (plus an optional consent form)
 * Down payment selection against a product's configured options, with the
   customer allowed to pay more than the selected minimum
 * An estimated EMI preview computed from the active interest rate (flat or
@@ -36,9 +35,7 @@ draft -> submitted -> kyc_review -> pending_finance_approval
         'security/application_security.xml',
         'security/ir.model.access.csv',
         'data/sequence_data.xml',
-        'data/kyc_requirement_data.xml',
         'wizard/reject_wizard_views.xml',
-        'views/kyc_requirement_views.xml',
         'views/kyc_views.xml',
         'views/application_views.xml',
         'views/menu_views.xml',

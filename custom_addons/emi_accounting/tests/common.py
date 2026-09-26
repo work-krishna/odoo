@@ -68,16 +68,13 @@ class EmiAccountingCommon(AccountTestInvoicingCommon):
             'partner_id': self.customer.id, 'product_id': self.phone.id,
             'finance_company_id': self.finance.id, 'tenure_plan_id': (plan or self.plan_18).id,
             'down_payment_amount': 10000.0, 'delivery_note': 'Shop pickup',
+            'application_form': DOC, 'application_form_filename': 'application.pdf',
             'kyc_ids': [(0, 0, {
                 'full_name': 'Sita', 'date_of_birth': '1992-02-02', 'phone': '98', 'citizenship_no': 'C-1',
                 'permanent_address': 'Pokhara', 'occupation': 'salaried', 'monthly_income': 60000,
                 'citizenship_front': DOC, 'citizenship_back': DOC, 'photo': DOC, 'income_proof': DOC,
                 'guarantor_name': 'Gita', 'guarantor_phone': '9811111111', 'guarantor_relation': 'Sister',
                 'guarantor_citizenship_front': DOC, 'guarantor_citizenship_back': DOC, 'guarantor_photo': DOC,
-                'item_ids': [(0, 0, {
-                    'requirement_id': self.env.ref('emi_application.kyc_requirement_signed_agreement').id,
-                    'value_file': DOC, 'value_filename': 'agreement.pdf',
-                })],
             })],
         })
         app.with_user(self.officer).action_submit()

@@ -61,16 +61,13 @@ class TestEmiPlatformNepal(AccountTestInvoicingCommon):
             'partner_id': env['res.partner'].create({'name': 'Hari'}).id,
             'product_id': tmpl.product_variant_id.id, 'finance_company_id': cls.finance.id,
             'tenure_plan_id': plan.id, 'delivery_note': 'x',
+            'application_form': DOC, 'application_form_filename': 'application.pdf',
             'kyc_ids': [(0, 0, {
                 'full_name': 'Hari', 'date_of_birth': '1990-01-01', 'phone': '98', 'citizenship_no': 'C',
                 'permanent_address': 'Lalitpur', 'occupation': 'business', 'monthly_income': 90000,
                 'citizenship_front': DOC, 'citizenship_back': DOC, 'photo': DOC, 'income_proof': DOC,
                 'guarantor_name': 'Gita', 'guarantor_phone': '9811111111', 'guarantor_relation': 'Sister',
                 'guarantor_citizenship_front': DOC, 'guarantor_citizenship_back': DOC, 'guarantor_photo': DOC,
-                'item_ids': [(0, 0, {
-                    'requirement_id': env.ref('emi_application.kyc_requirement_signed_agreement').id,
-                    'value_file': DOC, 'value_filename': 'agreement.pdf',
-                })],
             })],
         }
 

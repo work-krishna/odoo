@@ -89,6 +89,13 @@
                                context="{'default_type': 'delivery', 'default_parent_id': partner_id}"/>
                         <field name="delivery_note" readonly="state != 'draft'"/>
                     </group>
+                    <group string="Signed Forms">
+                        <field name="application_form" filename="application_form_filename" readonly="state != 'draft'"/>
+                        <field name="application_form_filename" invisible="1"/>
+                        <field name="consent_form" string="Consent Form (optional)" filename="consent_form_filename"
+                               readonly="state != 'draft'"/>
+                        <field name="consent_form_filename" invisible="1"/>
+                    </group>
                     <group string="Review" invisible="state == 'draft'">
                         <group>
                             <field name="kyc_verified"/>

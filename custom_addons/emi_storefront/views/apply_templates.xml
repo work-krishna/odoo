@@ -9,32 +9,6 @@
         </div>
     </template>
 
-    <!-- One item configured under Applications > KYC Requirements. -->
-    <template id="apply_requirement" name="EMI configured KYC item">
-        <t t-set="input_name" t-value="'kyc_item_%s' % requirement.id"/>
-        <div class="col-md-6">
-            <div t-if="requirement.value_type == 'checkbox'" class="form-check">
-                <input class="form-check-input" type="checkbox" t-att-id="'emi_' + input_name" t-att-name="input_name"
-                       t-att-checked="values.get(input_name) == 'on'" t-att-required="requirement.required"/>
-                <label class="form-check-label" t-att-for="'emi_' + input_name"><t t-out="requirement.name"/><span t-if="requirement.required" class="text-danger"> *</span></label>
-            </div>
-            <t t-else="">
-                <label class="form-label" t-att-for="'emi_' + input_name"><t t-out="requirement.name"/><span t-if="requirement.required" class="text-danger"> *</span><t t-else="">, optional</t></label>
-                <input t-if="requirement.value_type == 'file'" type="file" class="form-control"
-                       t-att-id="'emi_' + input_name" t-att-name="input_name"
-                       accept="image/jpeg,image/png,image/webp,application/pdf" t-att-required="requirement.required"/>
-                <input t-else="" class="form-control" t-att-id="'emi_' + input_name" t-att-name="input_name"
-                       t-att-type="{'date': 'date', 'number': 'number'}.get(requirement.value_type, 'text')"
-                       t-att-step="'any' if requirement.value_type == 'number' else None"
-                       t-att-value="values.get(input_name, '')" t-att-required="requirement.required"/>
-            </t>
-            <div t-if="requirement.description or requirement.template" class="form-text">
-                <t t-out="requirement.description"/>
-                <a t-if="requirement.template" t-attf-href="/phones/kyc-form/#{requirement.id}">Download the blank form</a>
-            </div>
-        </div>
-    </template>
-
     <template id="apply" name="Apply for EMI">
         <t t-call="website.layout">
             <t t-set="title">Apply for EMI</t>
@@ -147,9 +121,6 @@
                                        accept="image/jpeg,image/png,image/webp,application/pdf" t-att-required="doc[2]"/>
                             </div>
                         </t>
-                        <t t-foreach="applicant_requirements" t-as="requirement">
-                            <t t-call="emi_storefront.apply_requirement"/>
-                        </t>
                     </div>
 
                     <h2 class="h5 mt-4">Guarantor</h2>
@@ -164,8 +135,16 @@
                                        accept="image/jpeg,image/png,image/webp,application/pdf" t-att-required="doc[2]"/>
                             </div>
                         </t>
-                        <t t-foreach="guarantor_requirements" t-as="requirement">
-                            <t t-call="emi_storefront.apply_requirement"/>
+                    </div>
+
+                    <h2 class="h5 mt-4">Signed forms</h2>
+                    <div class="row g-3">
+                        <t t-foreach="[('application_form', 'EMI application form, signed by you and your guarantor', True), ('consent_form', 'Consent form, optional', False)]" t-as="doc">
+                            <div class="col-md-6">
+                                <label class="form-label" t-att-for="'emi_' + doc[0]"><t t-out="doc[1]"/><span t-if="doc[2]" class="text-danger"> *</span></label>
+                                <input t-att-id="'emi_' + doc[0]" type="file" t-att-name="doc[0]" class="form-control"
+                                       accept="image/jpeg,image/png,image/webp,application/pdf" t-att-required="doc[2]"/>
+                            </div>
                         </t>
                     </div>
 

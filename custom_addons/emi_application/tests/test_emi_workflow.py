@@ -299,6 +299,23 @@ class TestEmiApplicationWorkflow(EmiCommon):
         with self.assertRaisesRegex(UserError, 'Still missing: Income Proof'):
             app.with_user(self.officer).action_submit()
 
+    def test_signed_application_form_is_required_and_consent_optional(self):
+        app = self._draft_application(application_form=False)
+        officer_app = app.with_user(self.officer)
+        with self.assertRaisesRegex(UserError, 'EMI application form'):
+            officer_app.action_submit()
+        officer_app.write({'application_form': DOC, 'application_form_filename': 'form.pdf'})
+        self.assertFalse(app.consent_form)
+        officer_app.action_submit()
+        with self.assertRaisesRegex(UserError, 'only be changed while the application is a draft'):
+            officer_app.write({'consent_form': DOC})
+        # Applications submitted before the form was required do not reach the lender without it.
+        app.sudo().application_form = False
+        officer_app.action_start_review()
+        officer_app.action_verify_kyc()
+        with self.assertRaisesRegex(UserError, 'EMI application form'):
+            officer_app.action_send_to_finance()
+
     def test_submit_requires_guarantor_documents_but_not_nid(self):
         for field in ('guarantor_name', 'guarantor_phone', 'guarantor_relation', 'guarantor_citizenship_front',
                       'guarantor_citizenship_back', 'guarantor_photo'):
@@ -306,6 +323,10 @@ class TestEmiApplicationWorkflow(EmiCommon):
             label = self.env['emi.kyc']._fields[field].string
             with self.assertRaisesRegex(UserError, re.escape(label)):
                 app.with_user(self.officer).action_submit()
+        # Uploading the missing document afterwards is seen at once (same transaction).
+        app.kyc_ids.with_user(self.officer).guarantor_photo = DOC
+        app.with_user(self.officer).action_submit()
+        self.assertEqual(app.state, 'submitted')
         app = self._draft_application()
         self.assertFalse(app.kyc_ids.guarantor_nid_front or app.kyc_ids.guarantor_nid_back)
         app.with_user(self.officer).action_submit()

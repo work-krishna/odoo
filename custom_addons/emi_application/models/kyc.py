@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import Command, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import AccessError, UserError, ValidationError
 
 
@@ -105,9 +105,6 @@ class EmiKyc(models.Model):
     nid_back = fields.Binary(string='NID Back', help="National identity card, if the applicant has one.")
     nid_back_filename = fields.Char()
 
-    # --- Items configured at runtime under Applications > KYC Requirements ---
-    item_ids = fields.One2many('emi.kyc.item', 'kyc_id', string='Additional Items')
-
     verified = fields.Boolean(
         default=False, tracking=True, readonly=True, copy=False,
         help="Set by the 'Verify KYC' step of the application once an EMI Officer has "
@@ -118,15 +115,6 @@ class EmiKyc(models.Model):
         help="When the applicant agreed, on the online application, that the marketplace and the "
              "finance company may verify these details.",
     )
-
-    @api.model
-    def default_get(self, fields):
-        defaults = super().default_get(fields)
-        if 'item_ids' in fields and not defaults.get('item_ids'):
-            # A new KYC form lists every configured item, ready to fill in.
-            requirements = self.env['emi.kyc.requirement'].sudo().search([])
-            defaults['item_ids'] = [Command.create({'requirement_id': r.id}) for r in requirements]
-        return defaults
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -142,17 +130,7 @@ class EmiKyc(models.Model):
         # After create, so an application_id from context or user defaults is checked too.
         if not self.env.su and any(rec.application_id.state != 'draft' for rec in records):
             raise UserError("KYC can only be added while the application is a draft.")
-        records.sudo()._emi_sync_items()
         return records
-
-    def _emi_sync_items(self):
-        """Add an empty item for each active requirement a KYC form does not answer yet."""
-        requirements = self.env['emi.kyc.requirement'].sudo().search([])
-        self.env['emi.kyc.item'].sudo().create([
-            {'kyc_id': kyc.id, 'requirement_id': requirement.id}
-            for kyc in self
-            for requirement in requirements - kyc.item_ids.requirement_id
-        ])
 
     def write(self, vals):
         if not self.env.su:
@@ -186,11 +164,10 @@ class EmiKyc(models.Model):
     def _emi_missing_fields(self):
         """Labels of the required items that are still empty."""
         self.ensure_one()
+        # A write only refreshes the full-content cache, so drop any stale size cache first.
+        self.invalidate_recordset([f for f in self._EMI_REQUIRED_FIELDS if self._fields[f].type == 'binary'])
         kyc = self.with_context(bin_size=True)  # file sizes, not the files themselves
-        missing = [self._fields[fname].string for fname in self._EMI_REQUIRED_FIELDS if not kyc[fname]]
-        answered = self.sudo().item_ids.filtered('has_value').requirement_id
-        required = self.env['emi.kyc.requirement'].sudo().search([('required', '=', True)])
-        return missing + (required - answered).mapped('name')
+        return [self._fields[fname].string for fname in self._EMI_REQUIRED_FIELDS if not kyc[fname]]
 
     def is_complete(self):
         """Minimum-completeness check used by emi.application before it can

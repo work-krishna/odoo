@@ -19,6 +19,7 @@ class EmiApplication(models.Model):
     _EMI_DRAFT_ONLY_FIELDS = frozenset({
         'company_id', 'partner_id', 'product_id', 'finance_company_id', 'tenure_plan_id',
         'downpayment_option_id', 'down_payment_amount', 'delivery_address_id', 'delivery_note',
+        'application_form', 'application_form_filename', 'consent_form', 'consent_form_filename',
     })
     # Set by the server (computes, snapshots, workflow actions) only.
     _EMI_SERVER_FIELDS = frozenset({
@@ -118,6 +119,15 @@ class EmiApplication(models.Model):
     )
     delivery_note = fields.Text(help="Free-text delivery instructions if no saved address is used.")
 
+    # --- Signed forms ---
+    application_form = fields.Binary(
+        string='EMI Application Form', copy=False,
+        help="The EMI application form signed by the applicant and the guarantor (scan or photo).",
+    )
+    application_form_filename = fields.Char(copy=False)
+    consent_form = fields.Binary(string='Consent Form', copy=False, help="Signed consent form, if the customer gives one.")
+    consent_form_filename = fields.Char(copy=False)
+
     # --- KYC (at most one record, enforced on emi.kyc) ---
     kyc_ids = fields.One2many('emi.kyc', 'application_id', string='KYC')
     kyc_verified = fields.Boolean(compute='_compute_kyc_verified', string='KYC Verified')
@@ -188,7 +198,7 @@ class EmiApplication(models.Model):
                     f"These fields are set by the workflow, not edited directly: {', '.join(sorted(blocked))}."
                 )
             if self._EMI_DRAFT_ONLY_FIELDS & vals.keys() and any(rec.state != 'draft' for rec in self):
-                raise UserError("Loan terms can only be changed while the application is a draft.")
+                raise UserError("Loan terms and signed forms can only be changed while the application is a draft.")
         return super().write(vals)
 
     @api.ondelete(at_uninstall=False)
@@ -371,8 +381,15 @@ class EmiApplication(models.Model):
             raise UserError(f"{self.finance_company_id.name} does not offer the {self.tenure_plan_id.name} tenure.")
         if not (self.delivery_address_id or self.delivery_note):
             raise UserError("Choose a delivery address or enter delivery instructions.")
+        self._check_application_form()
         if product_tmpl.downpayment_option_ids.filtered('active') and not self.downpayment_option_id:
             raise UserError("Choose one of this phone's down payment options.")
+
+    def _check_application_form(self):
+        self.ensure_one()
+        self.invalidate_recordset(['application_form'])  # see emi.kyc._emi_missing_fields
+        if not self.with_context(bin_size=True).application_form:
+            raise UserError("Upload the EMI application form signed by the applicant and the guarantor.")
 
     def action_submit(self):
         self._check_group(OFFICER)
@@ -430,6 +447,7 @@ class EmiApplication(models.Model):
             if not rec.kyc_verified:
                 raise UserError("KYC documents must be marked as verified before sending "
                                  "this application to the finance company.")
+            rec._check_application_form()  # applications submitted before the form was required
         self.sudo().write({'state': 'pending_finance_approval', 'sent_to_finance_date': fields.Datetime.now()})
 
     def action_return_to_draft(self):

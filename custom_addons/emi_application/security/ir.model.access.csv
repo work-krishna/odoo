@@ -6,11 +6,5 @@ access_emi_application_customer,emi.application.customer,model_emi_application,g
 access_emi_kyc_officer,emi.kyc.officer,model_emi_kyc,emi_finance.group_emi_officer,1,1,1,1
 access_emi_kyc_finance_reviewer,emi.kyc.finance.reviewer,model_emi_kyc,emi_finance.group_emi_finance_reviewer,1,0,0,0
 access_emi_kyc_customer,emi.kyc.customer,model_emi_kyc,group_emi_customer_portal,1,0,0,0
-access_emi_kyc_item_officer,emi.kyc.item.officer,model_emi_kyc_item,emi_finance.group_emi_officer,1,1,1,1
-access_emi_kyc_item_finance_reviewer,emi.kyc.item.finance.reviewer,model_emi_kyc_item,emi_finance.group_emi_finance_reviewer,1,0,0,0
-access_emi_kyc_item_customer,emi.kyc.item.customer,model_emi_kyc_item,group_emi_customer_portal,1,0,0,0
-access_emi_kyc_requirement_manager,emi.kyc.requirement.manager,model_emi_kyc_requirement,emi_finance.group_emi_manager,1,1,1,1
-access_emi_kyc_requirement_user,emi.kyc.requirement.user,model_emi_kyc_requirement,base.group_user,1,0,0,0
-access_emi_kyc_requirement_customer,emi.kyc.requirement.customer,model_emi_kyc_requirement,group_emi_customer_portal,1,0,0,0
 access_emi_application_reject_wizard_officer,emi.application.reject.wizard.officer,model_emi_application_reject_wizard,emi_finance.group_emi_officer,1,1,1,1
 access_emi_application_reject_wizard_reviewer,emi.application.reject.wizard.reviewer,model_emi_application_reject_wizard,emi_finance.group_emi_finance_reviewer,1,1,1,1

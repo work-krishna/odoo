@@ -89,10 +89,6 @@ class EmiCommon(TransactionCase):
             'photo': DOC, 'income_proof': DOC,
             'guarantor_name': 'Shyam Bahadur', 'guarantor_phone': '9811111111', 'guarantor_relation': 'Brother',
             'guarantor_citizenship_front': DOC, 'guarantor_citizenship_back': DOC, 'guarantor_photo': DOC,
-            'item_ids': [(0, 0, {
-                'requirement_id': self.env.ref('emi_application.kyc_requirement_signed_agreement').id,
-                'value_file': DOC, 'value_filename': 'agreement.pdf',
-            })],
         }
         vals.update(overrides)
         return vals
@@ -102,6 +98,7 @@ class EmiCommon(TransactionCase):
             'partner_id': self.customer.id, 'product_id': self.phone.id,
             'finance_company_id': self.finance.id, 'tenure_plan_id': (plan or self.plan_18).id,
             'down_payment_amount': 10000.0, 'delivery_note': 'Deliver to office',
+            'application_form': DOC, 'application_form_filename': 'application.pdf',
             'kyc_ids': [(0, 0, self._kyc_vals())],
         }
         vals.update(overrides)

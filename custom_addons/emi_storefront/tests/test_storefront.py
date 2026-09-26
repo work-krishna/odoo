@@ -49,8 +49,7 @@ class TestEmiStorefront(EmiCommon, HttpCase):
         files = {name: (f'{name}.png', PNG, 'image/png')
                  for name in ('citizenship_front', 'citizenship_back', 'photo', 'income_proof',
                               'guarantor_citizenship_front', 'guarantor_citizenship_back', 'guarantor_photo')}
-        agreement = self.env.ref('emi_application.kyc_requirement_signed_agreement')
-        files[f'kyc_item_{agreement.id}'] = ('agreement.pdf', PDF, 'application/pdf')
+        files['application_form'] = ('application.pdf', PDF, 'application/pdf')
         files.update(overrides)
         return files
 
@@ -159,8 +158,8 @@ class TestEmiStorefront(EmiCommon, HttpCase):
         self.assertTrue(kyc.guarantor_citizenship_front and kyc.guarantor_citizenship_back and kyc.guarantor_photo)
         self.assertEqual(kyc.guarantor_photo_filename, 'guarantor_photo.png')
         self.assertFalse(kyc.guarantor_nid_front or kyc.guarantor_nid_back or kyc.nid_front or kyc.nid_back)
-        agreement = self.env.ref('emi_application.kyc_requirement_signed_agreement')
-        self.assertEqual(kyc.item_ids.filtered(lambda i: i.requirement_id == agreement).value_filename, 'agreement.pdf')
+        self.assertEqual(app.application_form_filename, 'application.pdf')
+        self.assertFalse(app.consent_form)
         self.assertFalse(app.kyc_ids.verified)
         self.assertIn('submitted', response.url)
         self.assertIn(self.customer_user, self.customer_group.user_ids)
@@ -209,52 +208,28 @@ class TestEmiStorefront(EmiCommon, HttpCase):
         kyc = self.env['emi.application'].search([('partner_id', '=', self.customer.id)]).kyc_ids
         self.assertEqual((kyc.guarantor_nid_front_filename, kyc.guarantor_nid_back_filename), ('nid_front.png', 'nid_back.png'))
 
-    def test_configured_kyc_items_on_the_online_form(self):
-        Requirement = self.env['emi.kyc.requirement']
-        consent = Requirement.create({
-            'name': 'Consent Form', 'description': 'Sign it and upload a scan.',
-            'template': base64.b64encode(PDF), 'template_filename': 'consent.pdf',
-        })
-        pan = Requirement.create({'name': 'Employer PAN', 'value_type': 'number', 'required': True})
-        pledge = Requirement.create({
-            'name': 'Guarantor agrees to stand surety', 'value_type': 'checkbox', 'party': 'guarantor', 'required': True,
-        })
+    def test_signed_forms_are_uploaded_with_the_application(self):
         self.authenticate(self.customer_user.login, self.customer_user.login + 'x' * max(0, 8 - len(self.customer_user.login)))
         url = f'/phones/{self.slug}/apply'
         token, page = self._csrf(url)
-        for requirement in (consent, pan, pledge):
-            self.assertIn(f'name="kyc_item_{requirement.id}"', page.text)
-        self.assertIn('Sign it and upload a scan.', page.text)
-        self.assertEqual(self.url_open(f'/phones/kyc-form/{consent.id}').content, PDF)
-        self.assertEqual(self.url_open(f'/phones/kyc-form/{pan.id}').status_code, 404)
+        self.assertIn('name="application_form"', page.text)
+        self.assertIn('name="consent_form"', page.text)
 
-        ticked = {f'kyc_item_{pledge.id}': 'on'}
-        response = self.url_open(url, data=self._apply_data(token, **ticked), files=self._files())
-        self.assertIn('Please fill in: Employer PAN', response.text)
-        response = self.url_open(url, data=self._apply_data(token, **ticked, **{f'kyc_item_{pan.id}': 'lots'}),
-                                 files=self._files())
-        self.assertIn('Enter Employer PAN as a number', response.text)
-        response = self.url_open(url, data=self._apply_data(token, **{f'kyc_item_{pan.id}': '600123456'}),
-                                 files=self._files())
-        self.assertIn('Please tick: Guarantor agrees to stand surety', response.text)
-        self.assertIn('value="600123456"', response.text, "answers are kept when the form comes back")
-        agreement = self.env.ref('emi_application.kyc_requirement_signed_agreement')
         files = self._files()
-        del files[f'kyc_item_{agreement.id}']
-        response = self.url_open(url, data=self._apply_data(token, **ticked, **{f'kyc_item_{pan.id}': '600123456'}),
-                                 files=files)
-        self.assertIn('Please upload the Signed EMI Application / Agreement Form.', response.text)
+        del files['application_form']
+        response = self.url_open(url, data=self._apply_data(token), files=files)
+        self.assertIn('Please upload the signed EMI application form.', response.text)
+        response = self.url_open(url, data=self._apply_data(token),
+                                 files=self._files(consent_form=('consent.txt', b'plain text', 'text/plain')))
+        self.assertIn('The consent form must be', response.text)
         self.assertFalse(self.env['emi.application'].search([('partner_id', '=', self.customer.id)]))
 
-        response = self.url_open(url, data=self._apply_data(token, **ticked, **{f'kyc_item_{pan.id}': '600123456'}),
-                                 files=self._files())
+        response = self.url_open(url, data=self._apply_data(token),
+                                 files=self._files(consent_form=('consent.pdf', PDF, 'application/pdf')))
         self.assertIn('submitted', response.url)
-        items = self.env['emi.application'].search([('partner_id', '=', self.customer.id)]).kyc_ids.item_ids
-        answers = {item.requirement_id: item for item in items}
-        self.assertEqual(answers[pan].value_text, '600123456')
-        self.assertTrue(answers[pledge].value_bool)
-        self.assertFalse(answers[consent].has_value, "the consent form was optional")
-        self.assertTrue(answers[agreement].has_value)
+        app = self.env['emi.application'].search([('partner_id', '=', self.customer.id)])
+        self.assertEqual((app.application_form_filename, app.consent_form_filename), ('application.pdf', 'consent.pdf'))
+        self.assertEqual(base64.b64decode(app.consent_form), PDF)
 
     def test_malformed_application_input_is_a_form_error(self):
         self.authenticate(self.customer_user.login, self.customer_user.login + 'x' * max(0, 8 - len(self.customer_user.login)))
