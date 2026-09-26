@@ -5,7 +5,7 @@ from freezegun import freeze_time
 
 from odoo import fields
 from odoo.exceptions import AccessError, UserError
-from odoo.tests import tagged
+from odoo.tests import Form, tagged
 from odoo.tests.common import new_test_user
 
 from odoo.addons.emi_accounting.tools.amortization import effective_monthly_rate
@@ -28,6 +28,38 @@ class TestEmiDownPayments(EmiAccountingCommon):
         self._pay_down_payment(app)
         self.assertEqual(app._emi_amount_due('down_payment'), 0.0)
         self.assertTrue(app.marketplace_move_id.line_ids.filtered(lambda l: l.partner_id == self.customer).reconciled)
+
+    def test_down_payment_wizard_preselects_a_marketplace_journal(self):
+        app = self._submitted_application()
+        wizard = self.env['emi.down.payment'].with_user(self.officer).create({'application_id': app.id})
+        self.assertEqual(wizard.receiving_company_id, self.marketplace)
+        self.assertEqual(wizard.journal_id.company_id, self.marketplace)
+        self.assertIn(wizard.journal_id.type, ('bank', 'cash'))
+        self.assertFalse(wizard.journal_hint)
+
+        # With only the lender active, the marketplace's journals are hidden from the
+        # dropdown: one is still pre-selected and the wizard says why the list is short.
+        clerk = new_test_user(
+            self.env(su=True), 'emi_two_companies', groups='emi_finance.group_emi_officer',
+            company_id=self.lender.id, company_ids=[(6, 0, (self.marketplace | self.lender).ids)],
+        )
+        Wizard = self.env['emi.down.payment'].with_user(clerk).with_context(allowed_company_ids=self.lender.ids)
+        form = Form(Wizard.with_context(default_application_id=app.id))
+        self.assertEqual(form.journal_id.id, wizard.journal_id.id)
+        self.assertIn('company switcher', form.journal_hint)
+        form.save().action_confirm()
+        self.assertEqual(app._emi_down_payment_received(), 10000.0)
+
+    def test_down_payment_wizard_explains_a_missing_journal(self):
+        app = self._submitted_application()
+        self.env['account.journal'].search([
+            ('company_id', '=', self.marketplace.id), ('type', 'in', ('bank', 'cash')),
+        ]).action_archive()
+        wizard = self.env['emi.down.payment'].with_user(self.officer).create({'application_id': app.id})
+        self.assertFalse(wizard.journal_id)
+        self.assertIn('has no bank or cash journal', wizard.journal_hint)
+        with self.assertRaisesRegex(UserError, 'Choose the bank or cash journal'):
+            wizard.action_confirm()
 
     def test_down_payment_is_capped_at_what_is_due(self):
         app = self._approved_application()
@@ -105,6 +137,13 @@ class TestEmiInstallments(EmiAccountingCommon):
         self.assertFalse(lines[3].due_move_id)
         self.assertAlmostEqual(app.advance_amount, 0.0)
         self.assertAlmostEqual(-self._balance(interest), sum(lines[:3].mapped('interest_amount')))
+
+    def test_installment_wizard_uses_the_collecting_company(self):
+        app = self._approved_application()
+        app.with_user(self.reviewer).action_disburse()
+        wizard = self.env['emi.installment.payment'].with_user(self.reviewer).create({'application_id': app.id})
+        self.assertEqual(wizard.receiving_company_id, self.lender)
+        self.assertEqual(wizard.journal_id.company_id, self.lender)
 
     def test_partly_paid_late_installment_stays_overdue(self):
         app = self._approved_application()

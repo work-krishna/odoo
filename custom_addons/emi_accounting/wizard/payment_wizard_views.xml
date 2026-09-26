@@ -6,11 +6,14 @@
         <field name="model">emi.installment.payment</field>
         <field name="arch" type="xml">
             <form>
+                <div class="alert alert-warning" role="alert" invisible="not journal_hint">
+                    <field name="journal_hint" nolabel="1"/>
+                </div>
                 <group>
                     <group>
                         <field name="application_id" readonly="1"/>
-                        <field name="collecting_company_id"/>
-                        <field name="journal_id" options="{'no_create': True}"/>
+                        <field name="receiving_company_id" string="Collected By"/>
+                        <field name="journal_id" required="1" options="{'no_create': True}"/>
                     </group>
                     <group>
                         <field name="amount"/>
@@ -32,11 +35,14 @@
         <field name="model">emi.down.payment</field>
         <field name="arch" type="xml">
             <form>
+                <div class="alert alert-warning" role="alert" invisible="not journal_hint">
+                    <field name="journal_hint" nolabel="1"/>
+                </div>
                 <group>
                     <group>
                         <field name="application_id" readonly="1"/>
-                        <field name="journal_id" options="{'no_create': True}"/>
-                        <field name="company_id" invisible="1"/>
+                        <field name="receiving_company_id"/>
+                        <field name="journal_id" required="1" options="{'no_create': True}"/>
                     </group>
                     <group>
                         <field name="amount"/>
@@ -57,11 +63,14 @@
         <field name="model">emi.down.payment.refund</field>
         <field name="arch" type="xml">
             <form>
+                <div class="alert alert-warning" role="alert" invisible="not journal_hint">
+                    <field name="journal_hint" nolabel="1"/>
+                </div>
                 <group>
                     <group>
                         <field name="application_id" readonly="1"/>
-                        <field name="journal_id" options="{'no_create': True}"/>
-                        <field name="company_id" invisible="1"/>
+                        <field name="receiving_company_id" string="Paid From"/>
+                        <field name="journal_id" required="1" options="{'no_create': True}"/>
                     </group>
                     <group>
                         <field name="amount"/>
