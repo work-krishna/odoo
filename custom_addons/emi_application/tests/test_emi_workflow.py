@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import re
+
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tests import Form, tagged
 
@@ -229,7 +231,8 @@ class TestEmiApplicationWorkflow(EmiCommon):
         officer_app.action_submit()
         officer_app.action_start_review()
         for vals in ({'monthly_income': 500000}, {'occupation': 'business'}, {'employer_name': 'Other Co'},
-                     {'bank_name': 'Other Bank'}, {'guarantor_name': 'Someone Else'}):
+                     {'bank_name': 'Other Bank'}, {'guarantor_name': 'Someone Else'},
+                     {'guarantor_citizenship_front': DOC}, {'guarantor_nid_front': DOC}, {'guarantor_photo': DOC}):
             officer_app.action_verify_kyc()
             app.kyc_ids.with_user(self.officer).write(vals)
             self.assertFalse(app.kyc_verified, vals)
@@ -292,8 +295,20 @@ class TestEmiApplicationWorkflow(EmiCommon):
 
     def test_submit_requires_complete_kyc_with_income_proof(self):
         app = self._draft_application(kyc_ids=[(0, 0, self._kyc_vals(income_proof=False))])
-        with self.assertRaises(UserError):
+        with self.assertRaisesRegex(UserError, 'Still missing: Income Proof'):
             app.with_user(self.officer).action_submit()
+
+    def test_submit_requires_guarantor_documents_but_not_nid(self):
+        for field in ('guarantor_name', 'guarantor_phone', 'guarantor_relation', 'guarantor_citizenship_front',
+                      'guarantor_citizenship_back', 'guarantor_photo'):
+            app = self._draft_application(kyc_ids=[(0, 0, self._kyc_vals(**{field: False}))])
+            label = self.env['emi.kyc']._fields[field].string
+            with self.assertRaisesRegex(UserError, re.escape(label)):
+                app.with_user(self.officer).action_submit()
+        app = self._draft_application()
+        self.assertFalse(app.kyc_ids.guarantor_nid_front or app.kyc_ids.guarantor_nid_back)
+        app.with_user(self.officer).action_submit()
+        self.assertEqual(app.state, 'submitted')
 
     def test_submit_enforces_down_payment_minimums(self):
         self.finance.min_down_payment_percent = 20.0

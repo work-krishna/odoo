@@ -65,6 +65,8 @@ class TestEmiPlatformNepal(AccountTestInvoicingCommon):
                 'full_name': 'Hari', 'date_of_birth': '1990-01-01', 'phone': '98', 'citizenship_no': 'C',
                 'permanent_address': 'Lalitpur', 'occupation': 'business', 'monthly_income': 90000,
                 'citizenship_front': DOC, 'citizenship_back': DOC, 'photo': DOC, 'income_proof': DOC,
+                'guarantor_name': 'Gita', 'guarantor_phone': '9811111111', 'guarantor_relation': 'Sister',
+                'guarantor_citizenship_front': DOC, 'guarantor_citizenship_back': DOC, 'guarantor_photo': DOC,
             })],
         }
 

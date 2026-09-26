@@ -87,6 +87,8 @@ class EmiCommon(TransactionCase):
             'citizenship_no': '12-34-56', 'permanent_address': 'Kathmandu', 'occupation': 'salaried',
             'monthly_income': 80000, 'citizenship_front': DOC, 'citizenship_back': DOC,
             'photo': DOC, 'income_proof': DOC,
+            'guarantor_name': 'Shyam Bahadur', 'guarantor_phone': '9811111111', 'guarantor_relation': 'Brother',
+            'guarantor_citizenship_front': DOC, 'guarantor_citizenship_back': DOC, 'guarantor_photo': DOC,
         }
         vals.update(overrides)
         return vals

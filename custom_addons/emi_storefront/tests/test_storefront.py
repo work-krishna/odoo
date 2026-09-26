@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import base64
+import html
 import re
 
 from odoo.tests import HttpCase, tagged
@@ -37,6 +38,7 @@ class TestEmiStorefront(EmiCommon, HttpCase):
             'down_payment_amount': '10000', 'full_name': 'Ram Bahadur', 'date_of_birth': '1990-01-01',
             'phone': '9800000000', 'citizenship_no': '12-34-56', 'permanent_address': 'Kathmandu',
             'occupation': 'salaried', 'monthly_income': '80000', 'delivery_note': 'Pick up at shop',
+            'guarantor_name': 'Shyam Bahadur', 'guarantor_phone': '9811111111', 'guarantor_relation': 'Brother',
             'consent': 'on',
         }
         data.update(overrides)
@@ -44,7 +46,8 @@ class TestEmiStorefront(EmiCommon, HttpCase):
 
     def _files(self, **overrides):
         files = {name: (f'{name}.png', PNG, 'image/png')
-                 for name in ('citizenship_front', 'citizenship_back', 'photo', 'income_proof')}
+                 for name in ('citizenship_front', 'citizenship_back', 'photo', 'income_proof',
+                              'guarantor_citizenship_front', 'guarantor_citizenship_back', 'guarantor_photo')}
         files.update(overrides)
         return files
 
@@ -148,6 +151,11 @@ class TestEmiStorefront(EmiCommon, HttpCase):
         self.assertEqual(app.product_id, self.phone)
         self.assertEqual(app.interest_rate_id, self.rate_18)
         self.assertTrue(app.kyc_ids.citizenship_front and app.kyc_ids.income_proof)
+        kyc = app.kyc_ids
+        self.assertEqual((kyc.guarantor_name, kyc.guarantor_relation), ('Shyam Bahadur', 'Brother'))
+        self.assertTrue(kyc.guarantor_citizenship_front and kyc.guarantor_citizenship_back and kyc.guarantor_photo)
+        self.assertEqual(kyc.guarantor_photo_filename, 'guarantor_photo.png')
+        self.assertFalse(kyc.guarantor_nid_front or kyc.guarantor_nid_back)
         self.assertFalse(app.kyc_ids.verified)
         self.assertIn('submitted', response.url)
         self.assertIn(self.customer_user, self.customer_group.user_ids)
@@ -168,6 +176,33 @@ class TestEmiStorefront(EmiCommon, HttpCase):
                                  files=self._files())
         self.assertIn('at least 18', response.text)
         self.assertFalse(self.env['emi.application'].search([('partner_id', '=', self.customer.id)]))
+
+    def test_guarantor_documents_are_required_but_nid_is_optional(self):
+        self.authenticate(self.customer_user.login, self.customer_user.login + 'x' * max(0, 8 - len(self.customer_user.login)))
+        token, page = self._csrf(f'/phones/{self.slug}/apply')
+        self.assertIn('name="guarantor_photo"', page.text)
+        self.assertIn('name="guarantor_nid_back"', page.text)
+        url = f'/phones/{self.slug}/apply'
+
+        files = self._files()
+        del files['guarantor_photo']
+        response = self.url_open(url, data=self._apply_data(token), files=files)
+        self.assertIn("Please upload the guarantor's passport-size photo.", html.unescape(response.text))
+        data = self._apply_data(token)
+        del data['guarantor_relation']
+        response = self.url_open(url, data=data, files=self._files())
+        self.assertIn('Please fill in: guarantor relation', response.text)
+        response = self.url_open(url, data=self._apply_data(token),
+                                 files=self._files(guarantor_nid_front=('nid.txt', b'plain text', 'text/plain')))
+        self.assertIn("front of your guarantor's national ID card must be", html.unescape(response.text))
+        self.assertFalse(self.env['emi.application'].search([('partner_id', '=', self.customer.id)]))
+
+        response = self.url_open(url, data=self._apply_data(token), files=self._files(
+            guarantor_nid_front=('nid_front.png', PNG, 'image/png'), guarantor_nid_back=('nid_back.png', PNG, 'image/png'),
+        ))
+        self.assertIn('submitted', response.url)
+        kyc = self.env['emi.application'].search([('partner_id', '=', self.customer.id)]).kyc_ids
+        self.assertEqual((kyc.guarantor_nid_front_filename, kyc.guarantor_nid_back_filename), ('nid_front.png', 'nid_back.png'))
 
     def test_malformed_application_input_is_a_form_error(self):
         self.authenticate(self.customer_user.login, self.customer_user.login + 'x' * max(0, 8 - len(self.customer_user.login)))

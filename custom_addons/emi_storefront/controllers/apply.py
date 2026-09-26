@@ -12,12 +12,21 @@ KYC_TEXT_FIELDS = (
     'citizenship_issue_date', 'pan_no', 'permanent_address', 'temporary_address', 'occupation', 'employer_name',
     'bank_name', 'bank_account_no', 'guarantor_name', 'guarantor_phone', 'guarantor_relation',
 )
-KYC_REQUIRED = ('full_name', 'date_of_birth', 'phone', 'citizenship_no', 'permanent_address', 'occupation')
+KYC_REQUIRED = (
+    'full_name', 'date_of_birth', 'phone', 'citizenship_no', 'permanent_address', 'occupation',
+    'guarantor_name', 'guarantor_phone', 'guarantor_relation',
+)
+# (field, label, required)
 KYC_DOCUMENTS = (
-    ('citizenship_front', 'front of your citizenship'),
-    ('citizenship_back', 'back of your citizenship'),
-    ('photo', 'passport-size photo'),
-    ('income_proof', 'proof of income'),
+    ('citizenship_front', 'front of your citizenship', True),
+    ('citizenship_back', 'back of your citizenship', True),
+    ('photo', 'passport-size photo', True),
+    ('income_proof', 'proof of income', True),
+    ('guarantor_citizenship_front', "front of your guarantor's citizenship", True),
+    ('guarantor_citizenship_back', "back of your guarantor's citizenship", True),
+    ('guarantor_nid_front', "front of your guarantor's national ID card", False),
+    ('guarantor_nid_back', "back of your guarantor's national ID card", False),
+    ('guarantor_photo', "guarantor's passport-size photo", True),
 )
 GENDERS = {'male', 'female', 'other'}
 OCCUPATIONS = {'salaried', 'self_employed', 'business', 'other'}
@@ -103,9 +112,12 @@ class EmiApply(http.Controller):
         if income <= 0:
             raise UserError("Enter your monthly income.")
         kyc['monthly_income'] = income
-        for field, label in KYC_DOCUMENTS:
-            kyc[field] = read_upload(request.httprequest.files.get(field), label)
-            kyc[f'{field}_filename'] = request.httprequest.files[field].filename
+        for field, label, required in KYC_DOCUMENTS:
+            upload = request.httprequest.files.get(field)
+            data = read_upload(upload, label, required=required)
+            if data:
+                kyc[field] = data
+                kyc[f'{field}_filename'] = upload.filename
         if post.get('consent') != 'on':
             raise UserError("Please confirm your details and agree to their verification.")
         kyc['consent_date'] = fields.Datetime.now()

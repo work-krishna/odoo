@@ -22,8 +22,16 @@ class EmiKyc(models.Model):
         'citizenship_issue_date', 'pan_no', 'permanent_address', 'occupation', 'employer_name',
         'monthly_income', 'currency_id', 'bank_name', 'bank_account_no', 'guarantor_name',
         'guarantor_phone', 'guarantor_relation', 'citizenship_front', 'citizenship_back', 'photo',
-        'income_proof',
+        'income_proof', 'guarantor_citizenship_front', 'guarantor_citizenship_back', 'guarantor_nid_front',
+        'guarantor_nid_back', 'guarantor_photo',
     })
+    # Needed before the application can be submitted or its KYC verified.
+    _EMI_REQUIRED_FIELDS = (
+        'full_name', 'date_of_birth', 'phone', 'citizenship_no', 'permanent_address', 'occupation',
+        'monthly_income', 'citizenship_front', 'citizenship_back', 'photo', 'income_proof',
+        'guarantor_name', 'guarantor_phone', 'guarantor_relation', 'guarantor_citizenship_front',
+        'guarantor_citizenship_back', 'guarantor_photo',
+    )
 
     _application_uniq = models.Constraint(
         'unique(application_id)',
@@ -68,10 +76,20 @@ class EmiKyc(models.Model):
     bank_name = fields.Char()
     bank_account_no = fields.Char()
 
-    # --- Guarantor (optional, used for higher-tenure / higher-amount financing) ---
+    # --- Guarantor (required; the national ID card is optional) ---
     guarantor_name = fields.Char()
     guarantor_phone = fields.Char()
     guarantor_relation = fields.Char()
+    guarantor_citizenship_front = fields.Binary(string='Guarantor Citizenship Front')
+    guarantor_citizenship_front_filename = fields.Char()
+    guarantor_citizenship_back = fields.Binary(string='Guarantor Citizenship Back')
+    guarantor_citizenship_back_filename = fields.Char()
+    guarantor_nid_front = fields.Binary(string='Guarantor NID Front', help="National identity card, if the guarantor has one.")
+    guarantor_nid_front_filename = fields.Char()
+    guarantor_nid_back = fields.Binary(string='Guarantor NID Back', help="National identity card, if the guarantor has one.")
+    guarantor_nid_back_filename = fields.Char()
+    guarantor_photo = fields.Binary(string='Guarantor Passport-size Photo')
+    guarantor_photo_filename = fields.Char()
 
     # --- Documents ---
     citizenship_front = fields.Binary(string='Citizenship Front')
@@ -139,14 +157,15 @@ class EmiKyc(models.Model):
             if age_years < 18:
                 raise ValidationError("The applicant must be at least 18 years old.")
 
+    def _emi_missing_fields(self):
+        """Labels of the required items that are still empty."""
+        self.ensure_one()
+        kyc = self.with_context(bin_size=True)  # file sizes, not the files themselves
+        return [self._fields[fname].string for fname in self._EMI_REQUIRED_FIELDS if not kyc[fname]]
+
     def is_complete(self):
         """Minimum-completeness check used by emi.application before it can
         be submitted. Kept as a plain method (not a constraint) so a KYC
         record can still be saved as a work-in-progress draft."""
         self.ensure_one()
-        required = [
-            self.full_name, self.date_of_birth, self.phone, self.citizenship_no,
-            self.permanent_address, self.occupation, self.monthly_income,
-            self.citizenship_front, self.citizenship_back, self.photo, self.income_proof,
-        ]
-        return all(required)
+        return not self._emi_missing_fields()

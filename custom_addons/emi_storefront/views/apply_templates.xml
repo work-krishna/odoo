@@ -111,14 +111,7 @@
                         <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'bank_account_no'"/><t t-set="label">Bank account number</t></t>
                     </div>
 
-                    <h2 class="h5 mt-4">Guarantor (optional)</h2>
-                    <div class="row g-3">
-                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'guarantor_name'"/><t t-set="label">Name</t><t t-set="col" t-value="'col-md-4'"/></t>
-                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'guarantor_phone'"/><t t-set="label">Phone</t><t t-set="col" t-value="'col-md-4'"/></t>
-                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'guarantor_relation'"/><t t-set="label">Relation</t><t t-set="col" t-value="'col-md-4'"/></t>
-                    </div>
-
-                    <h2 class="h5 mt-4">Documents</h2>
+                    <h2 class="h5 mt-4">Your documents</h2>
                     <p class="small text-muted">JPEG, PNG, WebP or PDF, up to 10 MB each.</p>
                     <div class="row g-3">
                         <t t-foreach="[('citizenship_front', 'Citizenship (front)'), ('citizenship_back', 'Citizenship (back)'), ('photo', 'Passport-size photo'), ('income_proof', 'Proof of income')]" t-as="doc">
@@ -126,6 +119,20 @@
                                 <label class="form-label" t-att-for="'emi_' + doc[0]"><t t-out="doc[1]"/> <span class="text-danger">*</span></label>
                                 <input t-att-id="'emi_' + doc[0]" type="file" t-att-name="doc[0]" class="form-control"
                                        accept="image/jpeg,image/png,image/webp,application/pdf" required="required"/>
+                            </div>
+                        </t>
+                    </div>
+
+                    <h2 class="h5 mt-4">Guarantor</h2>
+                    <div class="row g-3">
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'guarantor_name'"/><t t-set="label">Name</t><t t-set="col" t-value="'col-md-4'"/><t t-set="required" t-value="True"/></t>
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'guarantor_phone'"/><t t-set="label">Phone</t><t t-set="type" t-value="'tel'"/><t t-set="col" t-value="'col-md-4'"/><t t-set="required" t-value="True"/></t>
+                        <t t-call="emi_storefront.apply_field"><t t-set="name" t-value="'guarantor_relation'"/><t t-set="label">Relation</t><t t-set="col" t-value="'col-md-4'"/><t t-set="required" t-value="True"/></t>
+                        <t t-foreach="[('guarantor_citizenship_front', 'Citizenship (front)', True), ('guarantor_citizenship_back', 'Citizenship (back)', True), ('guarantor_nid_front', 'NID (front), optional', False), ('guarantor_nid_back', 'NID (back), optional', False), ('guarantor_photo', 'Passport-size photo', True)]" t-as="doc">
+                            <div class="col-md-6">
+                                <label class="form-label" t-att-for="'emi_' + doc[0]"><t t-out="doc[1]"/><span t-if="doc[2]" class="text-danger"> *</span></label>
+                                <input t-att-id="'emi_' + doc[0]" type="file" t-att-name="doc[0]" class="form-control"
+                                       accept="image/jpeg,image/png,image/webp,application/pdf" t-att-required="doc[2]"/>
                             </div>
                         </t>
                     </div>

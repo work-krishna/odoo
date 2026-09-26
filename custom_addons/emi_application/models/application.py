@@ -348,9 +348,11 @@ class EmiApplication(models.Model):
 
     def _check_kyc_complete(self):
         self.ensure_one()
-        if not self.kyc_ids or not self.kyc_ids[0].is_complete():
-            raise UserError("KYC information is incomplete. Please fill in all required "
-                             "fields and upload citizenship, photo and income proof.")
+        if not self.kyc_ids:
+            raise UserError("Add the applicant's KYC before continuing.")
+        missing = self.kyc_ids[0]._emi_missing_fields()
+        if missing:
+            raise UserError(f"KYC information is incomplete. Still missing: {', '.join(missing)}.")
 
     def _check_submittable(self):
         self.ensure_one()

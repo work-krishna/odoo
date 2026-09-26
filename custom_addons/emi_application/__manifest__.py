@@ -1,6 +1,6 @@
 {
     'name': 'EMI Application',
-    'version': '19.0.1.2.0',
+    'version': '19.0.1.3.0',
     'summary': 'Online EMI application, KYC intake and the approval workflow',
     'description': """
 EMI Application
