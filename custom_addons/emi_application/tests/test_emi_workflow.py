@@ -232,7 +232,8 @@ class TestEmiApplicationWorkflow(EmiCommon):
         officer_app.action_start_review()
         for vals in ({'monthly_income': 500000}, {'occupation': 'business'}, {'employer_name': 'Other Co'},
                      {'bank_name': 'Other Bank'}, {'guarantor_name': 'Someone Else'},
-                     {'guarantor_citizenship_front': DOC}, {'guarantor_nid_front': DOC}, {'guarantor_photo': DOC}):
+                     {'guarantor_citizenship_front': DOC}, {'guarantor_nid_front': DOC}, {'guarantor_photo': DOC},
+                     {'nid_front': DOC}, {'nid_back': DOC}):
             officer_app.action_verify_kyc()
             app.kyc_ids.with_user(self.officer).write(vals)
             self.assertFalse(app.kyc_verified, vals)

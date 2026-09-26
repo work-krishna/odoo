@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import api, fields, models
+from odoo import Command, api, fields, models
 from odoo.exceptions import AccessError, UserError, ValidationError
 
 
@@ -22,8 +22,8 @@ class EmiKyc(models.Model):
         'citizenship_issue_date', 'pan_no', 'permanent_address', 'occupation', 'employer_name',
         'monthly_income', 'currency_id', 'bank_name', 'bank_account_no', 'guarantor_name',
         'guarantor_phone', 'guarantor_relation', 'citizenship_front', 'citizenship_back', 'photo',
-        'income_proof', 'guarantor_citizenship_front', 'guarantor_citizenship_back', 'guarantor_nid_front',
-        'guarantor_nid_back', 'guarantor_photo',
+        'income_proof', 'nid_front', 'nid_back', 'guarantor_citizenship_front', 'guarantor_citizenship_back',
+        'guarantor_nid_front', 'guarantor_nid_back', 'guarantor_photo',
     })
     # Needed before the application can be submitted or its KYC verified.
     _EMI_REQUIRED_FIELDS = (
@@ -100,6 +100,13 @@ class EmiKyc(models.Model):
     photo_filename = fields.Char()
     income_proof = fields.Binary(string='Income Proof')
     income_proof_filename = fields.Char()
+    nid_front = fields.Binary(string='NID Front', help="National identity card, if the applicant has one.")
+    nid_front_filename = fields.Char()
+    nid_back = fields.Binary(string='NID Back', help="National identity card, if the applicant has one.")
+    nid_back_filename = fields.Char()
+
+    # --- Items configured at runtime under Applications > KYC Requirements ---
+    item_ids = fields.One2many('emi.kyc.item', 'kyc_id', string='Additional Items')
 
     verified = fields.Boolean(
         default=False, tracking=True, readonly=True, copy=False,
@@ -111,6 +118,15 @@ class EmiKyc(models.Model):
         help="When the applicant agreed, on the online application, that the marketplace and the "
              "finance company may verify these details.",
     )
+
+    @api.model
+    def default_get(self, fields):
+        defaults = super().default_get(fields)
+        if 'item_ids' in fields and not defaults.get('item_ids'):
+            # A new KYC form lists every configured item, ready to fill in.
+            requirements = self.env['emi.kyc.requirement'].sudo().search([])
+            defaults['item_ids'] = [Command.create({'requirement_id': r.id}) for r in requirements]
+        return defaults
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -126,7 +142,17 @@ class EmiKyc(models.Model):
         # After create, so an application_id from context or user defaults is checked too.
         if not self.env.su and any(rec.application_id.state != 'draft' for rec in records):
             raise UserError("KYC can only be added while the application is a draft.")
+        records.sudo()._emi_sync_items()
         return records
+
+    def _emi_sync_items(self):
+        """Add an empty item for each active requirement a KYC form does not answer yet."""
+        requirements = self.env['emi.kyc.requirement'].sudo().search([])
+        self.env['emi.kyc.item'].sudo().create([
+            {'kyc_id': kyc.id, 'requirement_id': requirement.id}
+            for kyc in self
+            for requirement in requirements - kyc.item_ids.requirement_id
+        ])
 
     def write(self, vals):
         if not self.env.su:
@@ -161,7 +187,10 @@ class EmiKyc(models.Model):
         """Labels of the required items that are still empty."""
         self.ensure_one()
         kyc = self.with_context(bin_size=True)  # file sizes, not the files themselves
-        return [self._fields[fname].string for fname in self._EMI_REQUIRED_FIELDS if not kyc[fname]]
+        missing = [self._fields[fname].string for fname in self._EMI_REQUIRED_FIELDS if not kyc[fname]]
+        answered = self.sudo().item_ids.filtered('has_value').requirement_id
+        required = self.env['emi.kyc.requirement'].sudo().search([('required', '=', True)])
+        return missing + (required - answered).mapped('name')
 
     def is_complete(self):
         """Minimum-completeness check used by emi.application before it can

@@ -74,6 +74,10 @@ class EmiAccountingCommon(AccountTestInvoicingCommon):
                 'citizenship_front': DOC, 'citizenship_back': DOC, 'photo': DOC, 'income_proof': DOC,
                 'guarantor_name': 'Gita', 'guarantor_phone': '9811111111', 'guarantor_relation': 'Sister',
                 'guarantor_citizenship_front': DOC, 'guarantor_citizenship_back': DOC, 'guarantor_photo': DOC,
+                'item_ids': [(0, 0, {
+                    'requirement_id': self.env.ref('emi_application.kyc_requirement_signed_agreement').id,
+                    'value_file': DOC, 'value_filename': 'agreement.pdf',
+                })],
             })],
         })
         app.with_user(self.officer).action_submit()

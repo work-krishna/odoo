@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_emi_kyc_requirement_list" model="ir.ui.view">
+        <field name="name">emi.kyc.requirement.list</field>
+        <field name="model">emi.kyc.requirement</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="party"/>
+                <field name="value_type"/>
+                <field name="required" widget="boolean_toggle"/>
+                <field name="template_filename" string="Blank Form" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_emi_kyc_requirement_form" model="ir.ui.view">
+        <field name="name">emi.kyc.requirement.form</field>
+        <field name="model">emi.kyc.requirement</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Signed Consent Form"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="party" widget="radio" options="{'horizontal': true}"/>
+                            <field name="value_type"/>
+                            <field name="required"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group invisible="value_type != 'file'">
+                            <field name="template" filename="template_filename"/>
+                            <field name="template_filename" invisible="1"/>
+                        </group>
+                    </group>
+                    <label for="description"/>
+                    <field name="description" placeholder="Instructions shown under the field, e.g. who has to sign the form."/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_emi_kyc_requirement_search" model="ir.ui.view">
+        <field name="name">emi.kyc.requirement.search</field>
+        <field name="model">emi.kyc.requirement</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <filter string="Applicant" name="applicant" domain="[('party', '=', 'applicant')]"/>
+                <filter string="Guarantor" name="guarantor" domain="[('party', '=', 'guarantor')]"/>
+                <separator/>
+                <filter string="Required" name="required" domain="[('required', '=', True)]"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_emi_kyc_requirement" model="ir.actions.act_window">
+        <field name="name">KYC Requirements</field>
+        <field name="res_model">emi.kyc.requirement</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_emi_kyc_requirement_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Ask for something more in the KYC</p>
+            <p>
+                Add a document to upload (with an optional blank form to download), a text, number or
+                date to enter, or a statement to tick, for the applicant or the guarantor. It shows up
+                right away on the KYC form and the online application; required items must be provided
+                before an application can be submitted or its KYC verified. Archive an item to stop
+                asking for it.
+            </p>
+        </field>
+    </record>
+
+</odoo>

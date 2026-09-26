@@ -26,6 +26,12 @@
         <field name="domain_force">[('application_id.finance_company_id.company_id', 'in', company_ids), ('application_id.sent_to_finance_date', '!=', False)]</field>
         <field name="groups" eval="[(4, ref('emi_finance.group_emi_finance_reviewer'))]"/>
     </record>
+    <record id="rule_kyc_item_finance_own_company" model="ir.rule">
+        <field name="name">Finance Company Reviewer: own company's KYC items only</field>
+        <field name="model_id" ref="model_emi_kyc_item"/>
+        <field name="domain_force">[('kyc_id.application_id.finance_company_id.company_id', 'in', company_ids), ('kyc_id.application_id.sent_to_finance_date', '!=', False)]</field>
+        <field name="groups" eval="[(4, ref('emi_finance.group_emi_finance_reviewer'))]"/>
+    </record>
 
     <!-- EMI Officer sees every application across finance companies -->
     <record id="rule_application_officer_all" model="ir.rule">
@@ -38,6 +44,12 @@
     <record id="rule_kyc_officer_all" model="ir.rule">
         <field name="name">EMI Officer: all KYC</field>
         <field name="model_id" ref="model_emi_kyc"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('emi_finance.group_emi_officer'))]"/>
+    </record>
+    <record id="rule_kyc_item_officer_all" model="ir.rule">
+        <field name="name">EMI Officer: all KYC items</field>
+        <field name="model_id" ref="model_emi_kyc_item"/>
         <field name="domain_force">[(1, '=', 1)]</field>
         <field name="groups" eval="[(4, ref('emi_finance.group_emi_officer'))]"/>
     </record>
@@ -59,6 +71,16 @@
         <field name="name">EMI Customer: own KYC only</field>
         <field name="model_id" ref="model_emi_kyc"/>
         <field name="domain_force">[('application_id.partner_id', '=', user.partner_id.id)]</field>
+        <field name="groups" eval="[(4, ref('group_emi_customer_portal'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="rule_kyc_item_customer_own" model="ir.rule">
+        <field name="name">EMI Customer: own KYC items only</field>
+        <field name="model_id" ref="model_emi_kyc_item"/>
+        <field name="domain_force">[('kyc_id.application_id.partner_id', '=', user.partner_id.id)]</field>
         <field name="groups" eval="[(4, ref('group_emi_customer_portal'))]"/>
         <field name="perm_read" eval="True"/>
         <field name="perm_write" eval="False"/>

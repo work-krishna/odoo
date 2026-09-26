@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from werkzeug.exceptions import NotFound
+
 from odoo import fields, http
 from odoo.exceptions import UserError, ValidationError
 from odoo.http import request
@@ -22,6 +24,8 @@ KYC_DOCUMENTS = (
     ('citizenship_back', 'back of your citizenship', True),
     ('photo', 'passport-size photo', True),
     ('income_proof', 'proof of income', True),
+    ('nid_front', 'front of your national ID card', False),
+    ('nid_back', 'back of your national ID card', False),
     ('guarantor_citizenship_front', "front of your guarantor's citizenship", True),
     ('guarantor_citizenship_back', "back of your guarantor's citizenship", True),
     ('guarantor_nid_front', "front of your guarantor's national ID card", False),
@@ -43,7 +47,10 @@ class EmiApply(http.Controller):
         rows = []
         for finance, plan, rate in phone._emi_active_offers():
             rows.append({'finance': finance, 'plan': plan, 'rate': rate})
+        requirements = request.env['emi.kyc.requirement'].sudo().search([])
         return {
+            'applicant_requirements': requirements.filtered(lambda r: r.party == 'applicant'),
+            'guarantor_requirements': requirements.filtered(lambda r: r.party == 'guarantor'),
             'phone': phone, 'phone_url': phone_url(phone), 'values': values, 'error': error,
             'variants': phone.product_variant_ids, 'offers': rows,
             'options': phone.sudo().downpayment_option_ids.filtered('active'),
@@ -54,6 +61,17 @@ class EmiApply(http.Controller):
     def apply_form(self, phone_slug, **kwargs):
         phone = get_phone(phone_slug)
         return request.render('emi_storefront.apply', self._form_context(phone, kwargs))
+
+    @http.route('/phones/kyc-form/<int:requirement_id>', type='http', auth='user', website=True, methods=['GET'])
+    def kyc_blank_form(self, requirement_id):
+        """Download the blank form of a configured KYC item (e.g. the agreement to sign)."""
+        requirement = request.env['emi.kyc.requirement'].sudo().browse(requirement_id).exists()
+        if not requirement.active or requirement.value_type != 'file' or not requirement.template:
+            raise NotFound()
+        stream = request.env['ir.binary']._get_stream_from(
+            requirement, 'template', filename_field='template_filename',
+        )
+        return stream.get_response(as_attachment=True)
 
     @http.route('/phones/<string:phone_slug>/apply', type='http', auth='user', website=True, methods=['POST'])
     def apply_submit(self, phone_slug, **post):
@@ -118,6 +136,7 @@ class EmiApply(http.Controller):
             if data:
                 kyc[field] = data
                 kyc[f'{field}_filename'] = upload.filename
+        kyc['item_ids'] = self._kyc_items(post)
         if post.get('consent') != 'on':
             raise UserError("Please confirm your details and agree to their verification.")
         kyc['consent_date'] = fields.Datetime.now()
@@ -145,3 +164,38 @@ class EmiApply(http.Controller):
             'kyc_ids': [(0, 0, kyc)],
             **delivery_vals,
         })
+
+    def _kyc_items(self, post):
+        """Answers to the KYC items configured under KYC Requirements."""
+        items = []
+        for requirement in request.env['emi.kyc.requirement'].sudo().search([]):
+            name, label = f'kyc_item_{requirement.id}', requirement.name
+            vals = {'requirement_id': requirement.id}
+            if requirement.value_type == 'file':
+                upload = request.httprequest.files.get(name)
+                data = read_upload(upload, label, required=requirement.required)
+                if data:
+                    vals.update(value_file=data, value_filename=upload.filename)
+            elif requirement.value_type == 'checkbox':
+                vals['value_bool'] = post.get(name) == 'on'
+                if requirement.required and not vals['value_bool']:
+                    raise UserError(f"Please tick: {label}.")
+            else:
+                value = text(post, name)
+                if not value:
+                    if requirement.required:
+                        raise UserError(f"Please fill in: {label}.")
+                elif requirement.value_type == 'date':
+                    try:
+                        vals['value_date'] = fields.Date.to_date(value)
+                    except ValueError:
+                        raise UserError(f"Enter {label} as a valid date.")
+                elif requirement.value_type == 'number':
+                    number = to_float(value, None)
+                    if number is None or abs(number) >= 1e12:
+                        raise UserError(f"Enter {label} as a number.")
+                    vals['value_text'] = value
+                else:
+                    vals['value_text'] = value
+            items.append((0, 0, vals))
+        return items
