@@ -128,6 +128,14 @@ class TestEmiFinanceConfig(EmiCommon):
         with self.assertRaisesRegex(ValidationError, re.escape(f"{self.marketplace.name} is already")):
             self.lender_company.emi_is_marketplace = True
 
+    def test_marketplace_flag_stays_while_it_has_applications(self):
+        app = self._draft_application()
+        with self.assertRaisesRegex(UserError, 'already has EMI applications'):
+            self.marketplace.emi_is_marketplace = False
+        app.sudo().unlink()
+        self.marketplace.emi_is_marketplace = False
+        self.other_lender_company.emi_is_marketplace = False  # untouched companies are fine
+
     def test_marketplace_flag_cannot_move_to_finance_company(self):
         self.marketplace.emi_is_marketplace = False
         with self.assertRaises(ValidationError):

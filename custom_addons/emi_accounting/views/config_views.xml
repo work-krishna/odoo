@@ -36,6 +36,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='settlement_bank_account_id']" position="after">
                 <field name="installment_collection"/>
+                <field name="down_payment_collection"/>
             </xpath>
         </field>
     </record>

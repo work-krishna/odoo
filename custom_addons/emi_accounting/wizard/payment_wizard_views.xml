@@ -41,15 +41,23 @@
                 <group>
                     <group>
                         <field name="application_id" readonly="1"/>
-                        <field name="receiving_company_id"/>
-                        <field name="journal_id" required="1" options="{'no_create': True}"/>
+                        <field name="down_payment_receiver"/>
+                        <field name="vendor_id" invisible="down_payment_receiver != 'retailer'"/>
+                        <field name="receiving_company_id" invisible="not receiving_company_id"/>
+                        <field name="journal_id" required="receiving_company_id" invisible="not receiving_company_id"
+                               options="{'no_create': True}"/>
                     </group>
                     <group>
                         <field name="amount"/>
                         <field name="payment_date"/>
+                        <field name="memo"/>
                         <field name="currency_id" invisible="1"/>
                     </group>
                 </group>
+                <p class="text-muted" invisible="down_payment_receiver != 'retailer'">
+                    The retailer takes this down payment at the shop: confirm what it received.
+                    Nothing is booked in the marketplace's or the finance company's accounts.
+                </p>
                 <footer>
                     <button name="action_confirm" type="object" string="Register Down Payment" class="btn-primary"/>
                     <button string="Cancel" special="cancel" class="btn-secondary"/>
@@ -69,8 +77,11 @@
                 <group>
                     <group>
                         <field name="application_id" readonly="1"/>
-                        <field name="receiving_company_id" string="Paid From"/>
-                        <field name="journal_id" required="1" options="{'no_create': True}"/>
+                        <field name="down_payment_receiver"/>
+                        <field name="vendor_id" invisible="down_payment_receiver != 'retailer'"/>
+                        <field name="receiving_company_id" string="Paid From" invisible="not receiving_company_id"/>
+                        <field name="journal_id" required="receiving_company_id" invisible="not receiving_company_id"
+                               options="{'no_create': True}"/>
                     </group>
                     <group>
                         <field name="amount"/>

@@ -9,7 +9,7 @@
             <xpath expr="//header/field[@name='state']" position="before">
                 <button name="action_open_down_payment" type="object" string="Register Down Payment"
                         invisible="state in ('draft', 'rejected', 'closed', 'defaulted') or not down_payment_amount"
-                        groups="emi_finance.group_emi_officer,account.group_account_invoice"/>
+                        groups="emi_finance.group_emi_officer,emi_finance.group_emi_finance_reviewer,account.group_account_invoice"/>
                 <button name="action_open_installment_payment" type="object" string="Register Installment Payment"
                         invisible="state not in ('disbursed', 'active')" class="btn-primary"
                         groups="emi_finance.group_emi_officer,emi_finance.group_emi_finance_reviewer,account.group_account_invoice"/>
@@ -22,10 +22,13 @@
                         confirm="Reverse the loan, collection and installment entries, credit the commission invoice and put this application back to Approved?"/>
                 <button name="action_open_down_payment_refund" type="object" string="Refund Down Payment"
                         invisible="state != 'rejected' or down_payment_received &lt;= 0"
-                        groups="emi_finance.group_emi_officer,account.group_account_invoice"/>
+                        groups="emi_finance.group_emi_officer,emi_finance.group_emi_finance_reviewer,account.group_account_invoice"/>
             </xpath>
             <xpath expr="//field[@name='down_payment_amount']" position="after">
+                <field name="down_payment_receiver"
+                       readonly="disbursement_date or down_payment_received or state in ('rejected', 'closed', 'defaulted')"/>
                 <field name="down_payment_received" invisible="state == 'draft' and not down_payment_received"/>
+                <field name="disbursement_date" invisible="1"/>
             </xpath>
             <xpath expr="//div[hasclass('oe_title')]" position="before">
                 <div class="oe_button_box" name="button_box">

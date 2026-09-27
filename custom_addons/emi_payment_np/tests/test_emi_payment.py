@@ -85,6 +85,26 @@ class TestEmiOnlinePayment(EmiAccountingCommon, HttpCase):
         self._online_payment(app, 'installment', self.marketplace_provider, first.amount)
         self.assertEqual(first.state, 'paid')
 
+    def test_down_payment_goes_to_whoever_takes_it(self):
+        self.finance.sudo().down_payment_collection = 'finance_company'
+        app = self._approved_application()
+        self.assertEqual(app._emi_payment_company('down_payment'), self.lender)
+        self.assertIn(f'company_id={self.lender.id}', app._emi_payment_link('down_payment'))
+        tx = self._online_payment(app, 'down_payment', self.lender_provider, 10000.0)
+        self.assertEqual(tx.payment_id.company_id, self.lender)
+        self.assertEqual(app._emi_amount_due('down_payment'), 0.0)
+
+        shop = self._submitted_application()
+        shop.with_user(self.officer).down_payment_receiver = 'retailer'
+        self.assertFalse(shop._emi_payment_link('down_payment'), "paid at the shop, not online")
+        # A receipt arriving anyway is kept, not lost or booked as the down payment.
+        tx = self._online_payment(shop, 'down_payment', self.marketplace_provider, 10000.0)
+        self.assertEqual(tx.payment_id.move_id.emi_payment_kind, 'unallocated')
+        self.assertEqual(shop.down_payment_at_retailer, 0.0)
+        self.authenticate(None, None)
+        page = self.url_open(f'{shop.access_url}?access_token={shop._portal_ensure_token()}')
+        self.assertIn("s shop.", page.text)
+
     def test_payment_link_token_is_valid(self):
         app = self._approved_application()
         link = app._emi_payment_link('down_payment')

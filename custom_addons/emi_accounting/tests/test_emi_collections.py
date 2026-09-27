@@ -388,3 +388,97 @@ class TestEmiAccountingAccess(EmiAccountingCommon):
         self.assertFalse(Vendor.with_user(outsider).search([('id', '=', self.vendor.id)]))
         self.assertTrue(Vendor.with_user(mp_accountant).search([('id', '=', self.vendor.id)]))
         self.assertTrue(Vendor.with_user(self.officer).search([('id', '=', self.vendor.id)]))
+
+
+@tagged('post_install', '-at_install')
+class TestEmiDownPaymentReceivers(EmiAccountingCommon):
+    """The retailer, the marketplace (default, tested above) or the finance company takes the down payment."""
+
+    def _lines(self, move, partner):
+        return move.line_ids.filtered(lambda l: l.partner_id == partner)
+
+    def _to_approved(self, app):
+        officer_app = app.with_user(self.officer)
+        officer_app.action_start_review()
+        officer_app.action_verify_kyc()
+        officer_app.action_send_to_finance()
+        app.with_user(self.reviewer).action_approve()
+
+    def test_finance_company_takes_the_down_payment(self):
+        self.finance.down_payment_collection = 'finance_company'
+        app = self._approved_application()
+        self.assertEqual(app.down_payment_receiver, 'finance_company')
+        with self.assertRaises(AccessError):  # marketplace staff do not book the lender's receipts
+            self.env['emi.down.payment'].with_user(self.officer).create({'application_id': app.id}).action_confirm()
+        wizard = self.env['emi.down.payment'].with_user(self.reviewer).create({'application_id': app.id})
+        self.assertEqual(wizard.receiving_company_id, self.lender)
+        self.assertEqual(wizard.journal_id.company_id, self.lender)
+        wizard.action_confirm()
+        self.assertEqual(app._emi_down_payment_received(), 10000.0)
+        self.assertEqual(app._emi_amount_due('down_payment'), 0.0)
+
+        app.with_user(self.reviewer).action_disburse()
+        down_payment_line = app._emi_down_payment_lines(app.finance_move_id)
+        self.assertEqual(down_payment_line.debit, 10000.0)
+        self.assertTrue(down_payment_line.reconciled, "matched with the receipt taken before disbursement")
+        # The lender passes the down payment on: it owes the marketplace the whole price.
+        self.assertEqual(self._lines(app.finance_move_id, self.marketplace.partner_id).credit, app.list_price)
+        self.assertEqual(self._lines(app.marketplace_move_id, self.lender.partner_id).debit, app.list_price)
+        self.assertFalse(self._lines(app.marketplace_move_id, app.partner_id.commercial_partner_id))
+        self.assertEqual(app._emi_amount_due('down_payment'), 0.0)
+        with self.assertRaises(UserError):
+            app.with_user(self.officer).down_payment_receiver = 'marketplace'
+
+    def test_finance_company_down_payment_after_disbursement(self):
+        self.finance.down_payment_collection = 'finance_company'
+        app = self._approved_application()
+        app.with_user(self.reviewer).action_disburse()
+        self.assertEqual(app._emi_amount_due('down_payment'), 10000.0)
+        self.env['emi.down.payment'].with_user(self.reviewer).create({'application_id': app.id}).action_confirm()
+        self.assertEqual(app._emi_amount_due('down_payment'), 0.0)
+        self.assertTrue(app._emi_down_payment_lines(app.finance_move_id).reconciled)
+
+    def test_retailer_takes_the_down_payment_at_the_shop(self):
+        app = self._submitted_application()
+        app.with_user(self.officer).down_payment_receiver = 'retailer'
+        self.assertFalse(app._emi_payment_company('down_payment'))
+        with self.assertRaisesRegex(UserError, 'at the shop'):  # e.g. a gateway receipt
+            app._emi_register_down_payment(100.0, fields.Date.today(), self.company_data['default_journal_bank'])
+        wizard = self.env['emi.down.payment'].with_user(self.officer).create({
+            'application_id': app.id, 'memo': 'Shop receipt 42',
+        })
+        self.assertFalse(wizard.receiving_company_id or wizard.journal_id or wizard.journal_hint)
+        wizard.action_confirm()
+        self.assertEqual(app.down_payment_at_retailer, 10000.0)
+        self.assertEqual(app._emi_amount_due('down_payment'), 0.0)
+        self.assertFalse(self.env['account.payment'].sudo().search([('move_id.emi_application_id', '=', app.id)]))
+        with self.assertRaises(UserError):
+            app.with_user(self.officer).down_payment_receiver = 'marketplace'
+
+        self._to_approved(app)
+        app.with_user(self.reviewer).action_disburse()
+        move = app.marketplace_move_id
+        # The retailer already has the down payment: the marketplace holds only the financed amount.
+        self.assertFalse(self._lines(move, app.partner_id.commercial_partner_id))
+        self.assertEqual(self._lines(move, self.lender.partner_id).debit, app.financed_amount)
+        clearing = move.line_ids.filtered(lambda l: l.account_id == self.marketplace.emi_vendor_clearing_account_id)
+        self.assertEqual(clearing.credit, app.financed_amount)
+        self.assertEqual(self._lines(app.finance_move_id, self.marketplace.partner_id).credit, app.financed_amount)
+        self.assertEqual(app._emi_amount_due('down_payment'), 0.0)
+
+    def test_retailer_refund_is_recorded(self):
+        app = self._submitted_application()
+        app.with_user(self.officer).down_payment_receiver = 'retailer'
+        self.env['emi.down.payment'].with_user(self.officer).create({'application_id': app.id}).action_confirm()
+        officer_app = app.with_user(self.officer)
+        officer_app.action_start_review()
+        officer_app.action_reject("Income could not be verified")
+        with self.assertRaises(UserError):
+            app.sudo().unlink()
+        refund = self.env['emi.down.payment.refund'].with_user(self.officer).create({'application_id': app.id})
+        self.assertEqual(refund.amount, 10000.0)
+        self.assertFalse(refund.journal_id)
+        refund.action_confirm()
+        self.assertEqual(app.down_payment_at_retailer, 0.0)
+        app.sudo().unlink()
+

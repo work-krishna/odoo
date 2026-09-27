@@ -3,6 +3,7 @@ from odoo import api, fields, models
 from odoo.exceptions import AccessError, UserError
 from odoo.tools import SQL
 
+from odoo.addons.emi_accounting.models.emi_finance_company import DOWN_PAYMENT_RECEIVERS
 from odoo.addons.emi_accounting.tools.amortization import build_schedule, effective_monthly_rate
 from odoo.addons.emi_application.models.application import OFFICER, REVIEWER, EmiApplication as BaseApplication
 
@@ -35,7 +36,7 @@ class EmiApplication(models.Model):
 
     _EMI_SERVER_FIELDS = BaseApplication._EMI_SERVER_FIELDS | {
         'schedule_line_ids', 'disbursement_date', 'finance_move_id', 'marketplace_move_id',
-        'commission_invoice_id', 'commission_amount',
+        'commission_invoice_id', 'commission_amount', 'down_payment_at_retailer',
     }
 
     schedule_line_ids = fields.One2many('emi.schedule.line', 'application_id', string='Installments', readonly=True)
@@ -67,6 +68,21 @@ class EmiApplication(models.Model):
         compute='_compute_down_payment_received',
         help="Down payment receipts booked for this application, net of refunds.",
     )
+    down_payment_receiver = fields.Selection(
+        DOWN_PAYMENT_RECEIVERS, string='Down Payment Received By', compute='_compute_down_payment_receiver',
+        store=True, readonly=False, tracking=True,
+        help="Taken from the finance company; it can be changed until a down payment is recorded or the "
+             "loan is disbursed.",
+    )
+    down_payment_at_retailer = fields.Monetary(
+        readonly=True, copy=False,
+        help="Down payment the retailer received at the shop (confirmed here), net of what it refunded.",
+    )
+
+    @api.depends('finance_company_id')
+    def _compute_down_payment_receiver(self):
+        for app in self:
+            app.down_payment_receiver = app.finance_company_id.sudo().down_payment_collection or 'marketplace'
 
     @api.depends('schedule_line_ids.state', 'schedule_line_ids.amount_residual')
     def _compute_installment_summary(self):
@@ -105,8 +121,20 @@ class EmiApplication(models.Model):
     def _unlink_except_with_entries(self):
         if self.env['account.move'].sudo().search_count([('emi_application_id', 'in', self.ids)], limit=1):
             raise UserError("Applications with journal entries or payments cannot be deleted.")
+        if any(app.down_payment_at_retailer for app in self.sudo()):
+            raise UserError("The retailer holds a down payment for this application: record its refund first.")
 
     def write(self, vals):
+        if 'down_payment_receiver' in vals or 'finance_company_id' in vals:
+            for app in self:
+                receiver = vals.get('down_payment_receiver') or (
+                    'finance_company_id' in vals and self.env['emi.finance.company'].sudo().browse(
+                        vals['finance_company_id']).down_payment_collection
+                ) or app.down_payment_receiver
+                if receiver != app.down_payment_receiver and (
+                        app.marketplace_move_id or app._emi_down_payment_received()):
+                    raise UserError(f"{app.name}: who receives the down payment cannot change once a down "
+                                    "payment is recorded or the loan is disbursed.")
         # Also for sudo writes (website): the receipts are booked against this customer and amount.
         if 'partner_id' in vals or 'down_payment_amount' in vals:
             for app in self:
@@ -157,40 +185,56 @@ class EmiApplication(models.Model):
         customer = self.partner_id.commercial_partner_id
         marketplace_partner = self.company_id.partner_id
         payable = marketplace_partner.with_company(lender).property_account_payable_id
+        # Taking the down payment, the lender also passes it on: it owes the marketplace the whole price.
+        down_payment = self.down_payment_amount if self.down_payment_receiver == 'finance_company' else 0.0
+        lines = [
+            (0, 0, {'name': f"{self.name} loan principal", 'account_id': lender.emi_loan_account_id.id,
+                    'partner_id': customer.id, 'debit': self.financed_amount}),
+            (0, 0, {'name': f"{self.name} disbursement to {self.company_id.name}", 'account_id': payable.id,
+                    'partner_id': marketplace_partner.id, 'credit': self.financed_amount + down_payment}),
+        ]
+        if down_payment:
+            lines.insert(1, (0, 0, {
+                'name': f"{self.name} down payment",
+                'account_id': customer.with_company(lender).property_account_receivable_id.id,
+                'partner_id': customer.id, 'debit': down_payment,
+            }))
         move = self.env['account.move'].sudo().with_company(lender).create({
             'move_type': 'entry',
             'journal_id': lender.emi_journal_id.id,
             'date': date,
             'ref': f"{self.name} disbursement",
             'emi_application_id': self.id,
-            'line_ids': [
-                (0, 0, {'name': f"{self.name} loan principal", 'account_id': lender.emi_loan_account_id.id,
-                        'partner_id': customer.id, 'debit': self.financed_amount}),
-                (0, 0, {'name': f"{self.name} disbursement to {self.company_id.name}", 'account_id': payable.id,
-                        'partner_id': marketplace_partner.id, 'credit': self.financed_amount}),
-            ],
+            'line_ids': lines,
         })
         move.action_post()
+        if down_payment:
+            self._emi_match_down_payment(move)
         return move
 
     def _emi_create_marketplace_move(self, date):
         """Marketplace books (agent for the retailer): the customer owes the
         down payment, the finance company owes the financed amount, and the
-        whole price is held for the retailer until settlement."""
+        whole price is held for the retailer until settlement. A finance
+        company that took the down payment owes it too; a down payment the
+        retailer took at the shop is not held here."""
         self.ensure_one()
         marketplace = self.company_id.sudo()
         customer = self.partner_id.commercial_partner_id
         lender_partner = self.finance_company_id.company_id.partner_id
         vendor_partner = self.vendor_id.sudo().partner_id.commercial_partner_id
+        receiver = self.down_payment_receiver
+        from_lender = self.financed_amount + (self.down_payment_amount if receiver == 'finance_company' else 0.0)
+        held = self.list_price - (self.down_payment_amount if receiver == 'retailer' else 0.0)
         lines = [
             (0, 0, {'name': f"{self.name} financed by {self.finance_company_id.name}",
                     'account_id': lender_partner.with_company(marketplace).property_account_receivable_id.id,
-                    'partner_id': lender_partner.id, 'debit': self.financed_amount}),
+                    'partner_id': lender_partner.id, 'debit': from_lender}),
             (0, 0, {'name': f"{self.name} {self.product_id.display_name} (held for {vendor_partner.name})",
                     'account_id': marketplace.emi_vendor_clearing_account_id.id,
-                    'partner_id': vendor_partner.id, 'credit': self.list_price}),
+                    'partner_id': vendor_partner.id, 'credit': held}),
         ]
-        if self.down_payment_amount:
+        if self.down_payment_amount and receiver == 'marketplace':
             lines.insert(0, (0, 0, {
                 'name': f"{self.name} down payment",
                 'account_id': customer.with_company(marketplace).property_account_receivable_id.id,
@@ -205,20 +249,30 @@ class EmiApplication(models.Model):
             'line_ids': lines,
         })
         move.action_post()
-        # A down payment received before disbursement sits as an outstanding
-        # credit on the customer: match it now.
-        receivable_lines = move.line_ids.filtered(lambda l: l.account_id.account_type == 'asset_receivable'
-                                                  and l.partner_id == customer)
-        if receivable_lines:
-            outstanding = self.env['account.move.line'].sudo().search([
-                ('company_id', '=', marketplace.id), ('partner_id', '=', customer.id),
-                ('account_id', '=', receivable_lines.account_id.id), ('reconciled', '=', False),
-                ('parent_state', '=', 'posted'), ('balance', '<', 0),
-                ('move_id.emi_application_id', '=', self.id), ('move_id.emi_payment_kind', '=', 'down_payment'),
-            ])
-            if outstanding:
-                (receivable_lines | outstanding).reconcile()
+        if receiver == 'marketplace':
+            self._emi_match_down_payment(move)
         return move
+
+    def _emi_down_payment_lines(self, move):
+        """Lines of a disbursement entry expecting the down payment from the customer."""
+        loan_account = self.finance_company_id.company_id.sudo().emi_loan_account_id
+        return _receivable_line(move, self.partner_id.commercial_partner_id).filtered(
+            lambda l: l.account_id != loan_account)
+
+    def _emi_match_down_payment(self, move):
+        """A down payment received before disbursement sits as an outstanding
+        credit on the customer: match it with the entry now expecting it."""
+        lines = self._emi_down_payment_lines(move)
+        if not lines:
+            return
+        outstanding = self.env['account.move.line'].sudo().search([
+            ('company_id', '=', move.company_id.id), ('partner_id', '=', self.partner_id.commercial_partner_id.id),
+            ('account_id', '=', lines.account_id.id), ('reconciled', '=', False),
+            ('parent_state', '=', 'posted'), ('balance', '<', 0),
+            ('move_id.emi_application_id', '=', self.id), ('move_id.emi_payment_kind', '=', 'down_payment'),
+        ])
+        if outstanding:
+            (lines | outstanding).reconcile()
 
     def _emi_create_commission_invoice(self, date):
         self.ensure_one()
@@ -411,21 +465,45 @@ class EmiApplication(models.Model):
     # ------------------------------------------------------------------
 
     def _emi_payment_company(self, kind):
-        """Company whose bank or gateway receives this kind of payment."""
+        """Company whose bank or gateway receives this kind of payment (none
+        for a down payment the retailer takes at the shop)."""
         self.ensure_one()
-        if kind == 'down_payment' or self.finance_company_id.installment_collection == 'marketplace':
+        if kind == 'down_payment':
+            return self._emi_down_payment_company()
+        if self.finance_company_id.installment_collection == 'marketplace':
             return self.company_id
         return self.finance_company_id.company_id
 
+    def _emi_down_payment_company(self):
+        """Company booking the down payment: the marketplace, the finance company, or none (retailer)."""
+        self.ensure_one()
+        app = self.sudo()
+        if app.down_payment_receiver == 'finance_company':
+            return app.finance_company_id.company_id
+        if app.down_payment_receiver == 'retailer':
+            return self.env['res.company']
+        return app.company_id
+
+    def _emi_down_payment_move(self):
+        """The disbursement entry expecting the down payment from the customer, if any yet."""
+        self.ensure_one()
+        return {
+            'marketplace': self.marketplace_move_id, 'finance_company': self.finance_move_id,
+        }.get(self.down_payment_receiver, self.env['account.move'])
+
     def _emi_down_payment_received(self):
-        """Down payment receipts (net of refunds) booked in the marketplace for this application."""
+        """Down payment received for this application, net of refunds: receipts
+        booked by whoever takes it, or what the retailer confirmed."""
         self.ensure_one()
         app = self.sudo()
         if not app._origin.id:
             return 0.0
+        if app.down_payment_receiver == 'retailer':
+            return app.down_payment_at_retailer
         lines = self.env['account.move.line'].sudo().search([
             ('move_id.emi_application_id', '=', app._origin.id), ('move_id.emi_payment_kind', '=', 'down_payment'),
-            ('company_id', '=', app.company_id.id), ('partner_id', '=', app.partner_id.commercial_partner_id.id),
+            ('company_id', '=', app._emi_down_payment_company().id),
+            ('partner_id', '=', app.partner_id.commercial_partner_id.id),
             ('account_id.account_type', '=', 'asset_receivable'), ('parent_state', '=', 'posted'),
         ])
         return app.currency_id.round(-sum(lines.mapped('balance')))
@@ -469,10 +547,10 @@ class EmiApplication(models.Model):
         if kind == 'down_payment':
             if app.state in ('draft', 'rejected', 'closed', 'defaulted'):
                 return 0.0
-            if app.marketplace_move_id:
-                # Disbursed: whatever the collection entry still expects from the customer.
-                due = sum(_receivable_line(
-                    app.marketplace_move_id, app.partner_id.commercial_partner_id).mapped('amount_residual'))
+            move = app._emi_down_payment_move()
+            if move:
+                # Disbursed: whatever the loan or collection entry still expects from the customer.
+                due = sum(app._emi_down_payment_lines(move).mapped('amount_residual'))
             else:
                 due = app.down_payment_amount - app._emi_down_payment_received()
             return max(app.currency_id.round(due), 0.0)
@@ -480,8 +558,10 @@ class EmiApplication(models.Model):
             return 0.0
         return app._emi_next_installment()[1]
 
-    def _emi_register_down_payment(self, amount, date, journal):
-        """Book a down payment received by the marketplace; returns the account.payment."""
+    def _emi_register_down_payment(self, amount, date, journal, memo=None):
+        """Book a down payment received by the marketplace or the finance
+        company and return the account.payment; for the retailer, record what
+        it received at the shop (no payment, no journal)."""
         self.ensure_one()
         app = self.sudo()
         if app.state in ('draft', 'rejected', 'closed', 'defaulted'):
@@ -492,16 +572,25 @@ class EmiApplication(models.Model):
         due = app._emi_amount_due('down_payment')
         if app.currency_id.compare_amounts(amount, due) > 0:
             raise UserError(f"Only {app.currency_id.format(due)} of the down payment is still due on {app.name}.")
-        marketplace = app.company_id.sudo()
+        memo = memo or f"{app.name} down payment"
+        if app.down_payment_receiver == 'retailer':
+            retailer = app.vendor_id.sudo().name
+            if journal:
+                raise UserError(f"{retailer} takes the down payment of {app.name} at the shop: "
+                                "confirm what it received instead of booking a payment.")
+            app.write({'down_payment_at_retailer': app.down_payment_at_retailer + amount})
+            app._emi_invalidate_summary()
+            app.message_post(body=f"Down payment of {app.currency_id.format(amount)} received by {retailer} "
+                                  f"at the shop ({memo}), confirmed by {self.env.user.name}.")
+            return self.env['account.payment']
         customer = app.partner_id.commercial_partner_id
         payment = app._emi_create_payment(
-            marketplace, customer, amount, date, journal, f"{app.name} down payment", 'down_payment',
+            app._emi_down_payment_company().sudo(), customer, amount, date, journal, memo, 'down_payment',
         )
-        if app.marketplace_move_id:
-            (app.marketplace_move_id | payment.move_id).line_ids.filtered(
-                lambda l: l.partner_id == customer and l.account_id.account_type == 'asset_receivable'
-                and not l.reconciled
-            ).reconcile()
+        move = app._emi_down_payment_move()
+        if move:
+            (app._emi_down_payment_lines(move) | _receivable_line(payment.move_id, customer)).filtered(
+                lambda l: not l.reconciled).reconcile()
         app._emi_invalidate_summary()
         return payment
 
@@ -517,14 +606,25 @@ class EmiApplication(models.Model):
         received = app._emi_down_payment_received()
         if app.currency_id.compare_amounts(amount, received) > 0:
             raise UserError(f"Only {app.currency_id.format(received)} of down payment is held for {app.name}.")
+        if app.down_payment_receiver == 'retailer':
+            retailer = app.vendor_id.sudo().name
+            if journal:
+                raise UserError(f"{retailer} refunds the down payment of {app.name} itself: "
+                                "confirm the refund instead of booking a payment.")
+            app.write({'down_payment_at_retailer': app.down_payment_at_retailer - amount})
+            app._emi_invalidate_summary()
+            app.message_post(body=f"Down payment refund of {app.currency_id.format(amount)} made by {retailer} "
+                                  f"to the customer, confirmed by {self.env.user.name}.")
+            return self.env['account.payment']
         customer = app.partner_id.commercial_partner_id
+        company = app._emi_down_payment_company().sudo()
         refund = app._emi_create_payment(
-            app.company_id.sudo(), customer, amount, date, journal, f"{app.name} down payment refund",
+            company, customer, amount, date, journal, f"{app.name} down payment refund",
             'down_payment', payment_type='outbound',
         )
         self.env['account.move.line'].sudo().search([
             ('move_id.emi_application_id', '=', app.id), ('move_id.emi_payment_kind', '=', 'down_payment'),
-            ('company_id', '=', app.company_id.id), ('partner_id', '=', customer.id),
+            ('company_id', '=', company.id), ('partner_id', '=', customer.id),
             ('account_id', '=', _receivable_line(refund.move_id, customer).account_id.id),
             ('parent_state', '=', 'posted'), ('reconciled', '=', False),
         ]).reconcile()

@@ -71,6 +71,14 @@
                             <a class="btn btn-primary" t-att-href="down_payment_link">Pay Down Payment</a>
                         </div>
                     </div>
+                    <div t-if="not down_payment_link and down_payment_due and app.down_payment_receiver == 'retailer'"
+                         class="card mb-3">
+                        <div class="card-body">
+                            <h5>Down payment due</h5>
+                            <p class="fs-4" t-out="down_payment_due" t-options="{'widget': 'monetary', 'display_currency': app.currency_id}"/>
+                            <p class="text-muted mb-0">Pay it at <t t-out="app.vendor_id.name"/>'s shop.</p>
+                        </div>
+                    </div>
                     <div t-if="installment_link" class="card mb-3">
                         <div class="card-body">
                             <h5>Next installment</h5>

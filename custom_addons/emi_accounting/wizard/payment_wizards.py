@@ -44,7 +44,7 @@ class EmiPaymentJournalMixin(models.AbstractModel):
     @api.depends('application_id')
     def _compute_journal_id(self):
         for wiz in self:
-            wiz.journal_id = wiz._emi_journals()[:1] if wiz.application_id else False
+            wiz.journal_id = wiz._emi_journals()[:1] if wiz._emi_receiving_company() else False
 
     @api.depends('application_id')
     @api.depends_context('allowed_company_ids')
@@ -52,7 +52,7 @@ class EmiPaymentJournalMixin(models.AbstractModel):
         for wiz in self:
             company = wiz._emi_receiving_company()
             wiz.journal_hint = False
-            if not wiz.application_id:
+            if not company:  # the retailer takes it: nothing is booked, so no journal
                 continue
             if not wiz._emi_journals():
                 wiz.journal_hint = (
@@ -67,7 +67,7 @@ class EmiPaymentJournalMixin(models.AbstractModel):
                 )
 
     def _emi_check_journal(self):
-        if not self.journal_id:
+        if self.receiving_company_id and not self.journal_id:
             raise UserError(f"Choose the bank or cash journal of {self.receiving_company_id.name} for this payment.")
 
 
@@ -113,8 +113,14 @@ class EmiDownPayment(models.TransientModel):
     _description = 'Register EMI Down Payment'
 
     company_id = fields.Many2one(related='application_id.company_id')
+    down_payment_receiver = fields.Selection(related='application_id.down_payment_receiver')
+    vendor_id = fields.Many2one(related='application_id.vendor_id', string='Retailer')
     amount = fields.Monetary(compute='_compute_amount', store=True, readonly=False)
     payment_date = fields.Date(required=True, default=fields.Date.context_today)
+    memo = fields.Char(string='Reference', help="E.g. the receipt number the shop or cashier gave the customer.")
+
+    def _emi_receiving_company(self):
+        return self.application_id.sudo()._emi_down_payment_company()
 
     @api.depends('application_id')
     def _compute_amount(self):
@@ -124,10 +130,10 @@ class EmiDownPayment(models.TransientModel):
     def action_confirm(self):
         self.ensure_one()
         app = self.application_id.sudo()
-        marketplace = app.company_id.sudo()
-        _check_collector(self.env, marketplace, (OFFICER, BILLING))
+        # Staff of the receiving company; for the retailer, the marketplace confirms it.
+        _check_collector(self.env, app._emi_down_payment_company() or app.company_id, (OFFICER, REVIEWER, BILLING))
         self._emi_check_journal()
-        app._emi_register_down_payment(self.amount, self.payment_date, self.journal_id)
+        app._emi_register_down_payment(self.amount, self.payment_date, self.journal_id, self.memo)
         return {'type': 'ir.actions.act_window_close'}
 
 
@@ -137,6 +143,11 @@ class EmiDownPaymentRefund(models.TransientModel):
     _description = 'Refund EMI Down Payment'
 
     company_id = fields.Many2one(related='application_id.company_id')
+    down_payment_receiver = fields.Selection(related='application_id.down_payment_receiver')
+    vendor_id = fields.Many2one(related='application_id.vendor_id', string='Retailer')
+
+    def _emi_receiving_company(self):
+        return self.application_id.sudo()._emi_down_payment_company()
     amount = fields.Monetary(compute='_compute_amount', store=True, readonly=False)
     payment_date = fields.Date(required=True, default=fields.Date.context_today)
 
@@ -148,7 +159,7 @@ class EmiDownPaymentRefund(models.TransientModel):
     def action_confirm(self):
         self.ensure_one()
         app = self.application_id.sudo()
-        _check_collector(self.env, app.company_id.sudo(), (OFFICER, BILLING))
+        _check_collector(self.env, app._emi_down_payment_company() or app.company_id, (OFFICER, REVIEWER, BILLING))
         self._emi_check_journal()
         app._emi_refund_down_payment(self.amount, self.payment_date, self.journal_id)
         return {'type': 'ir.actions.act_window_close'}

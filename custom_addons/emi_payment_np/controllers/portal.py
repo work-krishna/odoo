@@ -148,6 +148,8 @@ class EmiPaymentPortal(payment_portal.PaymentPortal):
         if kwargs.get('is_validation'):
             raise unavailable
         company = app_sudo._emi_payment_company(kind)
+        if not company:  # the retailer takes it at the shop
+            raise unavailable
         partner = app_sudo.partner_id
         providers_sudo = request.env['payment.provider'].sudo()._get_compatible_providers(
             company.id, partner.id, amount, currency_id=app_sudo.currency_id.id,

@@ -21,8 +21,8 @@ class EmiApplication(models.Model):
         """Link to the payment form for what is due now, or False."""
         self.ensure_one()
         amount = self._emi_amount_due(kind)
-        if kind not in PAYMENT_KINDS or not amount:
-            return False
+        if kind not in PAYMENT_KINDS or not amount or not self._emi_payment_company(kind):
+            return False  # nothing due, or the retailer takes it at the shop
         partner = self.partner_id
         return '/payment/pay?' + url_encode({
             'emi_application_id': self.id,
