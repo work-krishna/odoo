@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="signup_verify" name="Activate Your Account">
+        <t t-call="web.login_layout">
+            <form class="oe_login_form" role="form" method="post" action="/web/signup/verify">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                <input type="hidden" name="redirect" t-att-value="redirect"/>
+                <h4 class="mb-3">Activate your account</h4>
+                <p>
+                    We emailed a 6-digit code and an activation link to <strong t-out="email"/>.
+                    Enter the code below, or open the link. Both expire <t t-out="validity"/> minutes after we send them.
+                </p>
+                <p class="alert alert-success" t-if="message" role="status" t-out="message"/>
+                <p class="alert alert-danger" t-if="error" role="alert" t-out="error"/>
+                <div class="mb-3">
+                    <label for="signup_code" class="form-label">Activation code</label>
+                    <input type="text" name="code" id="signup_code" class="form-control form-control-lg text-center"
+                           required="required" autofocus="autofocus" autocomplete="one-time-code"
+                           inputmode="numeric" maxlength="7" placeholder="000000"/>
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">Activate account</button>
+                </div>
+            </form>
+            <form method="post" action="/web/signup/verify" class="text-center mt-3">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                <input type="hidden" name="redirect" t-att-value="redirect"/>
+                <input type="hidden" name="resend" value="1"/>
+                <button type="submit" class="btn btn-link">Email me a new code</button>
+            </form>
+            <p class="text-center small mb-0">
+                <a href="/web/session/logout?redirect=/web/login">Use another account</a>
+            </p>
+        </t>
+    </template>
+
+    <template id="signup_link_invalid" name="Activation Link Not Valid">
+        <t t-call="web.login_layout">
+            <h4 class="mb-3">This link cannot activate your account</h4>
+            <p class="alert alert-warning" role="alert" t-out="error"/>
+            <p>Log in with your email and password: we will email you a new code and link.</p>
+            <div class="d-grid">
+                <a href="/web/login" class="btn btn-primary">Log in</a>
+            </div>
+        </t>
+    </template>
+
+</odoo>

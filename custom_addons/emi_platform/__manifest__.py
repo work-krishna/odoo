@@ -25,6 +25,7 @@ Nepal localization they are built for.
         'emi_finance', 'emi_marketplace', 'emi_application', 'emi_accounting', 'emi_payment_np',
         'emi_storefront',
         'l10n_np_ird',
+        'auth_signup_email_otp',
         'payment_esewa', 'payment_khalti', 'payment_connectips', 'payment_fonepay',
     ],
     'data': [],

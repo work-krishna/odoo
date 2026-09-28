@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="mail_template_signup_verification" model="mail.template">
+        <field name="name">Sign-up: Activation Code</field>
+        <field name="model_id" ref="base.model_res_users"/>
+        <field name="subject">Activate your account at {{ object.company_id.name }}</field>
+        <field name="email_from">{{ (object.company_id.email_formatted or user.email_formatted) }}</field>
+        <field name="email_to">{{ object.email_formatted }}</field>
+        <field name="description">Sent to people who sign up on the website, with the code and link that activate their account</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="lang">{{ object.lang }}</field>
+        <field name="body_html" type="html">
+<div style="margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; color: #1f2933;">
+    <p>Hello <t t-out="object.name or ''">Ram</t>,</p>
+    <p>Thanks for signing up at <t t-out="object.company_id.name or ''">YourCompany</t>. Enter this code on the activation page:</p>
+    <p style="font-size: 30px; font-weight: bold; letter-spacing: 8px; margin: 18px 0;" t-out="ctx.get('signup_code')">123456</p>
+    <p>Or activate your account with one click:</p>
+    <p style="margin: 18px 0;">
+        <a t-att-href="ctx.get('signup_link')" style="background-color: #5b3fc4; color: #ffffff; padding: 10px 18px; border-radius: 6px; text-decoration: none; display: inline-block;">Activate my account</a>
+    </p>
+    <p>The code and the link expire in <t t-out="ctx.get('signup_validity')">15</t> minutes. If they expire, log in again and we will send new ones.</p>
+    <p style="color: #6b7785; font-size: 13px;">If you did not create this account, you can ignore this email.</p>
+</div>
+        </field>
+    </record>
+
+</odoo>

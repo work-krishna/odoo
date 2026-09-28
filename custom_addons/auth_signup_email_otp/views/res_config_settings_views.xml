@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.auth.signup.email.otp</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//setting[@id='access_rights']" position="before">
+                <setting id="signup_email_activation" string="Sign-up Activation"
+                         help="People who sign up on the website activate their account with an emailed code or link">
+                    <div class="content-group mt8">
+                        <span>Code and link valid for</span>
+                        <field name="signup_verification_minutes" class="oe_inline mx-2" style="width: 4rem;"/>
+                        <span>minutes</span>
+                    </div>
+                </setting>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
