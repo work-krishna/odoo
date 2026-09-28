@@ -1,0 +1,114 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}</style><style>:root{color-scheme:light dark;--md-bg:#fff;--md-text:rgba(0,0,0,.8);--md-muted:rgba(0,0,0,.6);--md-fill:rgba(0,0,0,.04);--md-fill-strong:rgba(0,0,0,.06);--md-rule:rgba(0,0,0,.1);--md-rule-strong:rgba(0,0,0,.16);--md-link:hsl(210 100% 45%)}@media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])){--md-bg:#0d0d0d;--md-text:rgba(255,255,255,.85);--md-muted:rgba(255,255,255,.6);--md-fill:rgba(255,255,255,.06);--md-fill-strong:rgba(255,255,255,.09);--md-rule:rgba(255,255,255,.14);--md-rule-strong:rgba(255,255,255,.22);--md-link:hsl(210 100% 72%)}}:root[data-theme="dark"]{color-scheme:dark;--md-bg:#0d0d0d;--md-text:rgba(255,255,255,.85);--md-muted:rgba(255,255,255,.6);--md-fill:rgba(255,255,255,.06);--md-fill-strong:rgba(255,255,255,.09);--md-rule:rgba(255,255,255,.14);--md-rule-strong:rgba(255,255,255,.22);--md-link:hsl(210 100% 72%)}:root[data-theme="light"]{color-scheme:light}@media print{:root,:root[data-theme="dark"]{color-scheme:light;--md-bg:#fff;--md-text:rgba(0,0,0,.8);--md-muted:rgba(0,0,0,.6);--md-fill:rgba(0,0,0,.04);--md-fill-strong:rgba(0,0,0,.06);--md-rule:rgba(0,0,0,.1);--md-rule-strong:rgba(0,0,0,.16);--md-link:hsl(210 100% 45%)}}body{background:var(--md-bg);color:var(--md-text);max-width:720px;margin:0 auto;padding:32px;display:flex;flex-direction:column;gap:10px;font:14px/1.55 -apple-system,BlinkMacSystemFont,'SF Pro','Segoe UI',sans-serif;overflow-wrap:break-word}body>:first-child{margin-top:0}h1,h2,h3,h4,h5,h6{margin:6px 0 0;line-height:1.25;font-weight:600;text-wrap:balance}h1{font-size:1.35em}h2{font-size:1.15em;color:var(--md-muted)}h3,h4,h5,h6{font-size:1em}p,ul,ol,blockquote,table,pre,hr{margin:0}strong{font-weight:600}a{color:var(--md-link);text-decoration:none}a:hover{text-decoration:underline}ul,ol{display:flex;flex-direction:column;gap:6px;padding-left:22px}ul{list-style:disc}ol{list-style:decimal}:is(li,td,th)>*+:is(p,ul,ol,blockquote){margin-top:6px}blockquote{display:flex;flex-direction:column;gap:10px;border-left:2px solid var(--md-rule);padding-left:10px;color:var(--md-muted)}:not(pre)>code{background:var(--md-fill);padding:1px 3px;border-radius:4px;font:.92em 'SF Mono',ui-monospace,Menlo,Consolas,monospace}a>code{background:none;color:inherit}pre{background:var(--md-fill);padding:10px 12px;border-radius:6px;overflow-x:auto;font:12px/1.5 'SF Mono',ui-monospace,Menlo,Consolas,monospace;margin-block:4px}pre code{background:none;padding:0;font:inherit}table{width:100%;border-collapse:separate;border-spacing:2px;font:inherit}th,td{padding:6px 8px;border-radius:3px;text-align:left;vertical-align:top}th{background:var(--md-fill-strong);font-weight:600}td{background:var(--md-fill)}:is(th,td) :not(pre)>code{background:transparent}hr{border:0;border-top:1px solid var(--md-rule-strong);margin-block:10px}img{max-width:100%;height:auto;border-radius:4px}</style>
+</head><body>
+<h1>EMI Platform — User Guide</h1>
+<p>Covers the three installed modules: <strong>emi_finance</strong>, <strong>emi_marketplace</strong>, <strong>emi_application</strong>. Not yet built: <code>emi_payment_np</code> (gateway payments) and <code>emi_accounting</code> (ledger entries, amortization posting) — see <strong>Known Gaps</strong> at the end.</p>
+<h2>1. How the pieces fit together</h2>
+<ul>
+<li><strong>emi_finance</strong> — finance companies (each backed by its own Odoo company), tenure plans, interest rates, down payment options.</li>
+<li><strong>emi_marketplace</strong> — vendors and the product catalog they own, with a listing-moderation workflow.</li>
+<li><strong>emi_application</strong> — the actual EMI application: links a customer, a product, a finance company and a tenure, carries the KYC form, and drives approval through to disbursement.</li>
+</ul>
+<p>All backend menus live under <strong>EMI Platform</strong> in the main app switcher.</p>
+<h2>2. Roles — who can do what</h2>
+<table>
+<thead>
+<tr>
+<th>Group</th>
+<th>Type</th>
+<th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>EMI Officer</td>
+<td>Internal</td>
+<td>Intake, KYC review, moves applications through the workflow</td>
+</tr>
+<tr>
+<td>EMI Manager</td>
+<td>Internal</td>
+<td>Everything EMI Officer can do, plus full config access</td>
+</tr>
+<tr>
+<td>Finance Company Reviewer</td>
+<td>Internal</td>
+<td>Only their own finance company's applications — approve/reject/disburse</td>
+</tr>
+<tr>
+<td>Marketplace Admin</td>
+<td>Internal</td>
+<td>Approve/suspend vendors, moderate product listings</td>
+</tr>
+<tr>
+<td>Vendor Portal User</td>
+<td>Portal</td>
+<td>Only their own vendor's products</td>
+</tr>
+<tr>
+<td>EMI Customer Portal</td>
+<td>Portal</td>
+<td>Only their own application + KYC</td>
+</tr>
+</tbody>
+</table>
+<p>Assign groups from <strong>Settings → Users &amp; Companies → Users</strong>, under the &quot;EMI Platform&quot; / &quot;EMI Marketplace&quot; category on a user's Access Rights.</p>
+<h2>3. One-time setup</h2>
+<h3>3.1 Create a finance company</h3>
+<ol>
+<li><strong>Settings → Users &amp; Companies → Companies</strong> → create a company for the lender (e.g. <em>Himalayan Finance Ltd</em>).</li>
+<li><strong>EMI Platform → Finance → Finance Companies</strong> → create: set <em>Code</em>, link the <em>Company</em> from step 1, contact info, default min. down payment %, which tenure plans it offers, and its settlement bank account.</li>
+<li>Open the record's <strong>Interest Rates</strong> smart button and add one row per tenure. To match &quot;0% up to 12 months, 7% above,&quot; add rows for 6/9/12-month tenures at 0% and 18/24-month tenures at 7% (rate is set per exact tenure, not a threshold). Choose <strong>Flat</strong> or <strong>Reducing Balance</strong> per row, and leave <em>Date To</em> empty for an open-ended rate.</li>
+<li>Create a user for the lender's staff, set their <strong>default Company</strong> and <strong>Allowed Companies</strong> to this finance company only, and add them to the <strong>Finance Company Reviewer</strong> group. Record rules then automatically restrict them to this company's applications.</li>
+</ol>
+<p>Tenure plans (6/9/12/18/24 months) come pre-seeded under <strong>EMI Platform → Finance → Tenure Plans</strong>; add more there if needed — nothing is hardcoded.</p>
+<h3>3.2 Onboard a vendor</h3>
+<ol>
+<li><strong>EMI Platform → Marketplace → Vendors</strong> → create: link the <em>Partner</em>, set commission type/value and settlement frequency, attach onboarding documents.</li>
+<li>Click <strong>Submit for Review</strong>, then (as Marketplace Admin) <strong>Approve</strong>.</li>
+<li>For the vendor's own login: create a portal user (<strong>Settings → Users</strong>), add them to the <strong>Vendor Portal User</strong> group, then add that user under the vendor record's <strong>Portal Users</strong> field — all three steps are needed for the record rules to scope correctly.</li>
+</ol>
+<h3>3.3 List a product</h3>
+<ol>
+<li>Create the product as usual (name, price, image, variants for RAM/storage/color).</li>
+<li>On the product form, the <strong>EMI Marketplace</strong> section: set <em>Vendor</em>, then <strong>Submit Listing</strong>. As Marketplace Admin, <strong>Publish Listing</strong> (only works once the vendor is Approved).</li>
+<li>On the <strong>EMI Down Payment Options</strong> tab, add tiers, e.g. &quot;10% Down&quot; / percent / 10, &quot;20% Down&quot; / percent / 20 — mark one as default.</li>
+</ol>
+<p>Only <strong>Published</strong> listings are selectable on an EMI application.</p>
+<h2>4. Running an application end to end</h2>
+<p>Currently done from the backend (<strong>EMI Platform → Applications</strong>) since the customer-facing storefront isn't built yet.</p>
+<ol>
+<li><strong>Create</strong>: set Customer, Product (published phones only), Finance Company, Tenure Plan — the interest rate auto-fills from step 3.1 and is frozen onto the application so later rate changes don't affect it. Choose a Down Payment Option and enter an amount at or above its minimum (the customer can pay more). Set a delivery address or note.</li>
+<li>Add a <strong>KYC</strong> row: personal details, citizenship number, address, occupation/income, bank details, optional guarantor, and upload citizenship front/back, photo, and income proof.</li>
+<li><strong>Submit</strong> — blocked if no interest rate is configured, down payment is under the minimum, or KYC is incomplete (name, DOB, phone, citizenship no., address, occupation, income, and all three documents are required).</li>
+<li>EMI Officer: <strong>Start KYC Review</strong>, verify the documents, tick <strong>Verified</strong> on the KYC record.</li>
+<li>EMI Officer: <strong>Send to Finance Company</strong> — blocked until KYC is marked Verified.</li>
+<li>Finance Company Reviewer (sees only their own company's applications): <strong>Approve</strong> or <strong>Reject</strong> (a reason is required to reject).</li>
+<li><strong>Disburse</strong> → <strong>Activate</strong>. At this stage today these just flip the status flag — no ledger entries or amortization schedule are posted yet (that's <code>emi_accounting</code>).</li>
+<li>From Active: <strong>Close</strong> on normal payoff, or <strong>Mark Defaulted</strong>.</li>
+</ol>
+<p>The <em>EMI Preview</em> fields (financed amount, total interest, monthly EMI) are computed live from flat-rate or reducing-balance formulas for the customer's reference — the authoritative schedule will come from <code>emi_accounting</code>.</p>
+<h2>5. Menu map</h2>
+<pre><code>EMI Platform
+├── Applications → EMI Applications          (Officer, Finance Reviewer)
+├── Finance
+│   ├── Finance Companies                     (Officer, Finance Reviewer)
+│   ├── Interest Rates                        (Officer, Finance Reviewer)
+│   └── Tenure Plans                          (Officer)
+└── Marketplace
+    ├── Vendors                               (Marketplace Admin)
+    └── Products                              (Marketplace Admin)
+</code></pre>
+<p><strong>Known issue:</strong> the EMI Platform root menu is currently only visible to EMI Officer and Finance Company Reviewer — a Marketplace Admin with no other group can't see it, so the Marketplace submenu is unreachable for them. Fix by adding this record (e.g. in <code>emi_marketplace/views/menu_views.xml</code>):</p>
+<pre><code class="language-xml">&lt;record id=&#34;emi_finance.menu_emi_root&#34; model=&#34;ir.ui.menu&#34;&gt;
+    &lt;field name=&#34;group_ids&#34; eval=&#34;[(4, ref(&#39;group_emi_marketplace_admin&#39;))]&#34;/&gt;
+&lt;/record&gt;
+</code></pre>
+<h2>6. Known gaps (not yet built)</h2>
+<ul>
+<li><strong>No payment gateway</strong> — down payment / EMI collection via eSewa, Khalti, ConnectIPS, Moru is <code>emi_payment_np</code>, not started.</li>
+<li><strong>No accounting entries</strong> — disbursement, vendor settlement, and interest recognition are <code>emi_accounting</code>, not started. Disburse/Activate today only change the application's status.</li>
+<li><strong>No customer/vendor storefront</strong> — everything above is done from the Odoo backend; the public-facing site is <code>emi_storefront</code>, not started.</li>
+</ul>
+<p>Let me know which of these you want built next.</p>
+
+</body></html>

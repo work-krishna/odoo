@@ -1,0 +1,426 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>EMI Platform Structure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+  :root {
+    --bg: #f1f3f2;
+    --surface: #ffffff;
+    --fg: #18212b;
+    --muted: #5b6672;
+    --line: #c7cfd3;
+    --mk: #5b3fc4;
+    --mk-soft: #ece8fb;
+    --fn: #16804f;
+    --fn-soft: #e0f2e8;
+    --rt: #a85f0c;
+    --rt-soft: #fbeddb;
+    --cu: #2c6490;
+    --cu-soft: #e2edf6;
+    --gov: #5f6974;
+    --gov-soft: #e9ecef;
+    --hl: #d9480f;
+    --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+    --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #11151a; --surface: #181e25; --fg: #e4e8ec; --muted: #9ba6b2; --line: #34414d;
+      --mk: #a894ff; --mk-soft: #29234a;
+      --fn: #4cc48b; --fn-soft: #16322a;
+      --rt: #f0a44b; --rt-soft: #3a2a16;
+      --cu: #80b4de; --cu-soft: #1a2c3c;
+      --gov: #a6afb9; --gov-soft: #262c33;
+      --hl: #ff7a45;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #11151a; --surface: #181e25; --fg: #e4e8ec; --muted: #9ba6b2; --line: #34414d;
+    --mk: #a894ff; --mk-soft: #29234a;
+    --fn: #4cc48b; --fn-soft: #16322a;
+    --rt: #f0a44b; --rt-soft: #3a2a16;
+    --cu: #80b4de; --cu-soft: #1a2c3c;
+    --gov: #a6afb9; --gov-soft: #262c33;
+    --hl: #ff7a45;
+  }
+
+  body { background: var(--bg); color: var(--fg); font: 16px/1.55 var(--body); }
+  .page { max-width: 1080px; margin: 0 auto; padding-inline: 20px; padding-block: 36px 56px; display: grid; gap: 44px; }
+  header { display: grid; gap: 14px; }
+  .eyebrow { font: 500 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  h1 { font: 700 clamp(30px, 5vw, 46px)/1.05 var(--display); margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+  h2 { font: 600 24px/1.2 var(--display); margin: 0; text-wrap: balance; }
+  p { margin: 0; max-width: 68ch; }
+  .lead { font-size: 18px; color: var(--muted); }
+  .legend { display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: 14px; }
+  .legend span { display: inline-flex; align-items: center; gap: 8px; }
+  .chip { width: 14px; height: 14px; border-radius: 4px; border: 1.5px solid; }
+  .setup { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 14px; color: var(--muted); }
+  .setup b { color: var(--fg); font-weight: 600; }
+  code { font: 500 13px var(--mono); }
+
+  section { display: grid; gap: 14px; }
+  figure { margin: 0; display: grid; gap: 10px; }
+  .canvas { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; overflow-x: auto; }
+  .canvas svg { display: block; width: 100%; min-width: 780px; height: auto; }
+  figcaption { font-size: 14px; color: var(--muted); max-width: 90ch; }
+
+  /* SVG vocabulary */
+  svg text { fill: var(--fg); font-family: var(--body); font-size: 13px; }
+  svg .tt { font-weight: 700; font-size: 14.5px; }
+  svg .ts { font-size: 11.5px; fill: var(--muted); }
+  svg .tm { font-family: var(--mono); font-size: 11px; fill: var(--muted); }
+  svg .th { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; font-weight: 500; }
+  svg .amt { font-family: var(--mono); font-size: 12px; font-weight: 500; }
+  .b-mk { fill: var(--mk-soft); stroke: var(--mk); stroke-width: 1.5; }
+  .b-fn { fill: var(--fn-soft); stroke: var(--fn); stroke-width: 1.5; }
+  .b-rt { fill: var(--rt-soft); stroke: var(--rt); stroke-width: 1.5; }
+  .b-cu { fill: var(--cu-soft); stroke: var(--cu); stroke-width: 1.5; }
+  .b-gov { fill: var(--gov-soft); stroke: var(--gov); stroke-width: 1.5; }
+  .b-base { fill: var(--bg); stroke: var(--line); stroke-width: 1.5; }
+  .dash { stroke-dasharray: 5 4; }
+  .zone { fill: none; stroke-width: 1.2; stroke-dasharray: 6 5; }
+  .z-mk { stroke: var(--mk); } .z-fn { stroke: var(--fn); } .z-pt { stroke: var(--line); }
+  .ar { fill: none; stroke: var(--fg); stroke-width: 1.4; }
+  .ar-soft { fill: none; stroke: var(--muted); stroke-width: 1.3; }
+  .ar-hl { fill: none; stroke: var(--hl); stroke-width: 2.4; }
+  .ar-fn { fill: none; stroke: var(--fn); stroke-width: 2; }
+  .ah { fill: var(--fg); } .ah-soft { fill: var(--muted); } .ah-hl { fill: var(--hl); } .ah-fn { fill: var(--fn); }
+  .c-mk { fill: var(--mk) !important; } .c-fn { fill: var(--fn) !important; } .c-cu { fill: var(--cu) !important; }
+  .c-hl { fill: var(--hl) !important; } .c-rt { fill: var(--rt) !important; }
+
+  .table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+  table { border-collapse: collapse; width: 100%; min-width: 720px; font-size: 14.5px; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  th { font: 500 11.5px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { font-weight: 600; white-space: nowrap; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 8px; vertical-align: 0; }
+  footer { font-size: 13px; color: var(--muted); }
+</style>
+
+<div class="page">
+  <header>
+    <div class="eyebrow">EMI Platform · Odoo 19</div>
+    <h1>EMI Platform Structure</h1>
+    <p class="lead">Who takes part, who works where, and how an EMI phone sale links the customer, the retailer, the marketplace and the finance company. Everything lives in one Odoo database: the marketplace and each finance company are Odoo companies with their own books; retailers and customers log in through the website.</p>
+    <div class="legend" aria-label="Colour key">
+      <span><i class="chip" style="background:var(--mk-soft);border-color:var(--mk)"></i>Marketplace host company</span>
+      <span><i class="chip" style="background:var(--fn-soft);border-color:var(--fn)"></i>Finance company</span>
+      <span><i class="chip" style="background:var(--rt-soft);border-color:var(--rt)"></i>Retailer</span>
+      <span><i class="chip" style="background:var(--cu-soft);border-color:var(--cu)"></i>Customer</span>
+      <span><i class="chip" style="background:var(--gov-soft);border-color:var(--gov)"></i>Government</span>
+    </div>
+    <div class="setup">
+      <span>Marketplace today: <b>Leo Hotel Pvt. Ltd.</b> (moving to its own company)</span>
+      <span>Finance company: <b>GOODWILL FINANCE</b></span>
+    </div>
+  </header>
+
+  <section id="organisation">
+    <h2>1. Organisations and how they link</h2>
+    <p>The marketplace sits in the middle: it sells on behalf of retailers, passes applications to the finance company and holds the sale proceeds until it pays the retailer.</p>
+    <figure>
+      <div class="canvas">
+        <svg viewBox="0 0 1000 540" role="img" aria-label="The customer buys from the retailer and applies through the marketplace; the marketplace sends applications to the finance company, which pays the financed amount to the marketplace and collects installments from the customer; the marketplace pays retailers their proceeds minus commission and reports commission bills to the Inland Revenue Department.">
+          <defs>
+            <marker id="f1a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker>
+          </defs>
+
+          <!-- Retailer -->
+          <rect class="b-rt" x="400" y="24" width="220" height="84" rx="10"/>
+          <text class="tt" x="510" y="52" text-anchor="middle">Retailer (vendor)</text>
+          <text class="ts" x="510" y="72" text-anchor="middle">seller of record · portal login</text>
+          <text class="ts" x="510" y="90" text-anchor="middle">issues the customer's VAT bill</text>
+
+          <!-- Other finance companies -->
+          <rect class="b-fn dash" x="760" y="110" width="216" height="44" rx="10"/>
+          <text class="ts" x="868" y="137" text-anchor="middle">other finance companies</text>
+
+          <!-- Customer -->
+          <rect class="b-cu" x="24" y="214" width="200" height="96" rx="10"/>
+          <text class="tt" x="124" y="244" text-anchor="middle">Customer</text>
+          <text class="ts" x="124" y="264" text-anchor="middle">portal login</text>
+          <text class="ts" x="124" y="281" text-anchor="middle">buys a phone on EMI</text>
+          <text class="ts" x="124" y="298" text-anchor="middle">and repays monthly</text>
+
+          <!-- Marketplace -->
+          <rect class="b-mk" x="380" y="200" width="260" height="124" rx="12" style="stroke-width:2.2"/>
+          <text class="tt" x="510" y="230" text-anchor="middle">Marketplace host company</text>
+          <text class="ts" x="510" y="251" text-anchor="middle">one Odoo company (EMI Marketplace flag)</text>
+          <text class="ts" x="510" y="270" text-anchor="middle">runs the storefront, checks KYC,</text>
+          <text class="ts" x="510" y="288" text-anchor="middle">holds sale proceeds for retailers</text>
+          <text class="tm" x="510" y="310" text-anchor="middle">today: Leo Hotel Pvt. Ltd.</text>
+
+          <!-- Finance company -->
+          <rect class="b-fn" x="760" y="190" width="216" height="86" rx="10"/>
+          <text class="tt" x="868" y="220" text-anchor="middle">GOODWILL FINANCE</text>
+          <text class="ts" x="868" y="240" text-anchor="middle">finance company: its own</text>
+          <text class="ts" x="868" y="258" text-anchor="middle">Odoo company and books</text>
+
+          <!-- IRD -->
+          <rect class="b-gov" x="400" y="446" width="220" height="70" rx="10"/>
+          <text class="tt" x="510" y="474" text-anchor="middle">Inland Revenue Dept.</text>
+          <text class="ts" x="510" y="494" text-anchor="middle">CBMS real-time bill reporting</text>
+
+          <!-- Customer to retailer -->
+          <line class="ar" x1="224" y1="232" x2="398" y2="82" marker-end="url(#f1a)"/>
+          <text x="300" y="134" text-anchor="end">buys the phone</text>
+          <text class="ts" x="300" y="150" text-anchor="end">in the shop or online</text>
+
+          <!-- Customer to marketplace -->
+          <line class="ar" x1="224" y1="262" x2="378" y2="262" marker-end="url(#f1a)"/>
+          <text x="301" y="252" text-anchor="middle">applies: KYC, forms</text>
+          <text class="ts" x="301" y="280" text-anchor="middle">down payment *</text>
+
+          <!-- Retailer and marketplace -->
+          <line class="ar" x1="470" y1="108" x2="470" y2="198" marker-end="url(#f1a)"/>
+          <text x="462" y="148" text-anchor="end">lists phones</text>
+          <text class="ts" x="462" y="164" text-anchor="end">admin approves</text>
+          <line class="ar" x1="550" y1="200" x2="550" y2="110" marker-end="url(#f1a)"/>
+          <text x="558" y="148">pays out proceeds</text>
+          <text class="ts" x="558" y="164">minus commission + 13% VAT</text>
+
+          <!-- Marketplace and finance company -->
+          <line class="ar" x1="640" y1="222" x2="758" y2="222" marker-end="url(#f1a)"/>
+          <text x="700" y="212" text-anchor="middle">sends application</text>
+          <line class="ar" x1="760" y1="256" x2="642" y2="256" marker-end="url(#f1a)"/>
+          <text class="ts" x="700" y="274" text-anchor="middle">pays financed amount</text>
+
+          <!-- Installments: customer to finance company -->
+          <path class="ar" d="M124,310 V400 H868 V278" marker-end="url(#f1a)"/>
+          <text x="740" y="392" text-anchor="middle">monthly installments</text>
+          <text class="ts" x="740" y="418" text-anchor="middle">or collected by the marketplace and remitted</text>
+
+          <!-- Marketplace to IRD -->
+          <line class="ar" x1="510" y1="324" x2="510" y2="444" marker-end="url(#f1a)"/>
+          <text x="518" y="372">reports commission bills</text>
+        </svg>
+      </div>
+      <figcaption>The retailer stays the seller of record and bills the customer outside Odoo. The marketplace invoices each retailer its commission plus 13% VAT and nets it from the payout; those invoices get Bikram Sambat fiscal-year numbers (Shrawan to Asar) and go to IRD CBMS. * The down payment goes to the retailer, the marketplace or the finance company, whichever the finance company has chosen (section 4).</figcaption>
+    </figure>
+  </section>
+
+  <section id="hierarchy">
+    <h2>2. People and roles</h2>
+    <p>Each person gets one role in the organisation they work for. A higher role includes everything the one below it can do.</p>
+    <figure>
+      <div class="canvas">
+        <svg viewBox="0 0 1000 360" role="img" aria-label="Marketplace staff: EMI Manager includes EMI Officer; Marketplace Admin and Invoicing or Accounting users; finance company staff: Finance Company Reviewer; all are internal Odoo users. Outside users: retailer users and customers, both portal users.">
+          <defs>
+            <marker id="f2a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah-soft" d="M0,0 L10,5 L0,10 z"/></marker>
+          </defs>
+          <rect class="zone z-mk" x="16" y="36" width="408" height="228" rx="12"/>
+          <rect class="zone z-fn" x="440" y="36" width="240" height="228" rx="12"/>
+          <rect class="zone z-pt" x="700" y="36" width="284" height="228" rx="12"/>
+          <text class="th c-mk" x="220" y="26" text-anchor="middle">MARKETPLACE HOST COMPANY STAFF</text>
+          <text class="th c-fn" x="560" y="26" text-anchor="middle">FINANCE COMPANY STAFF</text>
+          <text class="th" x="842" y="26" text-anchor="middle">OUTSIDE USERS (WEBSITE)</text>
+
+          <rect class="b-mk" x="32" y="56" width="180" height="70" rx="9"/>
+          <text class="tt" x="122" y="80" text-anchor="middle">EMI Manager</text>
+          <text class="ts" x="122" y="98" text-anchor="middle">sets up finance companies,</text>
+          <text class="ts" x="122" y="114" text-anchor="middle">interest rates and tenures</text>
+
+          <rect class="b-mk" x="228" y="56" width="180" height="70" rx="9"/>
+          <text class="tt" x="318" y="80" text-anchor="middle">Marketplace Admin</text>
+          <text class="ts" x="318" y="98" text-anchor="middle">approves retailers</text>
+          <text class="ts" x="318" y="114" text-anchor="middle">and their phone listings</text>
+
+          <rect class="b-mk" x="32" y="166" width="180" height="70" rx="9"/>
+          <text class="tt" x="122" y="190" text-anchor="middle">EMI Officer</text>
+          <text class="ts" x="122" y="208" text-anchor="middle">takes applications, checks</text>
+          <text class="ts" x="122" y="224" text-anchor="middle">KYC, sends to the lender</text>
+
+          <rect class="b-mk" x="228" y="166" width="180" height="70" rx="9" style="stroke-dasharray:5 4"/>
+          <text class="tt" x="318" y="190" text-anchor="middle">Invoicing / Accounting</text>
+          <text class="ts" x="318" y="208" text-anchor="middle">payments, commission,</text>
+          <text class="ts" x="318" y="224" text-anchor="middle">retailer settlements</text>
+
+          <rect class="b-fn" x="460" y="56" width="200" height="90" rx="9"/>
+          <text class="tt" x="560" y="80" text-anchor="middle">Finance Company Reviewer</text>
+          <text class="ts" x="560" y="98" text-anchor="middle">approves, disburses,</text>
+          <text class="ts" x="560" y="114" text-anchor="middle">collects installments</text>
+          <text class="tm" x="560" y="134" text-anchor="middle">own company only</text>
+
+          <rect class="b-fn" x="460" y="166" width="200" height="70" rx="9" style="stroke-dasharray:5 4"/>
+          <text class="tt" x="560" y="190" text-anchor="middle">Invoicing / Accounting</text>
+          <text class="ts" x="560" y="208" text-anchor="middle">the lender's own books</text>
+          <text class="ts" x="560" y="224" text-anchor="middle">and bank reconciliation</text>
+
+          <rect class="b-rt" x="716" y="56" width="252" height="70" rx="9"/>
+          <text class="tt" x="842" y="80" text-anchor="middle">Retailer user</text>
+          <text class="ts" x="842" y="98" text-anchor="middle">Vendor Portal: own listings,</text>
+          <text class="ts" x="842" y="114" text-anchor="middle">sales and payouts</text>
+
+          <rect class="b-cu" x="716" y="166" width="252" height="70" rx="9"/>
+          <text class="tt" x="842" y="190" text-anchor="middle">Customer</text>
+          <text class="ts" x="842" y="208" text-anchor="middle">EMI Customer Portal: own</text>
+          <text class="ts" x="842" y="224" text-anchor="middle">applications, pays online</text>
+
+          <rect class="b-base" x="32" y="292" width="628" height="44" rx="9"/>
+          <text x="346" y="319" text-anchor="middle"><tspan font-weight="700">Internal user</tspan>: Odoo employee login, sees only its own companies</text>
+          <rect class="b-base" x="716" y="292" width="252" height="44" rx="9"/>
+          <text x="842" y="319" text-anchor="middle"><tspan font-weight="700">Portal user</tspan>: website login only</text>
+
+          <line class="ar-soft" x1="122" y1="126" x2="122" y2="164" marker-end="url(#f2a)"/>
+          <text class="ts" x="130" y="150">includes</text>
+          <line class="ar-soft" x1="122" y1="236" x2="122" y2="290" marker-end="url(#f2a)"/>
+          <path class="ar-soft" d="M408,91 H416 V290" marker-end="url(#f2a)"/>
+          <line class="ar-soft" x1="318" y1="236" x2="318" y2="290" marker-end="url(#f2a)"/>
+          <path class="ar-soft" d="M660,101 H670 V314 H662" marker-end="url(#f2a)"/>
+          <line class="ar-soft" x1="560" y1="236" x2="560" y2="290" marker-end="url(#f2a)"/>
+          <path class="ar-soft" d="M968,91 H976 V314 H970" marker-end="url(#f2a)"/>
+          <line class="ar-soft" x1="842" y1="236" x2="842" y2="290" marker-end="url(#f2a)"/>
+        </svg>
+      </div>
+      <figcaption>Arrows point to the role whose rights are included. Dashed boxes are Odoo's own Invoicing / Accounting roles, given per company. A person working for both organisations can hold roles in both, but finance company reviewers only ever see applications of their own company, and only after the marketplace has sent them.</figcaption>
+    </figure>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Role</th><th>Works for</th><th>Sees</th><th>Main actions</th></tr></thead>
+        <tbody>
+          <tr><td><i class="dot" style="background:var(--mk)"></i>EMI Manager</td><td>Marketplace</td><td>Everything an officer sees</td><td>Finance companies, interest rates, tenure plans, down payment options; every officer action</td></tr>
+          <tr><td><i class="dot" style="background:var(--mk)"></i>EMI Officer</td><td>Marketplace</td><td>All applications and KYC</td><td>Create and submit applications, KYC review and verification, send to the finance company, register down payments</td></tr>
+          <tr><td><i class="dot" style="background:var(--mk)"></i>Marketplace Admin</td><td>Marketplace</td><td>Retailers, listings, phone brands</td><td>Approve or suspend retailers, publish or reject listings; also manages contacts and products</td></tr>
+          <tr><td><i class="dot" style="background:var(--fn)"></i>Finance Company Reviewer</td><td>One finance company</td><td>Its applications once sent, with KYC</td><td>Approve or reject, disburse, installments, early settlement, cancel a disbursement, down payments it receives</td></tr>
+          <tr><td><i class="dot" style="background:var(--gov)"></i>Invoicing / Accounting</td><td>Either company</td><td>That company's books</td><td>Payments, commission invoices and CBMS status, retailer settlements</td></tr>
+          <tr><td><i class="dot" style="background:var(--rt)"></i>Retailer user</td><td>A retailer</td><td>Its own retailer record and phones</td><td>Register, add and submit listings, follow sales and payouts</td></tr>
+          <tr><td><i class="dot" style="background:var(--cu)"></i>Customer</td><td>Themselves</td><td>Their own applications</td><td>Apply online with KYC and signed forms, pay the down payment and installments online</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="lifecycle">
+    <h2>3. An application from start to finish</h2>
+    <p>The colour of each step shows who moves the application on: the marketplace (violet), the finance company (green) or the customer (blue).</p>
+    <figure>
+      <div class="canvas">
+        <svg viewBox="0 0 1000 290" role="img" aria-label="Application states: draft, submitted, KYC review, pending approval, approved, disbursed, active, closed. The marketplace moves it up to pending approval, the finance company approves and disburses, the customer's first installment makes it active, and it closes when everything is paid. It can be rejected during KYC review or pending approval.">
+          <defs>
+            <marker id="f3a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker>
+          </defs>
+          <!-- states: x = 16 + 124 * i -->
+          <rect class="b-base" x="16" y="110" width="96" height="46" rx="8"/><text x="64" y="138" text-anchor="middle">Draft</text>
+          <rect class="b-base" x="140" y="110" width="96" height="46" rx="8"/><text x="188" y="138" text-anchor="middle">Submitted</text>
+          <rect class="b-base" x="264" y="110" width="96" height="46" rx="8"/><text x="312" y="138" text-anchor="middle">KYC review</text>
+          <rect class="b-base" x="388" y="110" width="96" height="46" rx="8"/><text x="436" y="130" text-anchor="middle">Pending</text><text x="436" y="146" text-anchor="middle">approval</text>
+          <rect class="b-base" x="512" y="110" width="96" height="46" rx="8"/><text x="560" y="138" text-anchor="middle">Approved</text>
+          <rect class="b-base" x="636" y="110" width="96" height="46" rx="8"/><text x="684" y="138" text-anchor="middle">Disbursed</text>
+          <rect class="b-base" x="760" y="110" width="96" height="46" rx="8"/><text x="808" y="138" text-anchor="middle">Active</text>
+          <rect class="b-base" x="884" y="110" width="96" height="46" rx="8"/><text x="932" y="138" text-anchor="middle">Closed</text>
+
+          <line class="ar" x1="112" y1="133" x2="138" y2="133" marker-end="url(#f3a)"/>
+          <line class="ar" x1="236" y1="133" x2="262" y2="133" marker-end="url(#f3a)"/>
+          <line class="ar" x1="360" y1="133" x2="386" y2="133" marker-end="url(#f3a)"/>
+          <line class="ar" x1="484" y1="133" x2="510" y2="133" marker-end="url(#f3a)"/>
+          <line class="ar" x1="608" y1="133" x2="634" y2="133" marker-end="url(#f3a)"/>
+          <line class="ar" x1="732" y1="133" x2="758" y2="133" marker-end="url(#f3a)"/>
+          <line class="ar" x1="856" y1="133" x2="882" y2="133" marker-end="url(#f3a)"/>
+
+          <text class="c-mk" x="126" y="84" text-anchor="middle" font-weight="600">Submit</text>
+          <text class="ts" x="126" y="99" text-anchor="middle">officer or online</text>
+          <text class="c-mk" x="250" y="84" text-anchor="middle" font-weight="600">Start review</text>
+          <text class="ts" x="250" y="99" text-anchor="middle">officer</text>
+          <text class="c-mk" x="374" y="84" text-anchor="middle" font-weight="600">Verify KYC</text>
+          <text class="ts" x="374" y="99" text-anchor="middle">and send to lender</text>
+          <text class="c-fn" x="498" y="84" text-anchor="middle" font-weight="600">Approve</text>
+          <text class="ts" x="498" y="99" text-anchor="middle">reviewer</text>
+          <text class="c-fn" x="622" y="84" text-anchor="middle" font-weight="600">Disburse</text>
+          <text class="ts" x="622" y="99" text-anchor="middle">reviewer</text>
+          <text class="c-cu" x="746" y="84" text-anchor="middle" font-weight="600">First EMI paid</text>
+          <text class="ts" x="746" y="99" text-anchor="middle">customer</text>
+          <text class="c-fn" x="870" y="84" text-anchor="middle" font-weight="600">Close</text>
+          <text class="ts" x="870" y="99" text-anchor="middle">all paid</text>
+
+          <text class="ts" x="188" y="176" text-anchor="middle">down payment can</text>
+          <text class="ts" x="188" y="190" text-anchor="middle">be taken from here</text>
+          <text class="ts" x="684" y="176" text-anchor="middle">loan and collection</text>
+          <text class="ts" x="684" y="190" text-anchor="middle">entries, commission bill</text>
+          <text class="ts" x="808" y="176" text-anchor="middle">installments</text>
+          <text class="ts" x="808" y="190" text-anchor="middle">fall due monthly</text>
+
+          <rect class="b-base" x="326" y="232" width="96" height="40" rx="8" style="stroke-dasharray:5 4"/>
+          <text x="374" y="257" text-anchor="middle">Rejected</text>
+          <line class="ar" x1="312" y1="156" x2="352" y2="230" marker-end="url(#f3a)"/>
+          <line class="ar" x1="436" y1="156" x2="396" y2="230" marker-end="url(#f3a)"/>
+          <text class="c-mk" x="316" y="206" text-anchor="end" font-size="12">officer rejects</text>
+          <text class="c-fn" x="432" y="206" font-size="12">lender rejects</text>
+        </svg>
+      </div>
+      <figcaption>Before it goes to the lender, an officer can return a submitted application to draft for corrections; loan terms and signed forms can only change in draft. After disbursement a reviewer can settle the loan early or cancel a disbursement booked by mistake.</figcaption>
+    </figure>
+  </section>
+
+  <section id="down-payment">
+    <h2>4. Who receives the down payment</h2>
+    <p>Each finance company chooses one of three options, and each application copies it until a down payment is recorded. The same sale in all three cases: a phone at NPR 1,00,000 with 10,000 down.</p>
+    <figure>
+      <div class="canvas">
+        <svg viewBox="0 0 1000 300" role="img" aria-label="Three options for the same NPR 1,00,000 sale with a 10,000 down payment. Retailer takes it: the finance company pays the marketplace 90,000, which holds 90,000 for the retailer. Marketplace takes it: finance company pays 90,000, marketplace holds 1,00,000. Finance company takes it: it pays the marketplace 1,00,000, which holds 1,00,000. The retailer ends with 94,350 each time.">
+          <defs>
+            <marker id="f4h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="ah-hl" d="M0,0 L10,5 L0,10 z"/></marker>
+            <marker id="f4f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="ah-fn" d="M0,0 L10,5 L0,10 z"/></marker>
+          </defs>
+
+          <!-- Panel A: retailer -->
+          <text class="tt" x="16" y="22">Retailer takes it</text>
+          <rect class="b-cu" x="16" y="48" width="104" height="40" rx="8"/><text x="68" y="73" text-anchor="middle">Customer</text>
+          <rect class="b-rt" x="200" y="48" width="104" height="40" rx="8"/><text x="252" y="73" text-anchor="middle">Retailer</text>
+          <rect class="b-mk" x="16" y="196" width="104" height="40" rx="8"/><text x="68" y="221" text-anchor="middle">Marketplace</text>
+          <rect class="b-fn" x="200" y="196" width="104" height="40" rx="8"/><text x="252" y="221" text-anchor="middle">Finance co.</text>
+          <line class="ar-hl" x1="120" y1="68" x2="197" y2="68" marker-end="url(#f4h)"/>
+          <text class="amt c-hl" x="160" y="58" text-anchor="middle">10,000</text>
+          <text class="ts" x="160" y="106" text-anchor="middle">paid at the shop</text>
+          <line class="ar-fn" x1="200" y1="216" x2="123" y2="216" marker-end="url(#f4f)"/>
+          <text class="amt c-fn" x="160" y="206" text-anchor="middle">90,000</text>
+          <text class="ts" x="16" y="258">marketplace holds 90,000</text>
+          <text class="ts" x="16" y="274">retailer gets 84,350 + 10,000</text>
+
+          <!-- Panel B: marketplace -->
+          <text class="tt" x="356" y="22">Marketplace takes it</text>
+          <text class="tm" x="518" y="22">default</text>
+          <rect class="b-cu" x="356" y="48" width="104" height="40" rx="8"/><text x="408" y="73" text-anchor="middle">Customer</text>
+          <rect class="b-rt" x="540" y="48" width="104" height="40" rx="8"/><text x="592" y="73" text-anchor="middle">Retailer</text>
+          <rect class="b-mk" x="356" y="196" width="104" height="40" rx="8"/><text x="408" y="221" text-anchor="middle">Marketplace</text>
+          <rect class="b-fn" x="540" y="196" width="104" height="40" rx="8"/><text x="592" y="221" text-anchor="middle">Finance co.</text>
+          <line class="ar-hl" x1="408" y1="88" x2="408" y2="193" marker-end="url(#f4h)"/>
+          <text class="amt c-hl" x="416" y="138">10,000</text>
+          <text class="ts" x="416" y="153">marketplace journal</text>
+          <line class="ar-fn" x1="540" y1="216" x2="463" y2="216" marker-end="url(#f4f)"/>
+          <text class="amt c-fn" x="500" y="206" text-anchor="middle">90,000</text>
+          <text class="ts" x="356" y="258">marketplace holds 1,00,000</text>
+          <text class="ts" x="356" y="274">retailer gets 94,350</text>
+
+          <!-- Panel C: finance company -->
+          <text class="tt" x="696" y="22">Finance company takes it</text>
+          <rect class="b-cu" x="696" y="48" width="104" height="40" rx="8"/><text x="748" y="73" text-anchor="middle">Customer</text>
+          <rect class="b-rt" x="880" y="48" width="104" height="40" rx="8"/><text x="932" y="73" text-anchor="middle">Retailer</text>
+          <rect class="b-mk" x="696" y="196" width="104" height="40" rx="8"/><text x="748" y="221" text-anchor="middle">Marketplace</text>
+          <rect class="b-fn" x="880" y="196" width="104" height="40" rx="8"/><text x="932" y="221" text-anchor="middle">Finance co.</text>
+          <line class="ar-hl" x1="800" y1="88" x2="878" y2="193" marker-end="url(#f4h)"/>
+          <text class="amt c-hl" x="820" y="130" text-anchor="end">10,000</text>
+          <text class="ts" x="820" y="145" text-anchor="end">lender's journal</text>
+          <line class="ar-fn" x1="880" y1="216" x2="803" y2="216" marker-end="url(#f4f)"/>
+          <text class="amt c-fn" x="840" y="206" text-anchor="middle">1,00,000</text>
+          <text class="ts" x="696" y="258">marketplace holds 1,00,000</text>
+          <text class="ts" x="696" y="274">retailer gets 94,350</text>
+
+          <line x1="336" y1="12" x2="336" y2="284" stroke="var(--line)" stroke-width="1"/>
+          <line x1="676" y1="12" x2="676" y2="284" stroke="var(--line)" stroke-width="1"/>
+        </svg>
+      </div>
+      <figcaption>Orange is the down payment, green is what the finance company pays the marketplace at disbursement. With a 5% commission (5,000 plus 650 VAT) the retailer ends with NPR 94,350 in every case; only who holds the 10,000 on the way changes. Installments are paid to the finance company in all three.</figcaption>
+    </figure>
+  </section>
+
+  <footer>Drawn from the emi_finance, emi_marketplace, emi_application, emi_accounting, emi_payment_np, emi_storefront and l10n_np_ird modules on the 19.0 branch, 27 September 2026.</footer>
+</div>
+
+</body></html>
