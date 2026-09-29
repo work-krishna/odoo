@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- The favicon is the company logo, or nothing: no fallback to Odoo's icon. -->
+    <template id="layout" inherit_id="website.layout" name="Favicon from company logo">
+        <xpath expr="//t[@t-set='x_icon']" position="replace">
+            <t t-set="x_icon" t-value="website.has_company_favicon and website.image_url(website, 'favicon')"/>
+            <t t-set="x_icon_none" t-value="not x_icon"/>
+        </xpath>
+        <xpath expr="//link[@rel='apple-touch-icon']" position="attributes">
+            <attribute name="t-if">x_icon</attribute>
+        </xpath>
+    </template>
+
+    <template id="web_layout" inherit_id="web.layout" name="No fallback favicon on websites">
+        <xpath expr="//link[@rel='shortcut icon']" position="attributes">
+            <attribute name="t-if">not x_icon_none</attribute>
+        </xpath>
+    </template>
+
+</odoo>
