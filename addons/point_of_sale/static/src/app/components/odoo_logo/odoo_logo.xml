@@ -1,13 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<templates id="template" xml:space="preserve">
-    <t t-name="point_of_sale.OdooLogo">
-        <div t-attf-class="{{ props.class }}" t-attf-style="{{ props.style }}">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 919 495">
-                <path d="M695,346a75,75,0,1,1,75-75A75,75,0,0,1,695,346Zm0-31a44,44,0,1,0-44-44A44,44,0,0,0,695,315ZM538,346a75,75,0,1,1,75-75A75,75,0,0,1,538,346Zm0-31a44,44,0,1,0-44-44A44,44,0,0,0,538,315Zm-82-45c0,41.9-33.6,76-75,76s-75-34-75-75.9S336.5,196,381,196c16.4,0,31.6,3.5,44,12.6V165.1c0-8.3,7.3-15.1,15.5-15.1s15.5,6.8,15.5,15.1Zm-75,45a44,44,0,1,0-44-44A44,44,0,0,0,381,315Z"
-                    t-attf-style="fill:{{ props.monochrome ? '#FFF' : '#8f8f8f' }}"/>
-                <path d="M224,346a75,75,0,1,1,75-75A75,75,0,0,1,224,346Zm0-31a44,44,0,1,0-44-44A44,44,0,0,0,224,315Z"
-                    t-attf-style="fill:{{ props.monochrome ? '#FFF' : '#714b67' }}"/>
-            </svg>
-        </div>
-    </t>
-</templates>
+<templates id="template" xml:space="preserve"> <t t-name="point_of_sale.OdooLogo"> <div t-attf-class="{{ props.class }}" t-attf-style="{{ props.style }}"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 392 100" role="img" aria-label="Chaitanya Innovation"> <!-- Chaitanya Innovation Icon --> <g transform="translate(4,4) scale(1.13580)"> <g transform="translate(-9.5,-9.5)"> <circle cx="50" cy="50" r="36" fill="none" stroke="#0E1116" stroke-width="9"/> <g stroke="#0E1116" stroke-width="9" stroke-linecap="butt"> <line x1="64" y1="50" x2="80" y2="50"/> <line x1="36" y1="50" x2="20" y2="50"/> <line x1="50" y1="64" x2="50" y2="80"/> <line x1="50" y1="36" x2="50" y2="20"/> <line x1="59.9" y1="59.9" x2="71.2" y2="71.2"/> <line x1="40.1" y1="59.9" x2="28.8" y2="71.2"/> <line x1="40.1" y1="40.1" x2="28.8" y2="28.8"/> <line x1="59.9" y1="40.1" x2="71.2" y2="28.8"/> </g> <circle cx="50" cy="50" r="11" fill="#1F6F6B"/> </g> </g> <!--
+                Chaitanya --> <text x="120" y="50" font-size="48" fill="#0E1116"> Chaitanya </text> <!--
+                INNOVATION --> <text x="121.5" y="79" font-size="16" fill="#41464E"> INNOVATION </text> </svg> </div> </t> </templates>
