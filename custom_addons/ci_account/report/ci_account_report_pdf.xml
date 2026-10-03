@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="paperformat_ci_report_landscape" model="report.paperformat">
+        <field name="name">Accounting Report (Landscape)</field>
+        <field name="format">A4</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">20</field>
+        <field name="margin_bottom">15</field>
+        <field name="margin_left">7</field>
+        <field name="margin_right">7</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">15</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="action_ci_report_pdf" model="ir.actions.report">
+        <field name="name">Accounting Report</field>
+        <field name="model">res.company</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">ci_account.report_ci_financial</field>
+        <field name="report_file">ci_account.report_ci_financial</field>
+    </record>
+
+    <record id="action_ci_report_pdf_landscape" model="ir.actions.report">
+        <field name="name">Accounting Report (Landscape)</field>
+        <field name="model">res.company</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">ci_account.report_ci_financial</field>
+        <field name="report_file">ci_account.report_ci_financial</field>
+        <field name="paperformat_id" ref="paperformat_ci_report_landscape"/>
+    </record>
+
+    <template id="report_ci_financial">
+        <t t-call="web.html_container">
+            <t t-call="web.internal_layout">
+                <div class="page o_ci_report_pdf">
+                    <style>
+                        .o_ci_report_pdf table { font-size: 0.8rem; }
+                        .o_ci_report_pdf .o_ci_section td { font-weight: bold; text-transform: uppercase; border-top: 1px solid #999; }
+                        .o_ci_report_pdf .o_ci_group td, .o_ci_report_pdf .o_ci_move td { font-weight: bold; }
+                        .o_ci_report_pdf .o_ci_total td { font-weight: bold; border-top: 1px solid #333; }
+                        .o_ci_report_pdf .o_ci_subtotal td { font-style: italic; border-top: 1px dotted #999; }
+                        .o_ci_report_pdf td, .o_ci_report_pdf th { padding: 2px 6px; }
+                    </style>
+                    <h3 t-out="ci_report['title']"/>
+                    <div t-out="ci_report['company_name']"/>
+                    <div class="text-muted mb-3" t-out="ci_report['filters']"/>
+                    <table class="table table-sm table-borderless">
+                        <thead>
+                            <tr t-if="ci_report['column_groups']">
+                                <th/>
+                                <th t-foreach="ci_report['column_groups']" t-as="group" class="text-center border-bottom"
+                                    t-att-colspan="group['colspan']" t-out="group['name']"/>
+                            </tr>
+                            <tr class="border-bottom">
+                                <th/>
+                                <th t-foreach="ci_report['columns']" t-as="column"
+                                    t-att-class="'text-end' if column.get('figure') in ('monetary', 'percentage', 'float') else ''"
+                                    t-out="column['name']"/>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="ci_report['lines']" t-as="line" t-att-class="line.get('class')">
+                                <td t-att-style="'padding-left: %spx;' % (6 + 14 * (line.get('level') or 0))"
+                                    t-out="line['name']"/>
+                                <td t-foreach="line['columns']" t-as="cell"
+                                    t-att-class="'text-end text-nowrap' if cell['figure'] in ('monetary', 'percentage', 'float') else ''"
+                                    t-out="cell['name']"/>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

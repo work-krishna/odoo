@@ -1,0 +1,121 @@
+.o_ci_account_report {
+    &.o_ci_loading .o_ci_report_sheet {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .o_content {
+        padding: 1rem;
+        overflow: auto;
+    }
+
+    .o_ci_report_sheet {
+        background-color: $o-view-background-color;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .o_ci_report_table {
+        margin-bottom: 0;
+
+        thead th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background-color: $o-view-background-color;
+            white-space: nowrap;
+        }
+
+        .o_ci_name_header {
+            min-width: 18rem;
+        }
+
+        td {
+            vertical-align: middle;
+        }
+
+        .o_ci_line_name {
+            max-width: 36rem;
+        }
+
+        .o_ci_caret {
+            display: inline-block;
+            width: 1rem;
+            flex-shrink: 0;
+        }
+
+        .o_ci_name {
+            cursor: default;
+        }
+
+        .o_ci_foldable .o_ci_name,
+        .o_ci_load_more .o_ci_name {
+            cursor: pointer;
+        }
+
+        .o_ci_load_more .o_ci_name {
+            color: $link-color;
+        }
+
+        .o_ci_line_menu {
+            visibility: hidden;
+        }
+
+        tr:hover .o_ci_line_menu {
+            visibility: visible;
+        }
+
+        .o_ci_text_cell {
+            max-width: 18rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .o_ci_clickable {
+            cursor: pointer;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+
+        .o_ci_negative {
+            color: $danger;
+        }
+
+        .o_ci_section td {
+            font-weight: bold;
+            text-transform: uppercase;
+            padding-top: 0.75rem;
+            border-top: 1px solid $border-color;
+        }
+
+        .o_ci_group td,
+        .o_ci_move td {
+            font-weight: 600;
+        }
+
+        .o_ci_total td {
+            font-weight: bold;
+            border-top: 2px solid $border-color;
+        }
+
+        .o_ci_subtotal td {
+            font-style: italic;
+            border-top: 1px dashed $border-color;
+        }
+    }
+}
+
+.o_ci_number_period {
+    width: 4.5rem;
+}
+
+.o_ci_selector {
+    min-width: 18rem;
+}
+
+.o_ci_custom_date .o_datetime_input {
+    width: 8rem;
+}

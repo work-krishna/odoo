@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="ci_account.Report">
+        <div class="o_action o_ci_account_report" t-att-class="{'o_ci_loading': state.loading}">
+            <ControlPanel>
+                <t t-set-slot="control-panel-create-button">
+                    <div class="d-flex gap-1">
+                        <button class="btn btn-primary" t-on-click="() => this.export('pdf')">PDF</button>
+                        <button class="btn btn-secondary" t-on-click="() => this.export('xlsx')">XLSX</button>
+                        <t t-foreach="data.buttons" t-as="button" t-key="button.method">
+                            <button class="btn btn-secondary" t-on-click="() => this.callButton(button)"
+                                    t-out="button.name"/>
+                        </t>
+                    </div>
+                </t>
+                <t t-set-slot="layout-actions">
+                    <div class="d-flex gap-1 flex-wrap o_ci_filters">
+                        <t t-call="ci_account.Report.DateFilter"/>
+                        <t t-if="hasFilter('comparison')" t-call="ci_account.Report.ComparisonFilter"/>
+                        <t t-if="hasFilter('journals')" t-call="ci_account.Report.JournalFilter"/>
+                        <t t-if="hasFilter('account_type')" t-call="ci_account.Report.AccountTypeFilter"/>
+                        <t t-if="hasFilter('aging')" t-call="ci_account.Report.AgingFilter"/>
+                        <t t-if="hasFilter('partner')" t-call="ci_account.Report.PartnerFilter"/>
+                        <t t-if="hasFilter('analytic') and data.show_analytic" t-call="ci_account.Report.AnalyticFilter"/>
+                        <t t-if="optionToggles.length" t-call="ci_account.Report.OptionsFilter"/>
+                        <button t-if="options.account_ids.length" class="btn btn-secondary"
+                                t-on-click="clearAccounts" title="Remove the account filter">
+                            <i class="fa fa-filter me-1"/>Accounts filtered<i class="fa fa-times ms-2"/>
+                        </button>
+                    </div>
+                </t>
+            </ControlPanel>
+            <div class="o_content">
+                <div t-foreach="data.warnings" t-as="warning" t-key="warning_index"
+                     class="alert alert-warning mb-2" role="alert" t-out="warning"/>
+                <div class="o_ci_report_sheet">
+                    <table class="table table-sm table-hover o_ci_report_table">
+                        <thead>
+                            <tr t-if="data.column_groups.length" class="o_ci_group_header">
+                                <th/>
+                                <th t-foreach="data.column_groups" t-as="group" t-key="group_index"
+                                    class="text-center" t-att-colspan="group.colspan" t-out="group.name"/>
+                            </tr>
+                            <tr>
+                                <th class="o_ci_name_header"/>
+                                <th t-foreach="data.columns" t-as="column" t-key="column_index"
+                                    t-att-class="isNumeric(column.figure) ? 'text-end' : ''" t-out="column.name"/>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-if="!data.lines.length">
+                                <td t-att-colspan="data.columns.length + 1" class="text-center text-muted py-4">
+                                    No data for these filters.
+                                </td>
+                            </tr>
+                            <t t-foreach="visibleLines" t-as="line" t-key="line.id">
+                                <tr t-att-class="lineClass(line)">
+                                    <td class="o_ci_line_name" t-att-style="indentStyle(line)">
+                                        <div class="d-flex align-items-center">
+                                            <span class="o_ci_caret">
+                                                <i t-if="line.unfoldable"
+                                                   t-att-class="line.unfolded ? 'fa fa-caret-down' : 'fa fa-caret-right'"/>
+                                            </span>
+                                            <span class="o_ci_name text-truncate" t-on-click="() => this.onNameClick(line)"
+                                                  t-att-title="line.name" t-out="line.name"/>
+                                            <Dropdown t-if="line.actions.length">
+                                                <button class="btn btn-link btn-sm o_ci_line_menu p-0 ms-1"
+                                                        title="Actions">
+                                                    <i class="fa fa-ellipsis-v"/>
+                                                </button>
+                                                <t t-set-slot="content">
+                                                    <t t-foreach="line.actions" t-as="lineAction" t-key="lineAction.target">
+                                                        <DropdownItem onSelected="() => this.openLine(line, lineAction.target)">
+                                                            <t t-out="lineAction.name"/>
+                                                        </DropdownItem>
+                                                    </t>
+                                                </t>
+                                            </Dropdown>
+                                        </div>
+                                    </td>
+                                    <td t-foreach="line.columns" t-as="cell" t-key="cell_index"
+                                        t-att-class="cellClass(line, cell)" t-on-click="() => this.onCellClick(line, cell)">
+                                        <t t-out="cell.name"/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="ci_account.Report.DateFilter">
+        <Dropdown>
+            <button class="btn btn-secondary">
+                <i class="fa fa-calendar me-1"/><t t-out="options.date.string"/>
+            </button>
+            <t t-set-slot="content">
+                <t t-foreach="dateFilters" t-as="dateFilter" t-key="dateFilter[0]">
+                    <DropdownItem class="{ 'selected': options.date.filter === dateFilter[0] }"
+                                  onSelected="() => this.setDateFilter(dateFilter[0])">
+                        <t t-out="dateFilter[1]"/>
+                    </DropdownItem>
+                </t>
+                <div class="dropdown-divider"/>
+                <div class="px-3 py-1 o_ci_custom_date">
+                    <div class="fw-bold mb-1">Custom</div>
+                    <div class="d-flex align-items-center gap-2">
+                        <t t-if="data.date_mode !== 'single'">
+                            <DateTimeInput type="'date'" value="state.customFrom"
+                                           onChange="(value) => this.state.customFrom = value"/>
+                            <span>→</span>
+                        </t>
+                        <DateTimeInput type="'date'" value="state.customTo"
+                                       onChange="(value) => this.state.customTo = value"/>
+                    </div>
+                    <button class="btn btn-primary btn-sm mt-2" t-on-click="applyCustomDate">Apply</button>
+                </div>
+            </t>
+        </Dropdown>
+    </t>
+
+    <t t-name="ci_account.Report.ComparisonFilter">
+        <Dropdown>
+            <button class="btn btn-secondary">
+                <i class="fa fa-exchange me-1"/><t t-out="comparisonLabel"/>
+            </button>
+            <t t-set-slot="content">
+                <div class="px-3 py-1 d-flex align-items-center gap-2">
+                    <label class="text-nowrap">Number of periods</label>
+                    <input type="number" min="1" max="12" class="form-control form-control-sm o_ci_number_period"
+                           t-model.number="state.numberPeriod"/>
+                </div>
+                <t t-foreach="comparisonFilters" t-as="comparisonFilter" t-key="comparisonFilter[0]">
+                    <DropdownItem class="{ 'selected': options.comparison.filter === comparisonFilter[0] }"
+                                  onSelected="() => this.setComparison(comparisonFilter[0])">
+                        <t t-out="comparisonFilter[1]"/>
+                    </DropdownItem>
+                </t>
+            </t>
+        </Dropdown>
+    </t>
+
+    <t t-name="ci_account.Report.JournalFilter">
+        <Dropdown>
+            <button class="btn btn-secondary">
+                <i class="fa fa-book me-1"/><t t-out="journalsLabel"/>
+            </button>
+            <t t-set-slot="content">
+                <DropdownItem onSelected="() => this.clearJournals()">All Journals</DropdownItem>
+                <div class="dropdown-divider"/>
+                <t t-foreach="options.journals" t-as="journal" t-key="journal.id">
+                    <DropdownItem class="{ 'selected': journal.selected }" closingMode="'none'"
+                                  onSelected="() => this.toggleJournal(journal)">
+                        <t t-out="journal.name"/> <span class="text-muted">(<t t-out="journal.code"/>)</span>
+                    </DropdownItem>
+                </t>
+            </t>
+        </Dropdown>
+    </t>
+
+    <t t-name="ci_account.Report.AccountTypeFilter">
+        <Dropdown>
+            <button class="btn btn-secondary">
+                <i class="fa fa-user me-1"/><t t-out="accountTypeLabel"/>
+            </button>
+            <t t-set-slot="content">
+                <t t-foreach="accountTypes" t-as="accountType" t-key="accountType[0]">
+                    <DropdownItem class="{ 'selected': options.account_type === accountType[0] }"
+                                  onSelected="() => this.reload({ account_type: accountType[0] })">
+                        <t t-out="accountType[1]"/>
+                    </DropdownItem>
+                </t>
+            </t>
+        </Dropdown>
+    </t>
+
+    <t t-name="ci_account.Report.AgingFilter">
+        <Dropdown>
+            <button class="btn btn-secondary">
+                <i class="fa fa-hourglass-half me-1"/><t t-out="agingLabel"/>
+            </button>
+            <t t-set-slot="content">
+                <DropdownItem class="{ 'selected': options.aging_based_on === 'due_date' }"
+                              onSelected="() => this.reload({ aging_based_on: 'due_date' })">Based on Due Date</DropdownItem>
+                <DropdownItem class="{ 'selected': options.aging_based_on === 'invoice_date' }"
+                              onSelected="() => this.reload({ aging_based_on: 'invoice_date' })">Based on Invoice Date</DropdownItem>
+            </t>
+        </Dropdown>
+    </t>
+
+    <t t-name="ci_account.Report.PartnerFilter">
+        <Dropdown>
+            <button class="btn btn-secondary">
+                <i class="fa fa-users me-1"/>Partners
+                <span t-if="options.partner_ids.length" class="badge text-bg-primary ms-1" t-out="options.partner_ids.length"/>
+            </button>
+            <t t-set-slot="content">
+                <div class="px-3 py-2 o_ci_selector">
+                    <MultiRecordSelector resModel="'res.partner'" resIds="options.partner_ids"
+                                         update="(ids) => this.updatePartners(ids)"
+                                         placeholder="'All partners'"/>
+                </div>
+            </t>
+        </Dropdown>
+    </t>
+
+    <t t-name="ci_account.Report.AnalyticFilter">
+        <Dropdown>
+            <button class="btn btn-secondary">
+                <i class="fa fa-folder-open me-1"/>Analytic
+                <span t-if="options.analytic_account_ids.length" class="badge text-bg-primary ms-1"
+                      t-out="options.analytic_account_ids.length"/>
+            </button>
+            <t t-set-slot="content">
+                <div class="px-3 py-2 o_ci_selector">
+                    <MultiRecordSelector resModel="'account.analytic.account'" resIds="options.analytic_account_ids"
+                                         update="(ids) => this.updateAnalytic(ids)"
+                                         placeholder="'All analytic accounts'"/>
+                </div>
+            </t>
+        </Dropdown>
+    </t>
+
+    <t t-name="ci_account.Report.OptionsFilter">
+        <Dropdown>
+            <button class="btn btn-secondary">
+                <i class="fa fa-sliders me-1"/>Options
+            </button>
+            <t t-set-slot="content">
+                <t t-foreach="optionToggles" t-as="toggle" t-key="toggle[0]">
+                    <DropdownItem class="{ 'selected': options[toggle[0]] }"
+                                  onSelected="() => this.toggleOption(toggle[0])">
+                        <t t-out="toggle[1]"/>
+                    </DropdownItem>
+                </t>
+            </t>
+        </Dropdown>
+    </t>
+</templates>

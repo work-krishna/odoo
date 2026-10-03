@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Fiscal years -->
+    <record id="ci_account_fiscal_year_view_list" model="ir.ui.view">
+        <field name="name">ci.account.fiscal.year.list</field>
+        <field name="model">ci.account.fiscal.year</field>
+        <field name="arch" type="xml">
+            <list string="Fiscal Years" editable="bottom">
+                <header>
+                    <button name="action_create_next" type="object" string="Create Next Year" class="btn-secondary"
+                            display="always" groups="account.group_account_manager"/>
+                </header>
+                <field name="name"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="is_locked" widget="boolean" optional="show"/>
+                <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="ci_account_fiscal_year_view_search" model="ir.ui.view">
+        <field name="name">ci.account.fiscal.year.search</field>
+        <field name="model">ci.account.fiscal.year</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_ci_account_fiscal_year" model="ir.actions.act_window">
+        <field name="name">Fiscal Years</field>
+        <field name="res_model">ci.account.fiscal.year</field>
+        <field name="path">fiscal-years</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Define your fiscal years</p>
+            <p>Record the fiscal years whose dates do not follow the fiscal year end day and month of the
+                company, e.g. the Nepali fiscal year from 1 Shrawan to the end of Asar. Reports, depreciation and
+                closing use these dates.</p>
+        </field>
+    </record>
+
+    <!-- Lock dates -->
+    <record id="ci_account_lock_date_wizard_view_form" model="ir.ui.view">
+        <field name="name">ci.account.lock.date.wizard.form</field>
+        <field name="model">ci.account.lock.date.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Lock Dates">
+                <div class="alert alert-warning" role="alert" invisible="not draft_move_count">
+                    <field name="draft_move_count" class="oe_inline"/> draft entries are dated before the global or hard
+                    lock date; post or delete them before locking.
+                    <button name="action_open_draft_moves" type="object" string="Show" class="btn-link p-0"/>
+                </div>
+                <div class="alert alert-warning" role="alert" invisible="not unreconciled_line_count">
+                    <field name="unreconciled_line_count" class="oe_inline"/> bank transactions before that date are
+                    not reconciled yet.
+                </div>
+                <group>
+                    <group string="Soft locks">
+                        <field name="company_id" invisible="1"/>
+                        <field name="fiscalyear_lock_date"/>
+                        <field name="tax_lock_date"/>
+                        <field name="sale_lock_date"/>
+                        <field name="purchase_lock_date"/>
+                    </group>
+                    <group string="Hard lock">
+                        <field name="current_hard_lock_date" readonly="1"/>
+                        <field name="hard_lock_date"/>
+                        <div colspan="2" class="text-muted">
+                            The hard lock date is irreversible: once set, it can only move forward.
+                        </div>
+                    </group>
+                </group>
+                <group string="Unlocking" invisible="not is_loosening">
+                    <field name="is_loosening" invisible="1"/>
+                    <field name="loosening_mode" widget="radio"/>
+                    <field name="exception_user" widget="radio" invisible="loosening_mode != 'exception'"/>
+                    <field name="exception_duration" invisible="loosening_mode != 'exception'"/>
+                    <field name="exception_reason" invisible="loosening_mode != 'exception'"/>
+                </group>
+                <footer>
+                    <button name="action_save" type="object" string="Save" class="btn-primary"/>
+                    <button special="cancel" string="Discard" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ci_lock_date_wizard" model="ir.actions.act_window">
+        <field name="name">Lock Dates</field>
+        <field name="res_model">ci.account.lock.date.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Lock date exceptions (Community only has the form view) -->
+    <record id="ci_account_lock_exception_view_list" model="ir.ui.view">
+        <field name="name">account.lock_exception.list</field>
+        <field name="model">account.lock_exception</field>
+        <field name="arch" type="xml">
+            <list string="Lock Date Exceptions" create="0" decoration-muted="state != 'active'">
+                <field name="create_date" string="Created on"/>
+                <field name="create_uid" string="Created by" widget="many2one_avatar_user"/>
+                <field name="user_id" string="Valid for" widget="many2one_avatar_user"/>
+                <field name="lock_date_field"/>
+                <field name="company_lock_date" string="Lock Date"/>
+                <field name="lock_date" string="Exception Date"/>
+                <field name="end_datetime"/>
+                <field name="reason" optional="show"/>
+                <field name="state" widget="badge" decoration-success="state == 'active'"
+                       decoration-danger="state == 'revoked'"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_ci_lock_exceptions" model="ir.actions.act_window">
+        <field name="name">Lock Date Exceptions</field>
+        <field name="res_model">account.lock_exception</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'active_test': False}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">No lock date exception</p>
+            <p>Exceptions are created from the Lock Dates window when a lock date is moved back for a while.</p>
+        </field>
+    </record>
+
+    <!-- Tax return closing -->
+    <record id="ci_account_tax_closing_wizard_view_form" model="ir.ui.view">
+        <field name="name">ci.account.tax.closing.wizard.form</field>
+        <field name="model">ci.account.tax.closing.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Tax Return Closing">
+                <group>
+                    <group>
+                        <field name="company_id" invisible="1"/>
+                        <field name="currency_id" invisible="1"/>
+                        <label for="date_from" string="Period"/>
+                        <div class="o_row">
+                            <field name="date_from"/> → <field name="date_to"/>
+                        </div>
+                        <field name="journal_id" options="{'no_create': True}"/>
+                        <field name="set_tax_lock_date"/>
+                    </group>
+                    <group>
+                        <field name="payable_account_id" options="{'no_create': True}"/>
+                        <field name="receivable_account_id" options="{'no_create': True}"/>
+                        <field name="amount_due"/>
+                    </group>
+                </group>
+                <field name="line_ids" readonly="1">
+                    <list>
+                        <field name="currency_id" column_invisible="1"/>
+                        <field name="tax_group_id"/>
+                        <field name="account_id"/>
+                        <field name="balance" sum="Total"/>
+                    </list>
+                </field>
+                <footer>
+                    <button name="action_create_closing" type="object" string="Post Closing Entry" class="btn-primary"/>
+                    <button special="cancel" string="Discard" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ci_tax_closing_wizard" model="ir.actions.act_window">
+        <field name="name">Tax Return Closing</field>
+        <field name="res_model">ci.account.tax.closing.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Year-end earnings allocation -->
+    <record id="ci_account_earnings_allocation_wizard_view_form" model="ir.ui.view">
+        <field name="name">ci.account.earnings.allocation.wizard.form</field>
+        <field name="model">ci.account.earnings.allocation.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Year-End Earnings Allocation">
+                <p class="text-muted">
+                    Moves the profit or loss not allocated yet, up to the closing date, from the current year earnings
+                    account to retained earnings. Lock the closed year afterwards with the Lock Dates.
+                </p>
+                <group>
+                    <group>
+                        <field name="company_id" invisible="1"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="date"/>
+                        <field name="journal_id" options="{'no_create': True}"/>
+                        <field name="amount"/>
+                    </group>
+                    <group>
+                        <field name="unaffected_account_id" options="{'no_create': True}"/>
+                        <field name="retained_earnings_account_id" options="{'no_create': True}"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_allocate" type="object" string="Post Allocation" class="btn-primary"/>
+                    <button special="cancel" string="Discard" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ci_earnings_allocation_wizard" model="ir.actions.act_window">
+        <field name="name">Year-End Earnings Allocation</field>
+        <field name="res_model">ci.account.earnings.allocation.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Settings: fiscal periods and closing instead of the Enterprise upgrade toggles -->
+    <record id="ci_account_res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.ci.account</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="account.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <setting id="fiscalyear" position="attributes">
+                <attribute name="invisible">0</attribute>
+                <attribute name="string">Fiscal Years</attribute>
+                <attribute name="help">Last day of the fiscal year, or explicit fiscal years</attribute>
+            </setting>
+            <setting id="fiscalyear" position="inside">
+                <div class="content-group">
+                    <div class="row mt16">
+                        <label for="ci_fiscalyear_last_day" string="Last Day" class="col-lg-3 o_light_label"/>
+                        <div class="col">
+                            <field name="ci_fiscalyear_last_month" class="oe_inline me-2"/>
+                            <field name="ci_fiscalyear_last_day" class="oe_inline"/>
+                        </div>
+                    </div>
+                    <div class="mt8">
+                        <button name="%(ci_account.action_ci_account_fiscal_year)d" type="action"
+                                string="Fiscal Years" icon="oi-arrow-right" class="btn-link"/>
+                    </div>
+                </div>
+            </setting>
+            <setting id="dynamic_report" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </setting>
+            <block id="accounting_reports" position="inside">
+                <setting id="ci_lock_dates" string="Lock Dates" groups="account.group_account_manager"
+                         help="Protect closed periods, with temporary exceptions">
+                    <div class="mt8">
+                        <button name="%(ci_account.action_ci_lock_date_wizard)d" type="action"
+                                string="Lock Dates" icon="oi-arrow-right" class="btn-link"/>
+                    </div>
+                </setting>
+                <setting id="ci_tax_closing" string="Tax Return Closing" groups="account.group_account_manager"
+                         help="Accounts receiving the tax due or to recover when a tax group has none">
+                    <div class="content-group">
+                        <div class="row mt16">
+                            <label for="ci_tax_payable_account_id" string="Payable" class="col-lg-3 o_light_label"/>
+                            <field name="ci_tax_payable_account_id" options="{'no_create': True}"/>
+                        </div>
+                        <div class="row">
+                            <label for="ci_tax_receivable_account_id" string="Receivable" class="col-lg-3 o_light_label"/>
+                            <field name="ci_tax_receivable_account_id" options="{'no_create': True}"/>
+                        </div>
+                    </div>
+                </setting>
+                <setting id="ci_retained_earnings" string="Retained Earnings" groups="account.group_account_manager"
+                         help="Equity account receiving the earnings at year-end allocation">
+                    <field name="ci_retained_earnings_account_id" options="{'no_create': True}"/>
+                </setting>
+            </block>
+        </field>
+    </record>
+</odoo>

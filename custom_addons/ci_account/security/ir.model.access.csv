@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ci_account_fiscal_year_user,ci.account.fiscal.year user,model_ci_account_fiscal_year,base.group_user,1,0,0,0
+access_ci_account_fiscal_year_manager,ci.account.fiscal.year manager,model_ci_account_fiscal_year,account.group_account_manager,1,1,1,1
+access_ci_account_lock_date_wizard,ci.account.lock.date.wizard,model_ci_account_lock_date_wizard,account.group_account_manager,1,1,1,1
+access_ci_account_tax_closing_wizard,ci.account.tax.closing.wizard,model_ci_account_tax_closing_wizard,account.group_account_manager,1,1,1,1
+access_ci_account_tax_closing_wizard_line,ci.account.tax.closing.wizard.line,model_ci_account_tax_closing_wizard_line,account.group_account_manager,1,1,1,1
+access_ci_account_earnings_allocation_wizard,ci.account.earnings.allocation.wizard,model_ci_account_earnings_allocation_wizard,account.group_account_manager,1,1,1,1

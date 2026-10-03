@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Community hides the accounting groups that have no privilege
+        (res.groups.get_application_groups). Giving them the Accounting
+        privilege makes them selectable on the user form, in the same chain
+        as the Enterprise "accountant" install:
+
+            Invoicing  ⇨  Accountant  ⇨  Administrator
+            Auditor (read-only) ⬏
+    -->
+    <record id="account.group_account_readonly" model="res.groups">
+        <field name="name">Auditor (Read-only)</field>
+        <field name="sequence">25</field>
+        <field name="privilege_id" ref="account.res_groups_privilege_accounting"/>
+        <field name="comment">Sees everything in accounting (journal entries, reports, configuration) but cannot change anything.</field>
+    </record>
+
+    <record id="account.group_account_user" model="res.groups">
+        <field name="name">Accountant</field>
+        <field name="sequence">30</field>
+        <field name="privilege_id" ref="account.res_groups_privilege_accounting"/>
+        <field name="comment">Invoicing plus journal entries, bank reconciliation, assets, budgets, follow-ups and all reports. No advanced configuration.</field>
+    </record>
+
+    <record id="account.group_account_manager" model="res.groups">
+        <field name="implied_ids" eval="[Command.link(ref('account.group_account_user'))]"/>
+        <field name="comment">Full access, including configuration, lock dates and closing.</field>
+    </record>
+</odoo>

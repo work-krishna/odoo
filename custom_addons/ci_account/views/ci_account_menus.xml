@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Community "Invoicing" becomes the "Accounting" app -->
+    <record id="account.menu_finance" model="ir.ui.menu">
+        <field name="name">Accounting</field>
+        <field name="web_icon">ci_account,static/description/icon.png</field>
+    </record>
+
+    <!--
+        Anchors every ci_account feature hangs its menus on. Community parents
+        used as well: account.account_transactions_menu, account.account_closing_menu,
+        account.account_reports_legal_statements_menu, account.account_reports_partners_reports_menu,
+        account.account_reports_taxes_and_fiscal_menu, account.account_reports_management_menu,
+        account.account_account_menu, account.account_invoicing_menu.
+    -->
+    <!-- Accounting > Management: assets, deferrals, budgets -->
+    <menuitem id="menu_ci_management"
+              name="Management"
+              parent="account.menu_finance_entries"
+              groups="account.group_account_readonly"
+              sequence="10"/>
+
+    <!-- Accounting > Bank: transactions and reconciliation -->
+    <menuitem id="menu_ci_bank"
+              name="Bank"
+              parent="account.menu_finance_entries"
+              groups="account.group_account_readonly"
+              sequence="5"/>
+
+    <!-- Reporting > Audit Reports: general ledger, trial balance, journal report -->
+    <menuitem id="menu_ci_audit_reports"
+              name="Audit Reports"
+              parent="account.menu_finance_reports"
+              groups="account.group_account_readonly"
+              sequence="2"/>
+
+    <!-- Configuration > Management: asset models, budgetary positions -->
+    <menuitem id="menu_ci_config_management"
+              name="Management"
+              parent="account.menu_finance_configuration"
+              groups="account.group_account_manager"
+              sequence="15"/>
+
+    <!-- Chart of accounts: a shortcut next to journal entries -->
+    <menuitem id="menu_ci_chart_of_accounts"
+              name="Chart of Accounts"
+              parent="account.account_transactions_menu"
+              action="account.action_account_form"
+              groups="account.group_account_readonly"
+              sequence="40"/>
+</odoo>

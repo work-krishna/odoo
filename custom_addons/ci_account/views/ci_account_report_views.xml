@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Financial reports: one client action per report model -->
+    <record id="action_ci_report_balance_sheet" model="ir.actions.client">
+        <field name="name">Balance Sheet</field>
+        <field name="tag">ci_account_report</field>
+        <field name="path">balance-sheet</field>
+        <field name="context" eval="{'report_model': 'ci.account.report.balance.sheet'}"/>
+    </record>
+    <record id="action_ci_report_profit_loss" model="ir.actions.client">
+        <field name="name">Profit and Loss</field>
+        <field name="tag">ci_account_report</field>
+        <field name="path">profit-and-loss</field>
+        <field name="context" eval="{'report_model': 'ci.account.report.profit.loss'}"/>
+    </record>
+    <record id="action_ci_report_cash_flow" model="ir.actions.client">
+        <field name="name">Cash Flow Statement</field>
+        <field name="tag">ci_account_report</field>
+        <field name="path">cash-flow-statement</field>
+        <field name="context" eval="{'report_model': 'ci.account.report.cash.flow'}"/>
+    </record>
+    <record id="action_ci_report_general_ledger" model="ir.actions.client">
+        <field name="name">General Ledger</field>
+        <field name="tag">ci_account_report</field>
+        <field name="path">general-ledger</field>
+        <field name="context" eval="{'report_model': 'ci.account.report.general.ledger'}"/>
+    </record>
+    <record id="action_ci_report_trial_balance" model="ir.actions.client">
+        <field name="name">Trial Balance</field>
+        <field name="tag">ci_account_report</field>
+        <field name="path">trial-balance</field>
+        <field name="context" eval="{'report_model': 'ci.account.report.trial.balance'}"/>
+    </record>
+    <record id="action_ci_report_journal" model="ir.actions.client">
+        <field name="name">Journal Report</field>
+        <field name="tag">ci_account_report</field>
+        <field name="path">journal-report</field>
+        <field name="context" eval="{'report_model': 'ci.account.report.journal'}"/>
+    </record>
+    <record id="action_ci_report_partner_ledger" model="ir.actions.client">
+        <field name="name">Partner Ledger</field>
+        <field name="tag">ci_account_report</field>
+        <field name="path">partner-ledger</field>
+        <field name="context" eval="{'report_model': 'ci.account.report.partner.ledger'}"/>
+    </record>
+    <record id="action_ci_report_aged_receivable" model="ir.actions.client">
+        <field name="name">Aged Receivable</field>
+        <field name="tag">ci_account_report</field>
+        <field name="path">aged-receivable</field>
+        <field name="context" eval="{'report_model': 'ci.account.report.aged.receivable'}"/>
+    </record>
+    <record id="action_ci_report_aged_payable" model="ir.actions.client">
+        <field name="name">Aged Payable</field>
+        <field name="tag">ci_account_report</field>
+        <field name="path">aged-payable</field>
+        <field name="context" eval="{'report_model': 'ci.account.report.aged.payable'}"/>
+    </record>
+    <record id="action_ci_report_tax" model="ir.actions.client">
+        <field name="name">Tax Report</field>
+        <field name="tag">ci_account_report</field>
+        <field name="path">tax-report</field>
+        <field name="context" eval="{'report_model': 'ci.account.report.tax'}"/>
+    </record>
+
+    <!-- Chart of accounts helpers Community has views but no actions for -->
+    <record id="action_ci_account_group" model="ir.actions.act_window">
+        <field name="name">Account Groups</field>
+        <field name="res_model">account.group</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Group your accounts</p>
+            <p>Account groups gather accounts by code prefix (e.g. 1000 to 1099 "Cash and Bank"); the trial balance
+                can show them as a hierarchy.</p>
+        </field>
+    </record>
+    <record id="action_ci_account_tag" model="ir.actions.act_window">
+        <field name="name">Account Tags</field>
+        <field name="res_model">account.account.tag</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('applicability', '=', 'accounts')]</field>
+        <field name="context">{'default_applicability': 'accounts'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Tag your accounts</p>
+            <p>The Operating, Investing and Financing Activity tags decide where an account appears in the cash flow
+                statement.</p>
+        </field>
+    </record>
+
+    <!-- Reporting -->
+    <menuitem id="menu_ci_report_balance_sheet" name="Balance Sheet" action="action_ci_report_balance_sheet"
+              parent="account.account_reports_legal_statements_menu" groups="account.group_account_readonly" sequence="10"/>
+    <menuitem id="menu_ci_report_profit_loss" name="Profit and Loss" action="action_ci_report_profit_loss"
+              parent="account.account_reports_legal_statements_menu" groups="account.group_account_readonly" sequence="20"/>
+    <menuitem id="menu_ci_report_cash_flow" name="Cash Flow Statement" action="action_ci_report_cash_flow"
+              parent="account.account_reports_legal_statements_menu" groups="account.group_account_readonly" sequence="30"/>
+
+    <menuitem id="menu_ci_report_general_ledger" name="General Ledger" action="action_ci_report_general_ledger"
+              parent="menu_ci_audit_reports" groups="account.group_account_readonly" sequence="10"/>
+    <menuitem id="menu_ci_report_trial_balance" name="Trial Balance" action="action_ci_report_trial_balance"
+              parent="menu_ci_audit_reports" groups="account.group_account_readonly" sequence="20"/>
+    <menuitem id="menu_ci_report_journal" name="Journal Report" action="action_ci_report_journal"
+              parent="menu_ci_audit_reports" groups="account.group_account_readonly" sequence="30"/>
+
+    <menuitem id="menu_ci_report_partner_ledger" name="Partner Ledger" action="action_ci_report_partner_ledger"
+              parent="account.account_reports_partners_reports_menu" groups="account.group_account_readonly" sequence="10"/>
+    <menuitem id="menu_ci_report_aged_receivable" name="Aged Receivable" action="action_ci_report_aged_receivable"
+              parent="account.account_reports_partners_reports_menu" groups="account.group_account_readonly" sequence="20"/>
+    <menuitem id="menu_ci_report_aged_payable" name="Aged Payable" action="action_ci_report_aged_payable"
+              parent="account.account_reports_partners_reports_menu" groups="account.group_account_readonly" sequence="30"/>
+
+    <menuitem id="menu_ci_report_tax" name="Tax Report" action="action_ci_report_tax"
+              parent="account.account_reports_taxes_and_fiscal_menu" groups="account.group_account_readonly" sequence="10"/>
+
+    <!-- Accounting > Closing -->
+    <menuitem id="menu_ci_lock_dates" name="Lock Dates" action="action_ci_lock_date_wizard"
+              parent="account.account_closing_menu" groups="account.group_account_manager" sequence="10"/>
+    <menuitem id="menu_ci_tax_closing" name="Tax Return Closing" action="action_ci_tax_closing_wizard"
+              parent="account.account_closing_menu" groups="account.group_account_manager" sequence="20"/>
+    <menuitem id="menu_ci_earnings_allocation" name="Year-End Earnings Allocation"
+              action="action_ci_earnings_allocation_wizard"
+              parent="account.account_closing_menu" groups="account.group_account_manager" sequence="30"/>
+    <menuitem id="menu_ci_lock_exceptions" name="Lock Date Exceptions" action="action_ci_lock_exceptions"
+              parent="account.account_closing_menu" groups="account.group_account_manager" sequence="40"/>
+
+    <!-- Configuration > Accounting -->
+    <menuitem id="menu_ci_account_group" name="Account Groups" action="action_ci_account_group"
+              parent="account.account_account_menu" groups="account.group_account_manager" sequence="2"/>
+    <menuitem id="menu_ci_account_tag" name="Account Tags" action="action_ci_account_tag"
+              parent="account.account_account_menu" groups="account.group_account_manager" sequence="3"/>
+    <menuitem id="menu_ci_fiscal_year" name="Fiscal Years" action="action_ci_account_fiscal_year"
+              parent="account.account_account_menu" groups="account.group_account_manager" sequence="20"/>
+</odoo>

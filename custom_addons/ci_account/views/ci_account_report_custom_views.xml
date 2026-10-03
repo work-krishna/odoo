@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Designer for account.report records (Community ships the models without views):
+        the localization tax reports and the statements users build themselves,
+        rendered by ci.account.report.custom.
+    -->
+    <record id="ci_account_report_view_list" model="ir.ui.view">
+        <field name="name">account.report.list.ci</field>
+        <field name="model">account.report</field>
+        <field name="arch" type="xml">
+            <list string="Financial Reports">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="country_id" optional="show"/>
+                <field name="root_report_id" optional="show"/>
+                <field name="availability_condition" optional="hide"/>
+                <button name="action_ci_open_report" type="object" string="Open" icon="fa-external-link"
+                        class="btn-link"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="ci_account_report_view_search" model="ir.ui.view">
+        <field name="name">account.report.search.ci</field>
+        <field name="model">account.report</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="country_id"/>
+                <filter name="root_reports" string="Main Reports" domain="[('root_report_id', '=', False)]"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_country" string="Country" context="{'group_by': 'country_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="ci_account_report_view_form" model="ir.ui.view">
+        <field name="name">account.report.form.ci</field>
+        <field name="model">account.report</field>
+        <field name="arch" type="xml">
+            <form string="Financial Report">
+                <header>
+                    <button name="action_ci_open_report" type="object" string="Open Report" class="btn-primary"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Management Profit and Loss"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="root_report_id"/>
+                            <field name="country_id"/>
+                            <field name="availability_condition"/>
+                        </group>
+                        <group>
+                            <field name="default_opening_date_filter"/>
+                            <field name="only_tax_exigible"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Lines" name="lines">
+                            <field name="line_ids" context="{'default_report_id': id}">
+                                <list>
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="code" optional="show"/>
+                                    <field name="parent_id" optional="show"/>
+                                    <field name="hierarchy_level" optional="hide"/>
+                                    <field name="groupby" optional="show"/>
+                                    <field name="foldable" optional="hide"/>
+                                    <field name="hide_if_zero" optional="hide"/>
+                                    <field name="expression_ids" widget="many2many_tags" optional="show"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Columns" name="columns">
+                            <field name="column_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="expression_label"/>
+                                    <field name="figure_type"/>
+                                    <field name="blank_if_zero"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Options" name="options">
+                            <group>
+                                <group string="Dates">
+                                    <field name="filter_date_range"/>
+                                    <field name="filter_period_comparison"/>
+                                </group>
+                                <group string="Filters">
+                                    <field name="filter_journals"/>
+                                    <field name="filter_analytic"/>
+                                    <field name="filter_partner"/>
+                                    <field name="filter_unfold_all"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Help" name="help">
+                            <div class="o_ci_report_help">
+                                <p>Each line holds expressions; the columns show the expressions whose label matches
+                                    their <i>expression label</i> (usually <code>balance</code>).</p>
+                                <ul>
+                                    <li><b>Account codes</b>: <code>4 - 41\(4100) + 51C</code> sums the accounts whose
+                                        code starts with 4 (except 4100) minus those starting with 41, plus the
+                                        accounts starting with 51 that have a credit balance. <code>tag(xml_id)</code>
+                                        selects the accounts with a tag.</li>
+                                    <li><b>Domain</b>: a journal items domain such as
+                                        <code>[('account_id.account_type', '=', 'income')]</code>, subformula
+                                        <code>sum</code>, <code>-sum</code>, <code>sum_if_pos</code>,
+                                        <code>sum_if_neg</code> or <code>count_rows</code>.</li>
+                                    <li><b>Tax tags</b>: the name of a tax tag of the report's country; a leading
+                                        <code>-</code> negates it.</li>
+                                    <li><b>Aggregation</b>: arithmetic on other lines, <code>REV.balance - EXP.balance</code>,
+                                        or <code>sum_children</code>; subformulas <code>if_above(CUR(0))</code>,
+                                        <code>if_below(...)</code>, <code>if_between(..., ...)</code>,
+                                        <code>cross_report(xml_id)</code>.</li>
+                                    <li><b>External</b>: values entered manually (<code>sum</code> or
+                                        <code>most_recent</code>).</li>
+                                </ul>
+                                <p>Date scopes: <i>strict range</i> (the period), <i>from beginning</i>
+                                    (balance at the end of the period), <i>from fiscal year</i>,
+                                    <i>to beginning of fiscal year</i>, <i>to beginning of period</i>.</p>
+                            </div>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="ci_account_report_line_view_form" model="ir.ui.view">
+        <field name="name">account.report.line.form.ci</field>
+        <field name="model">account.report.line</field>
+        <field name="arch" type="xml">
+            <form string="Report Line">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="code"/>
+                            <field name="report_id" invisible="1"/>
+                            <field name="parent_id" domain="[('report_id', '=', report_id)]"
+                                   options="{'no_create': True}"/>
+                        </group>
+                        <group>
+                            <field name="groupby" placeholder="e.g. account_id"/>
+                            <field name="foldable"/>
+                            <field name="hide_if_zero"/>
+                            <field name="hierarchy_level"/>
+                        </group>
+                    </group>
+                    <field name="expression_ids">
+                        <list editable="bottom">
+                            <field name="label"/>
+                            <field name="engine"/>
+                            <field name="formula"/>
+                            <field name="subformula" optional="show"/>
+                            <field name="date_scope"/>
+                            <field name="figure_type" optional="hide"/>
+                            <field name="blank_if_zero" optional="hide"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ci_account_report_custom" model="ir.actions.act_window">
+        <field name="name">Financial Reports</field>
+        <field name="res_model">account.report</field>
+        <field name="path">financial-reports</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_ids" eval="[Command.clear(),
+            Command.create({'view_mode': 'list', 'view_id': ref('ci_account_report_view_list')}),
+            Command.create({'view_mode': 'form', 'view_id': ref('ci_account_report_view_form')})]"/>
+        <field name="search_view_id" ref="ci_account_report_view_search"/>
+        <field name="context">{'search_default_root_reports': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Design your own financial reports</p>
+            <p>Build statements from account codes, journal item domains, tax tags and formulas on other lines,
+                then open them with dates, comparisons, drill-down and PDF/XLSX exports. The tax reports of the
+                installed localizations are listed here too.</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_ci_account_report_custom" name="Financial Reports" action="action_ci_account_report_custom"
+              parent="account.account_report_folder" groups="account.group_account_readonly" sequence="10"/>
+    <menuitem id="menu_ci_account_report_custom_open" name="Custom Reports" action="action_ci_account_report_custom"
+              parent="account.account_reports_management_menu" groups="account.group_account_readonly" sequence="50"/>
+</odoo>
