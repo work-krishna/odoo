@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.mail.security.sender</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="mail.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <setting id="email-alias-setting" position="after">
+                <setting id="email-security-sender-setting" string="Security Emails From"
+                         help="Sends sign-up codes, invitations, password resets, two-factor codes and security alerts. Leave empty to use the company email."
+                         company_dependent="1">
+                    <field name="security_email" placeholder="e.g. support@mycompany.com"/>
+                </setting>
+            </setting>
+        </field>
+    </record>
+</odoo>
