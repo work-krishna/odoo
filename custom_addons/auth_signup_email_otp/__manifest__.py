@@ -1,6 +1,6 @@
 {
     'name': 'Sign-up Email Activation (OTP)',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.0.1',
     'summary': 'Website sign-ups activate their account with an emailed code or link before logging in',
     'description': """
 People who create their own account on the website get an email with a
