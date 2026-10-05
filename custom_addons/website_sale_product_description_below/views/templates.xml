@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Out of the column under the product name, with the spacing Odoo gives a product that has no description -->
+    <template id="product_title" inherit_id="website_sale.product_title" name="Product title: without the description">
+        <xpath expr="//div[@t-field='product.description_ecommerce']" position="replace"/>
+        <xpath expr="//div[contains(@t-attf-class, 'o_wsale_product_details_content_section_title')]" position="attributes">
+            <attribute name="t-attf-class">o_wsale_product_details_content_section o_wsale_product_details_content_section_title mb-3</attribute>
+        </xpath>
+        <xpath expr="//h1[@t-field='product.name']" position="attributes">
+            <attribute name="t-attf-class">h3 {{'' if is_view_active('website_sale.product_comment') else 'mb-3'}}</attribute>
+        </xpath>
+    </template>
+
+    <!-- Into its own section under the product details, so above the alternative products and the reviews.
+         Without a description it is only shown in the editor, to type one in. -->
+    <template id="product" inherit_id="website_sale.product" name="Product page: description below the details">
+        <xpath expr="//section[@id='product_detail']" position="after">
+            <t t-set="has_description" t-value="not is_html_empty(product.description_ecommerce)"/>
+            <div
+                t-if="has_description or editable"
+                t-attf-class="o_wsale_product_description border-top {{'' if has_description else 'css_non_editable_mode_hidden'}}"
+            >
+                <section id="o_product_page_description" class="container pt48 pb48">
+                    <h2 class="fs-4 mb-3">Description</h2>
+                    <div
+                        t-field="product.description_ecommerce"
+                        class="oe_structure"
+                        placeholder="A detailed, formatted description to promote your product on this page. Use '/' to discover more features."
+                    />
+                </section>
+            </div>
+        </xpath>
+    </template>
+</odoo>
