@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Under the rating, or under the product name when ratings are off -->
+    <template id="product_title" inherit_id="website_sale.product_title" name="Product title: brand">
+        <xpath expr="//t[contains(@t-if, 'website_sale.product_comment')]" position="after">
+            <t t-set="website_brand" t-value="product._get_website_brand()"/>
+            <div t-if="website_brand" class="o_wsale_product_brand mb-2 text-muted" t-out="website_brand.name"/>
+        </xpath>
+    </template>
+</odoo>

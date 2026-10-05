@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_catalog_brands" parent="website_sale.menu_catalog" action="product_brand.product_brand_action" sequence="4"/>
+    <menuitem id="menu_sale_config_brands" parent="sale.prod_config_main" action="product_brand.product_brand_action" sequence="25"/>
+</odoo>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- The default brand of products, see product.brand.init() -->
+    <record id="product_brand_no_brand" model="product.brand">
+        <field name="name">No Brand</field>
+        <field name="sequence">0</field>
+    </record>
+</odoo>
