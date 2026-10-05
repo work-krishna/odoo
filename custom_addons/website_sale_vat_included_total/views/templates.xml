@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- On a website showing its prices tax included, the order summary shows the total only, with
+         "Incl. VAT" under it when the total includes tax. The Subtotal and Taxes rows stay in the
+         page, hidden, since the checkout updates them when the delivery method changes. -->
+    <template id="total" inherit_id="website_sale.total" name="Order total: VAT included">
+        <xpath expr="//table" position="before">
+            <t
+                t-set="vat_included_total"
+                t-value="website_sale_order.website_id.show_line_subtotals_tax_selection == 'tax_included'"
+            />
+        </xpath>
+        <tr name="o_order_total_untaxed" position="attributes">
+            <attribute name="t-attf-class" add="#{'d-none' if vat_included_total else ''}" separator=" "/>
+        </tr>
+        <tr name="o_order_total_taxes" position="attributes">
+            <attribute name="t-attf-class" add="#{'d-none' if vat_included_total else ''}" separator=" "/>
+        </tr>
+        <!-- No rule above the total when no Delivery row comes before it -->
+        <tr name="o_order_total" position="attributes">
+            <attribute name="class" remove="border-top" separator=" "/>
+            <attribute
+                name="t-attf-class"
+                add="#{'' if vat_included_total and not website_sale_order._has_deliverable_products() else 'border-top'}"
+                separator=" "
+            />
+        </tr>
+        <xpath expr="//tr[@name='o_order_total']//strong[@t-field='website_sale_order.amount_total']" position="after">
+            <div
+                t-if="vat_included_total"
+                name="o_order_total_tax_note"
+                t-attf-class="small text-muted #{'' if website_sale_order._total_includes_tax() else 'd-none'}"
+            >Incl. VAT</div>
+        </xpath>
+    </template>
+</odoo>
