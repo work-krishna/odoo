@@ -1,0 +1,10 @@
+// Only the /shop grid: the same title class is used by the product carousels, including the
+// ones on the product page, which keep showing full names. The "Unpublished" button next to
+// the name is not part of the clamped link, so it stays visible.
+#o_wsale_products_grid .o_wsale_products_item_title > a:not(.btn) {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+}

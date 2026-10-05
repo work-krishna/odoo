@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- The full name, shown on hover when the listing cuts it off -->
+    <template id="products_item" inherit_id="website_sale.products_item" name="Products item: full name on hover">
+        <xpath expr="//h2[hasclass('o_wsale_products_item_title')]/a[1]" position="attributes">
+            <attribute name="t-att-title">product.name</attribute>
+        </xpath>
+    </template>
+</odoo>
