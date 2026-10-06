@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Product page: no "+ 5,000.00" next to the attribute values (radio buttons, pills and drop-down lists) -->
+    <template id="badge_extra_price" inherit_id="website_sale.badge_extra_price" name="Badge Extra Price: hidden">
+        <xpath expr="//t[@t-set='price_extra']" position="replace"/>
+        <xpath expr="//span[@t-if='price_extra']" position="replace"/>
+    </template>
+</odoo>

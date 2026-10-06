@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <!-- The window to choose the options of a product, on the website only: no extra price next to the values -->
+    <t t-inherit="sale.ptav_radio" t-inherit-mode="extension">
+        <xpath expr="//BadgeExtraPrice" position="replace"/>
+    </t>
+    <t t-inherit="sale.ptav_pills" t-inherit-mode="extension">
+        <xpath expr="//BadgeExtraPrice" position="replace"/>
+    </t>
+    <t t-inherit="sale.ptav_multi" t-inherit-mode="extension">
+        <xpath expr="//BadgeExtraPrice" position="replace"/>
+    </t>
+</templates>
