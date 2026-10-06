@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- List of variants: publish each variant without opening it -->
+    <record id="product_product_tree_view" model="ir.ui.view">
+        <field name="name">product.product.list.variant.publish</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_product_tree_view"/>
+        <field name="arch" type="xml">
+            <field name="product_template_variant_value_ids" position="after">
+                <field name="is_variant_published" string="Published" widget="boolean_toggle" optional="show"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Odoo's "Is Published" column of the variants is their product's -->
+    <record id="product_product_website_tree_view" model="ir.ui.view">
+        <field name="name">product.product.website.list.variant.publish</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="website_sale.product_product_website_tree_view"/>
+        <field name="arch" type="xml">
+            <field name="is_published" position="attributes">
+                <attribute name="string">Product Published</attribute>
+            </field>
+        </field>
+    </record>
+
+    <!-- Form of a variant (Inventory > Products > Product Variants) -->
+    <record id="product_normal_form_view" model="ir.ui.view">
+        <field name="name">product.product.form.variant.publish</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_normal_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='extra_info']//field[@name='is_published']" position="attributes">
+                <attribute name="string">Product Published</attribute>
+                <attribute name="help">Publish the product with all its variants</attribute>
+            </xpath>
+            <xpath expr="//group[@name='extra_info']//field[@name='is_published']" position="after">
+                <field name="is_variant_published" widget="boolean_toggle"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Form of a variant, from its product's Variants -->
+    <record id="product_variant_easy_edit_view" model="ir.ui.view">
+        <field name="name">product.product.view.form.easy.variant.publish</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_variant_easy_edit_view"/>
+        <field name="arch" type="xml">
+            <group name="sales" position="inside">
+                <field name="is_variant_published" widget="boolean_toggle"/>
+            </group>
+        </field>
+    </record>
+</odoo>

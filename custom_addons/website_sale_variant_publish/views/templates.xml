@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Not the attribute values whose variants are all hidden from the website -->
+    <template id="variants" inherit_id="website_sale.variants" name="Variants: published">
+        <xpath expr="//t[@t-set='ptavs']" position="after">
+            <t t-set="ptavs" t-value="ptavs._filter_website_published()"/>
+        </xpath>
+    </template>
+</odoo>

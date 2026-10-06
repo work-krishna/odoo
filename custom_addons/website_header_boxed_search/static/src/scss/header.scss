@@ -1,0 +1,8 @@
+// The search field of the "Rounded Box Menu" header only takes the space the
+// menu leaves: with no width of its own (flex-basis 0), it never shrinks the
+// menu, which keeps moving its last items into its "+" dropdown when the bar
+// is too narrow, but it keeps a minimum width.
+#o_main_nav > .o_header_boxed_search {
+    flex: 1 1 0;
+    min-width: 12rem;
+}

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- The search icon, which opens a search window, becomes a search field
+         between the menu and the icons on the right. The search is moved, not
+         copied, so the "Search Bar" option keeps working. Applied after the
+         other views (priority), which place their icons next to the search
+         (the cart of website_sale, ...): they stay with the icons. -->
+    <template id="template_header_boxed" inherit_id="website.template_header_boxed" name="Rounded Box Menu: Search Field" priority="99">
+        <xpath expr="//t[@t-call='website.navbar_nav']" position="after">
+            <ul t-if="is_view_active('website.header_search_box')" class="navbar-nav o_header_boxed_search ps-3"/>
+        </xpath>
+        <xpath expr="//ul[hasclass('o_header_boxed_search')]" position="inside">
+            <xpath expr="//t[@t-call='website.placeholder_header_search_box']" position="move"/>
+        </xpath>
+        <!-- Same look as the field of the mobile menu of this header -->
+        <xpath expr="//t[@t-call='website.placeholder_header_search_box']" position="attributes">
+            <attribute name="_layout.f"/>
+            <attribute name="_button_classes.f"/>
+            <attribute name="_item_class.f">w-100</attribute>
+            <attribute name="_input_classes.f">rounded-start-pill ps-3 text-bg-light</attribute>
+            <attribute name="_submit_classes.f">rounded-end-pill bg-o-color-3 pe-3</attribute>
+        </xpath>
+    </template>
+
+</odoo>

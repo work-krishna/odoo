@@ -22,10 +22,6 @@ With this module, the customer also sees it before choosing:
 - In the shop, a product is only out of stock (no quick Add to Cart, "Out of
   stock" ribbon) when all its variants are, not as soon as its first one is.
 
-Odoo grays out an option by looking for the input with its id in the whole
-product form, which finds the hidden product (template) id first when it is
-the same number: only the attribute values are looked at.
-
 This only applies to products whose inventory is tracked, and which are not
 allowed to be sold when out of stock: product form > Sales > "Sell when
 Out-of-Stock" unticked (Website > Settings > Inventory Defaults > Out-of-Stock
@@ -34,14 +30,11 @@ Out-of-Stock" unticked (Website > Settings > Inventory Defaults > Out-of-Stock
     'category': 'Website/Website',
     'author': 'EMI Platform',
     'license': 'LGPL-3',
-    'depends': ['website_sale_stock'],
+    'depends': ['website_sale_stock', 'website_sale_variant_picker_fix'],
     'data': [
         'views/templates.xml',
     ],
     'assets': {
-        'web.assets_frontend': [
-            'website_sale_stock_variant_availability/static/src/interactions/**/*',
-        ],
         'web.assets_tests': [
             'website_sale_stock_variant_availability/static/tests/tours/**/*',
         ],
