@@ -1,15 +1,19 @@
 {
     'name': 'Shop: VAT-Inclusive Order Total',
     'version': '19.0.1.0.0',
-    'summary': 'The order summary shows the total with "Incl. VAT" under it instead of Subtotal and Taxes lines',
+    'summary': 'The order summary lists Items Total, Delivery Fee and the Total "All taxes included" instead of Subtotal and Taxes lines',
     'description': """
 When a website displays its prices tax included (Website > Configuration >
 Settings > eCommerce > Display Product Prices: Tax Included), the order
-summary of the cart, checkout, payment and confirmation pages no longer lists
-a Subtotal and a Taxes line. It shows the Total, with a smaller "Incl. VAT"
-under it when that total really includes tax. An order without any tax
-(untaxed or 0% products, or a fiscal position that removes the tax) shows the
-Total alone. Changing the delivery method updates the note.
+summary of the cart, checkout, payment and confirmation pages reads like a
+receipt: the promo code box under a "Promotion" heading, then "Order Detail"
+with the Items Total (and item count), the Delivery Fee and the Total, all tax
+included, instead of a Subtotal and a Taxes line. The Total is larger, in the
+website's primary color, with a smaller "All taxes included" under it when it
+really includes tax. An order without any tax (untaxed or 0% products, or a fiscal
+position that removes the tax) shows the Total alone. Changing the delivery
+method updates the amounts and the note. With website_sale_loyalty, the
+vouchers get rows of their own (see website_sale_vat_included_total_loyalty).
 
 Only the display changes: the order's untaxed amount, taxes and total are
 computed and recorded as before, and the order PDF, the customer portal and

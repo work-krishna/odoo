@@ -3,15 +3,16 @@ import { Checkout } from '@website_sale/interactions/checkout';
 
 patch(Checkout.prototype, {
     /**
-     * Show "Incl. VAT" under the total only while it includes tax: the new delivery method's line
-     * can bring tax into the total or take it out.
+     * Replace the summary's Order Detail table with the one rendered for the new delivery method,
+     * which can change its rows, its amounts and whether the total includes tax.
      *
      * @override method from `@website_sale/interactions/checkout`
      */
     _updateCartSummary(result, targetEl) {
         super._updateCartSummary(...arguments);
-        targetEl.querySelector('[name="o_order_total_tax_note"]')?.classList.toggle(
-            'd-none', !result.total_includes_tax
-        );
+        const orderDetail = targetEl.querySelector('table[name="o_order_detail"]');
+        if (orderDetail && result.order_detail) {
+            orderDetail.outerHTML = result.order_detail;
+        }
     },
 });

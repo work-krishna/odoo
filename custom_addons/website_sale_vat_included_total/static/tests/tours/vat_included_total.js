@@ -20,10 +20,16 @@ registry.category('web_tour.tours').add('website_sale_vat_included_total_deliver
         selectDeliveryMethod('Courier with VAT'),
         {
             content: 'The total includes the VAT of the delivery',
-            trigger: `${taxNote}:visible:contains(Incl. VAT)`,
+            trigger: `${taxNote}:visible:contains(All taxes included)`,
         },
         {
             trigger: 'div.o_total_card tr[name="o_order_total"] .oe_currency_value:text(213.00)',
+        },
+        {
+            trigger: 'div.o_total_card tr[name="o_order_delivery"] .oe_currency_value:text(113.00)',
+        },
+        {
+            trigger: 'div.o_total_card tr[name="o_order_items_total"] .oe_currency_value:text(100.00)',
         },
         selectDeliveryMethod('Free Pickup'),
         {

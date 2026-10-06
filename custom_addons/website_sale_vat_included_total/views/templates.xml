@@ -1,14 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- On a website showing its prices tax included, the order summary shows the total only, with
-         "Incl. VAT" under it when the total includes tax. The Subtotal and Taxes rows stay in the
-         page, hidden, since the checkout updates them when the delivery method changes. -->
+    <!-- On a website showing its prices tax included, the order summary reads like a receipt: the
+         promo code box, then "Order Detail" with Items Total, Delivery Fee, vouchers and the Total,
+         with "All taxes included" under it when the total includes tax. The Subtotal and Taxes
+         rows stay in the page, hidden, since the checkout updates them when the delivery method
+         changes.
+         A dynamic class replaces the static one, so elements of `website_sale.total` given a
+         conditional class get their static classes again. -->
     <template id="total" inherit_id="website_sale.total" name="Order total: VAT included">
         <xpath expr="//table" position="before">
             <t
                 t-set="vat_included_total"
-                t-value="website_sale_order.website_id.show_line_subtotals_tax_selection == 'tax_included'"
+                t-value="website_sale_order._show_vat_included_summary()"
             />
+        </xpath>
+        <!-- The totals move to a table of their own, after the first table, which keeps the promo
+             code rows that other views append to it. Showing prices tax excluded, the totals stay
+             above the promo code rows. -->
+        <xpath expr="//div[contains(@t-attf-class, 'o_cart_total')]" position="attributes">
+            <attribute name="t-attf-class" add="d-flex flex-column" separator=" "/>
+        </xpath>
+        <xpath expr="//table" position="after">
+            <h5 t-if="vat_included_total" class="fw-normal mb-3">Order Detail</h5>
+            <table
+                name="o_order_detail"
+                t-attf-class="table mb-0 #{'' if vat_included_total else 'order-first'}"
+            >
+                <tr t-if="vat_included_total" name="o_order_items_total">
+                    <td class="border-0 pb-2 ps-0 pt-0 text-start text-muted" colspan="2">
+                        <t t-set="items_count" t-value="website_sale_order.cart_quantity"/>
+                        <t t-if="items_count == 1">Items Total (1 Item)</t>
+                        <t t-else="">Items Total (<t t-out="items_count"/> Items)</t>
+                    </td>
+                    <td class="text-end border-0 pb-2 pe-0 pt-0">
+                        <span
+                            t-out="website_sale_order._get_items_total()"
+                            class="monetary_field"
+                            style="white-space: nowrap;"
+                            t-options="{'widget': 'monetary', 'display_currency': website_sale_order.currency_id}"
+                        />
+                    </td>
+                </tr>
+            </table>
+        </xpath>
+        <xpath expr="//table[@name='o_order_detail']" position="inside">
+            <xpath expr="//tr[@name='o_order_delivery']" position="move"/>
+            <xpath expr="//tr[@name='o_order_total_untaxed']" position="move"/>
+            <xpath expr="//tr[@name='o_order_total_taxes']" position="move"/>
+            <xpath expr="//tr[@name='o_order_total']" position="move"/>
+        </xpath>
+
+        <!-- Vouchers and the like, as negative amounts, between the Delivery Fee and the Total. Not
+             a free shipping worth nothing yet, before a delivery method is chosen. -->
+        <xpath expr="//tr[@name='o_order_delivery']" position="after">
+            <t t-if="vat_included_total">
+                <tr
+                    t-foreach="website_sale_order._get_summary_reward_lines()"
+                    t-as="reward_line"
+                    t-if="not website_sale_order.currency_id.is_zero(reward_line._get_cart_display_price())"
+                    name="o_order_reward"
+                >
+                    <td class="ps-0 pt-0 pb-2 border-0 text-muted" colspan="2" t-out="reward_line._get_summary_label()"/>
+                    <td class="text-end border-0 pb-2 pe-0 pt-0">
+                        <span
+                            t-out="reward_line._get_cart_display_price()"
+                            class="monetary_field"
+                            style="white-space: nowrap;"
+                            t-options="{'widget': 'monetary', 'display_currency': website_sale_order.currency_id}"
+                        />
+                    </td>
+                </tr>
+            </t>
+        </xpath>
+        <xpath expr="//tr[@name='o_order_delivery']/td[1]" position="replace">
+            <td class="ps-0 pt-0 pb-2 border-0 text-muted" colspan="2">
+                <t t-if="vat_included_total">Delivery Fee</t>
+                <t t-else="">Delivery</t>
+            </td>
         </xpath>
         <tr name="o_order_total_untaxed" position="attributes">
             <attribute name="t-attf-class" add="#{'d-none' if vat_included_total else ''}" separator=" "/>
@@ -16,21 +84,54 @@
         <tr name="o_order_total_taxes" position="attributes">
             <attribute name="t-attf-class" add="#{'d-none' if vat_included_total else ''}" separator=" "/>
         </tr>
-        <!-- No rule above the total when no Delivery row comes before it -->
+        <!-- "Total" in plain text, on the line of the larger amount -->
         <tr name="o_order_total" position="attributes">
             <attribute name="class" remove="border-top" separator=" "/>
             <attribute
                 name="t-attf-class"
-                add="#{'' if vat_included_total and not website_sale_order._has_deliverable_products() else 'border-top'}"
+                add="border-top #{'align-baseline' if vat_included_total else ''}"
                 separator=" "
             />
         </tr>
+        <xpath expr="//tr[@name='o_order_total']/td[1]/strong" position="attributes">
+            <attribute name="t-attf-class">#{'fw-normal' if vat_included_total else ''}</attribute>
+        </xpath>
+        <xpath expr="//tr[@name='o_order_total']//strong[@t-field='website_sale_order.amount_total']" position="attributes">
+            <attribute name="class"/>
+            <attribute name="t-attf-class">monetary_field text-end p-0 #{'fs-5 fw-normal text-primary' if vat_included_total else ''}</attribute>
+        </xpath>
         <xpath expr="//tr[@name='o_order_total']//strong[@t-field='website_sale_order.amount_total']" position="after">
             <div
                 t-if="vat_included_total"
                 name="o_order_total_tax_note"
-                t-attf-class="small text-muted #{'' if website_sale_order._total_includes_tax() else 'd-none'}"
-            >Incl. VAT</div>
+                t-attf-class="small text-nowrap #{'' if website_sale_order._total_includes_tax() else 'd-none'}"
+            >All taxes included</div>
+        </xpath>
+    </template>
+
+    <template id="reduction_code" inherit_id="website_sale.reduction_code" name="Promo Code: heading">
+        <xpath expr="//div[hasclass('coupon_form')]" position="before">
+            <h5 t-if="vat_included_total" class="fw-normal text-start mb-3">Promotion</h5>
+        </xpath>
+    </template>
+
+    <!-- The lines listed as rows of their own under Order Detail are not listed with the items. They
+         stay in the page, hidden, since the checkout of website_sale_loyalty counts them. -->
+    <template id="cart_summary_content" inherit_id="website_sale.cart_summary_content" name="Cart summary: rewards listed apart">
+        <xpath expr="//div[contains(@t-att-class, 'o_wsale_scrollable_table')]" position="before">
+            <t
+                t-set="listed_lines"
+                t-value="website_sale_order.website_order_line - website_sale_order._get_summary_reward_lines() if website_sale_order else website_sale_order.website_order_line"
+            />
+            <t t-set="summary_reward_lines" t-value="website_sale_order.website_order_line - listed_lines"/>
+            <t t-set="last_listed_line" t-value="listed_lines[-1:]"/>
+        </xpath>
+        <!-- Scrolling from 4 lines shown, not counting the hidden ones -->
+        <xpath expr="//div[contains(@t-att-class, 'o_wsale_scrollable_table')]" position="attributes">
+            <attribute name="t-att-class">len(listed_lines) &gt; 3 and 'o_wsale_scrollable_table'</attribute>
+        </xpath>
+        <xpath expr="//tr[@t-as='line']" position="attributes">
+            <attribute name="t-att-class">'d-none' if line in summary_reward_lines else (line == last_listed_line and 'border-transparent')</attribute>
         </xpath>
     </template>
 </odoo>

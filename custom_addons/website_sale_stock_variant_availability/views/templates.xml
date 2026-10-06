@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- The variant selector grays out the archived combinations: the out-of-stock ones too -->
+    <template id="variants" inherit_id="website_sale.variants" name="Variants: out of stock">
+        <xpath expr="//t[@t-set='attribute_exclusions']" position="after">
+            <t t-set="attribute_exclusions" t-value="product._add_sold_out_combinations(attribute_exclusions)"/>
+        </xpath>
+    </template>
+</odoo>

@@ -26,16 +26,23 @@ class TestVatIncludedTotal(WebsiteSaleCommon):
         cls.untaxed_product = cls._create_product(
             name="Untaxed Charger", list_price=100, taxes_id=[Command.clear()],
         )
+        cls.free_pickup = cls._prepare_carrier(
+            cls._prepare_carrier_product(taxes_id=[Command.clear()]), name="Pickup", fixed_price=0,
+        )
+        cls.courier = cls._prepare_carrier(
+            cls._prepare_carrier_product(taxes_id=[Command.set(cls.vat_13.ids)]),
+            name="Courier", fixed_price=100,
+        )
 
     def _cart(self, *products):
         return self._create_so(order_line=[
             Command.create({'product_id': product.id}) for product in products
         ])
 
-    def _render_summary(self, cart):
+    def _render_summary(self, cart, hide_promotions=True):
         with MockRequest(self.env, website=self.website, sale_order_id=cart.id):
             rendered = self.env['ir.ui.view']._render_template('website_sale.total', {
-                'website_sale_order': cart, 'hide_promotions': True,
+                'website_sale_order': cart, 'hide_promotions': hide_promotions,
             })
         return html.fromstring(str(rendered))
 
@@ -47,7 +54,12 @@ class TestVatIncludedTotal(WebsiteSaleCommon):
             for element in self._render_summary(cart).xpath('//*[@name]')
         }
 
-    def test_total_incl_vat_instead_of_subtotal_and_taxes(self):
+    @staticmethod
+    def _text(summary, name):
+        [element] = summary.xpath(f'//*[@name="{name}"]')
+        return ' '.join(element.text_content().split())
+
+    def test_order_detail_instead_of_subtotal_and_taxes(self):
         cart = self._cart(self.product)
         self.assertEqual(
             (cart.amount_untaxed, cart.amount_tax, cart.amount_total), (1000, 130, 1130),
@@ -57,13 +69,49 @@ class TestVatIncludedTotal(WebsiteSaleCommon):
         shown = self._shown(cart)
         self.assertFalse(shown['o_order_total_untaxed'])
         self.assertFalse(shown['o_order_total_taxes'])
+        self.assertTrue(shown['o_order_items_total'])
+        self.assertTrue(shown['o_order_delivery'])
         self.assertTrue(shown['o_order_total'])
         self.assertTrue(shown['o_order_total_tax_note'])
-        [total] = summary.xpath('//tr[@name="o_order_total"]')
-        self.assertIn('1,130.00', total.text_content())
-        [note] = total.xpath('.//*[@name="o_order_total_tax_note"]')
-        self.assertEqual(note.text_content(), "Incl. VAT")
-        self.assertIn('small', note.classes, "smaller than the total")
+        self.assertIn("Order Detail", summary.text_content())
+        self.assertIn("Items Total (1 Item)", self._text(summary, 'o_order_items_total'))
+        self.assertIn('1,130.00', self._text(summary, 'o_order_items_total'))
+        self.assertIn("Delivery Fee", self._text(summary, 'o_order_delivery'))
+        self.assertIn('1,130.00', self._text(summary, 'o_order_total'))
+        [amount] = summary.xpath('//tr[@name="o_order_total"]//strong[hasclass("monetary_field")]')
+        self.assertIn('text-primary', amount.classes)
+        self.assertEqual(self._text(summary, 'o_order_total_tax_note'), "All taxes included")
+        self.assertIn('small', summary.xpath('//*[@name="o_order_total_tax_note"]')[0].classes)
+
+    def test_amounts_still_updatable_by_the_checkout(self):
+        """The checkout's script updates the amounts it finds by these selectors when the delivery
+        method changes."""
+        summary = self._render_summary(self._cart(self.product))
+        for row in ('o_order_delivery', 'o_order_total_untaxed', 'o_order_total_taxes',
+                    'o_order_total', 'o_order_items_total'):
+            self.assertTrue(
+                summary.xpath(f'//tr[@name="{row}"]//*[hasclass("monetary_field")]'), row,
+            )
+
+    def test_items_total_adds_up_with_delivery_fee(self):
+        cart = self._create_so(order_line=[
+            Command.create({'product_id': self.product.id, 'product_uom_qty': 2}),
+            Command.create({'product_id': self.untaxed_product.id}),
+        ])
+        cart._set_delivery_method(self.courier)
+        self.assertEqual(
+            (cart._get_items_total(), cart.amount_delivery, cart.amount_total), (2360, 113, 2473),
+        )
+        summary = self._render_summary(cart)
+        self.assertIn("Items Total (3 Items)", self._text(summary, 'o_order_items_total'))
+        self.assertIn('2,360.00', self._text(summary, 'o_order_items_total'))
+        self.assertIn('113.00', self._text(summary, 'o_order_delivery'))
+        self.assertIn('2,473.00', self._text(summary, 'o_order_total'))
+
+    def test_promotion_above_order_detail(self):
+        text = self._render_summary(self._cart(self.product), hide_promotions=False).text_content()
+        self.assertLess(text.index("Promotion"), text.index("Order Detail"))
+        self.assertLess(text.index("Order Detail"), text.index("Items Total"))
 
     def test_no_note_without_tax(self):
         cart = self._cart(self.untaxed_product)
@@ -91,7 +139,7 @@ class TestVatIncludedTotal(WebsiteSaleCommon):
         self.env.company.country_id = self.env.ref('base.np')
         # A new fiscal country resets the website's tax display
         self.website.show_line_subtotals_tax_selection = 'tax_included'
-        export =self.env['account.fiscal.position'].create({
+        export = self.env['account.fiscal.position'].create({
             'name': "Export", 'auto_apply': True, 'country_id': self.country_us.id,
         })
         vat_0 = self.env['account.tax'].create({
@@ -107,35 +155,54 @@ class TestVatIncludedTotal(WebsiteSaleCommon):
 
     def test_tax_excluded_website_keeps_the_breakdown(self):
         self.website.show_line_subtotals_tax_selection = 'tax_excluded'
-        shown = self._shown(self._cart(self.product))
+        cart = self._cart(self.product)
+        summary = self._render_summary(cart)
+        shown = self._shown(cart)
         self.assertTrue(shown['o_order_total_untaxed'])
         self.assertTrue(shown['o_order_total_taxes'])
         self.assertTrue(shown['o_order_total'])
+        self.assertNotIn('o_order_items_total', shown)
         self.assertNotIn('o_order_total_tax_note', shown)
+        self.assertNotIn("Order Detail", summary.text_content())
+        self.assertEqual(self._text(summary, 'o_order_delivery').split()[0], "Delivery")
+        [detail] = summary.xpath('//table[@name="o_order_detail"]')
+        self.assertIn('order-first', detail.classes, "the totals stay above the promo code")
+        [amount] = summary.xpath('//tr[@name="o_order_total"]//strong[hasclass("monetary_field")]')
+        self.assertNotIn('text-primary', amount.classes)
 
-    def test_rule_above_total_only_after_delivery_row(self):
-        def total_classes(cart):
-            return self._render_summary(cart).xpath('//tr[@name="o_order_total"]')[0].classes
-
-        self.assertIn('border-top', total_classes(self._cart(self.product)))
-        self.assertNotIn('border-top', total_classes(self._cart(self.service_product)))
-
-    def test_delivery_method_change_reports_tax(self):
-        free_pickup = self._prepare_carrier(
-            self._prepare_carrier_product(taxes_id=[Command.clear()]), name="Pickup", fixed_price=0,
-        )
-        courier = self._prepare_carrier(
-            self._prepare_carrier_product(taxes_id=[Command.set(self.vat_13.ids)]),
-            name="Courier", fixed_price=100,
-        )
+    def test_delivery_method_change_renders_order_detail(self):
         cart = self._cart(self.untaxed_product)
         with MockRequest(self.env, website=self.website, sale_order_id=cart.id) as request:
             request.cart = cart
             controller = WebsiteSaleVatIncludedTotalDelivery()
-            self.assertTrue(controller.shop_set_delivery_method(dm_id=courier.id)['total_includes_tax'])
+            detail = html.fromstring(
+                controller.shop_set_delivery_method(dm_id=self.courier.id)['order_detail'],
+            )
             self.assertEqual(cart.amount_tax, 13)
-            self.assertFalse(controller.shop_set_delivery_method(dm_id=free_pickup.id)['total_includes_tax'])
+            self.assertIn('100.00', self._text(detail, 'o_order_items_total'))
+            self.assertIn('113.00', self._text(detail, 'o_order_delivery'))
+            self.assertIn('213.00', self._text(detail, 'o_order_total'))
+            [note] = detail.xpath('//*[@name="o_order_total_tax_note"]')
+            self.assertNotIn('d-none', note.classes)
+
+            detail = html.fromstring(
+                controller.shop_set_delivery_method(dm_id=self.free_pickup.id)['order_detail'],
+            )
             self.assertFalse(cart.amount_tax)
+            self.assertIn('100.00', self._text(detail, 'o_order_total'))
+            [note] = detail.xpath('//*[@name="o_order_total_tax_note"]')
+            self.assertIn('d-none', note.classes)
+
+    def test_tax_excluded_delivery_change_keeps_core_values(self):
+        self.website.show_line_subtotals_tax_selection = 'tax_excluded'
+        cart = self._cart(self.untaxed_product)
+        with MockRequest(self.env, website=self.website, sale_order_id=cart.id) as request:
+            request.cart = cart
+            values = WebsiteSaleVatIncludedTotalDelivery().shop_set_delivery_method(
+                dm_id=self.courier.id,
+            )
+        self.assertNotIn('order_detail', values)
+        self.assertIn('213.00', values['amount_total'])
 
 
 @tagged('post_install', '-at_install')
@@ -147,7 +214,7 @@ class TestVatIncludedTotalUi(HttpCase):
         # No discount from a demo pricelist, so the tour can check the totals
         self.env['product.pricelist'].search([]).action_archive()
         self.env['product.pricelist'].create({'name': "Public", 'website_id': website.id})
-        vat_13 =self.env['account.tax'].create({'name': "VAT 13%", 'amount': 13})
+        vat_13 = self.env['account.tax'].create({'name': "VAT 13%", 'amount': 13})
         # Skips the address step of the checkout
         self.env.ref('base.partner_admin').write({
             'street': '215 Vine St',

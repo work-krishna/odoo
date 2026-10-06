@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- The images of the variants, for the preview on hovering an attribute value -->
+    <template id="variants" inherit_id="website_sale.variants" name="Variants: image previews">
+        <xpath expr="//ul[@t-att-data-attribute-exclusions]" position="before">
+            <t t-set="variant_image_previews" t-value="product._get_variant_image_previews()"/>
+        </xpath>
+        <xpath expr="//ul[@t-att-data-attribute-exclusions]" position="attributes">
+            <attribute name="t-att-data-variant-image-previews">variant_image_previews and json.dumps(variant_image_previews)</attribute>
+        </xpath>
+    </template>
+</odoo>
