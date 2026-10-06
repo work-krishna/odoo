@@ -1,10 +1,146 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Under the rating, or under the product name when ratings are off -->
+    <!-- Under the rating, or under the product name when ratings are off: "Brand: Apple", to the shop's Apple products -->
     <template id="product_title" inherit_id="website_sale.product_title" name="Product title: brand">
         <xpath expr="//t[contains(@t-if, 'website_sale.product_comment')]" position="after">
             <t t-set="website_brand" t-value="product._get_website_brand()"/>
-            <div t-if="website_brand" class="o_wsale_product_brand mb-2 text-muted" t-out="website_brand.name"/>
+            <div t-if="website_brand" class="o_wsale_product_brand mb-2">
+                <span class="text-muted">Brand:</span>
+                <a t-att-href="website_brand._get_shop_url()" t-out="website_brand.name"/>
+            </div>
+        </xpath>
+    </template>
+
+    <!-- Shop filters: the brands, above the attributes -->
+    <template id="product_attribute_filters_form" inherit_id="website_sale.product_attribute_filters_form" name="Product Attribute Filters Form: brands">
+        <xpath expr="//t[@t-foreach='attributes']" position="before">
+            <t t-if="available_brands and (len(available_brands) &gt; 1 or shop_brands)" t-call="website_sale_product_brand.filter_brands"/>
+        </xpath>
+    </template>
+
+    <!-- Laid out like an attribute's filter: in the sidebar (collapsible or not) or in the mobile offcanvas.
+         Always expanded, as the quick filter of the shop. -->
+    <template id="filter_brands" name="Brand Filter">
+        <t t-set="is_collapsible" t-value="not isMobile and is_view_active('website_sale.products_attributes_collapsible')"/>
+        <t t-set="brand_filter_id" t-value="'o_wsale_offcanvas_brands' if isMobile else 'o_products_attributes_brands'"/>
+        <div t-att-class="'o_wsale_brand_filter accordion-item ' + ('border-top-0 order-0' if isMobile else 'nav-item mb-1 rounded-0')">
+            <h2 t-if="isMobile" class="accordion-header mb-0" id="o_wsale_offcanvas_brands_header">
+                <button
+                    class="o_wsale_offcanvas_title accordion-button rounded-0"
+                    type="button"
+                    t-att-data-status="'active' if shop_brands else 'inactive'"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#o_wsale_offcanvas_brands"
+                    aria-expanded="true"
+                    aria-controls="o_wsale_offcanvas_brands"
+                >
+                    <b>Brand</b>
+                </button>
+            </h2>
+            <div t-elif="is_collapsible" class="accordion-header h6 mb-0">
+                <button
+                    class="accordion-button px-0 bg-transparent shadow-none"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#o_products_attributes_brands"
+                    aria-expanded="true"
+                    aria-controls="o_products_attributes_brands"
+                >
+                    <b>Brand</b>
+                </button>
+            </div>
+            <h6 t-else="" class="mb-3"><b class="d-none d-lg-block">Brand</b></h6>
+            <div t-att-id="brand_filter_id" t-att-class="'accordion-collapse collapse show' if isMobile or is_collapsible else None">
+                <div t-att-class="'accordion-body pt-0' if isMobile else None">
+                    <div t-att-class="'list-group list-group-flush' if isMobile else 'flex-column mb-3'">
+                        <t t-call="website_sale_product_brand.filter_brands_values"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Like website_sale.filter_radio_and_multi_attributes: the chosen brands first, "View More" after 8, a search bar after 20 -->
+    <template id="filter_brands_values" name="Brand Filter: values">
+        <t t-set="brands" t-value="sorted(available_brands, key=lambda brand: brand not in shop_brands)"/>
+        <t t-if="len(brands) &gt; 20">
+            <div t-att-class="'my-3' if isMobile else 'mb-3'">
+                <input
+                    type="text"
+                    class="o_wsale_attribute_search_bar form-control"
+                    t-attf-placeholder="Search Brand ({{len(brands)}})"
+                    t-att-data-container-id="brand_filter_id + '_values'"
+                />
+            </div>
+            <div t-att-id="brand_filter_id + '_values'" class="overflow-auto" t-attf-style="max-height:{{'290px' if isMobile else '220px'}};">
+                <t t-foreach="brands" t-as="brand" t-call="website_sale_product_brand.filter_brand_value"/>
+            </div>
+        </t>
+        <t t-else="">
+            <t t-foreach="brands[:8]" t-as="brand" t-call="website_sale_product_brand.filter_brand_value"/>
+            <t t-if="len(brands) &gt; 8">
+                <div
+                    t-att-id="brand_filter_id + '_more'"
+                    class="accordion-collapse collapse"
+                    t-att-aria-labelledby="brand_filter_id + '_more_header'"
+                >
+                    <t t-foreach="brands[8:]" t-as="brand" t-call="website_sale_product_brand.filter_brand_value"/>
+                </div>
+                <div t-att-id="brand_filter_id + '_more_header'" t-att-class="'accordion-header mb-0' if isMobile else 'accordion-header'">
+                    <button
+                        type="button"
+                        class="o_wsale_view_more_btn btn btn-link px-0 collapsed"
+                        data-bs-toggle="collapse"
+                        t-att-data-bs-target="'#%s_more' % brand_filter_id"
+                        t-att-aria-controls="brand_filter_id + '_more'"
+                        aria-expanded="false"
+                    >
+                        View More
+                    </button>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <template id="filter_brand_value" name="Brand Filter: value">
+        <t t-set="brand_input_id" t-value="'%s_%s' % (brand_filter_id, brand.id)"/>
+        <div t-att-class="'list-group-item border-0 ps-0 pb-0' if isMobile else None">
+            <div class="form-check mb-1">
+                <input
+                    type="checkbox"
+                    name="brand"
+                    class="form-check-input"
+                    t-att-id="brand_input_id"
+                    t-att-value="slug(brand)"
+                    t-att-checked="brand in shop_brands"
+                />
+                <label class="form-check-label fw-normal" t-att-for="brand_input_id" t-out="brand.name"/>
+            </div>
+        </div>
+    </template>
+
+    <!-- The sidebar's filters, also when the products have brands but no attributes nor tags -->
+    <template id="products_attributes" inherit_id="website_sale.products_attributes" name="Attributes &amp; Variants filters: brands">
+        <xpath expr="//div[@id='wsale_products_attributes_collapse']" position="attributes">
+            <attribute name="t-if">attributes or all_tags or available_brands</attribute>
+        </xpath>
+    </template>
+
+    <!-- "Clear Filters" also clears the brands -->
+    <template id="products" inherit_id="website_sale.products" name="Products: clear the brand filter">
+        <xpath expr="//aside[@id='products_grid_before']//a[contains(@t-att-href, 'attribute_values=0, tags=0, min_price=0')]/.." position="attributes">
+            <attribute name="t-if">attrib_values or tags or shop_brands or (show_price_filter and isFilteringByPrice)</attribute>
+        </xpath>
+        <xpath expr="//aside[@id='products_grid_before']//a[contains(@t-att-href, 'attribute_values=0, tags=0, min_price=0')]" position="attributes">
+            <attribute name="t-att-href">keep(attribute_values=0, tags=0, min_price=0, max_price=0, brand=0)</attribute>
+        </xpath>
+    </template>
+
+    <template id="o_wsale_offcanvas" inherit_id="website_sale.o_wsale_offcanvas" name="Offcanvas: clear the brand filter">
+        <xpath expr="//a[contains(@t-att-href, 'attribute_values=0, tags=0, min_price=0')]" position="attributes">
+            <attribute name="t-attf-class">btn btn-{{navClass}} d-flex py-1 mb-2 {{(not attrib_values and not isFilteringByPrice and not tags and not shop_brands) and 'disabled' }}</attribute>
+            <attribute name="t-att-aria-disabled">(not attrib_values and not isFilteringByPrice and not tags and not shop_brands) and 'true' or 'false'</attribute>
+            <attribute name="t-att-href">keep(attribute_values=0, tags=0, min_price=0, max_price=0, brand=0)</attribute>
         </xpath>
     </template>
 </odoo>
