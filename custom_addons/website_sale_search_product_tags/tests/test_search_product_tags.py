@@ -37,16 +37,24 @@ class TestSearchProductTags(HttpCase, WebsiteSaleCommon):
             'list_price': 100, 'website_published': True, 'public_categ_ids': [Command.set(cls.category.ids)],
         })
 
-    def _search(self, search, allow_fuzzy=True):
+    def _search(self, search, allow_fuzzy=True, limit=None):
         """ The products found, and the search term used when there was a typo """
         # As on the website, where the changes were saved by earlier requests:
         # with pg_trgm, the typo correction reads the products in SQL
         self.env.flush_all()
-        _count, details, fuzzy_term = self.website._search_with_fuzzy('products_only', search, limit=None, order='name asc', options={
+        _count, details, fuzzy_term = self.website._search_with_fuzzy('products_only', search, limit=limit, order='name asc', options={
             'displayDescription': True, 'displayDetail': False, 'displayExtraLink': False, 'displayImage': False,
             'allowFuzzy': allow_fuzzy, 'category': str(self.category.id),
         })
         return details[0]['results'], fuzzy_term
+
+    def _shop_names(self, page):
+        names = page.xpath("//h2[contains(@class, 'o_wsale_products_item_title')]/a/span[1]")
+        return [name.text_content().strip() for name in names]
+
+    def _shop(self, search, **params):
+        """ The names of the products the shop shows for a search """
+        return self._shop_names(html.fromstring(self.url_open('/shop', params={'search': search, **params}).content))
 
     def test_search_by_tag(self):
         self.assertEqual(self._search('trekking'), (self.boots, False))
@@ -110,6 +118,10 @@ class TestSearchProductTags(HttpCase, WebsiteSaleCommon):
         camping.product_tag_ids = False
         self.assertFalse(self._search('shelter', allow_fuzzy=False)[0])
 
+        self.boots.public_categ_ids = self.category
+        self.boots.product_tag_ids = shelter
+        self.assertEqual(self._search('shelter'), (self.boots, False), "A tag of the product still counts")
+
     def test_category_tag_changes(self):
         shelter = self.env['product.tag'].create({'name': 'Shelter'})
         camping, tents = self.env['product.public.category'].create([
@@ -137,6 +149,91 @@ class TestSearchProductTags(HttpCase, WebsiteSaleCommon):
         camping.unlink()
         self.assertFalse(self._search('bivouac', allow_fuzzy=False)[0], "Category deleted, with its subcategories")
 
+    def test_category_name(self):
+        camping = self.env['product.public.category'].create({'name': 'Camping Gear', 'parent_id': self.category.id})
+        tents = self.env['product.public.category'].create({'name': 'Tents', 'parent_id': camping.id})
+        self.tent.public_categ_ids += tents
+        self.jacket.public_categ_ids += camping
+        self.assertEqual(self._search('tents'), (self.tent, False))
+        self.assertEqual(self._search('camping'), (self.jacket | self.tent, False), "Also from a parent category")
+        self.assertEqual(self._search('camping dome'), (self.tent, False))
+
+        camping.name = 'Outdoor'
+        self.assertEqual(self._search('outdoor'), (self.jacket | self.tent, False))
+        self.assertFalse(self._search('camping', allow_fuzzy=False)[0])
+
+        self.env['res.lang']._activate_lang('fr_FR')
+        tents.update_field_translations('name', {'fr_FR': 'Chapiteaux'})
+        self.assertEqual(self._search('chapiteaux'), (self.tent, False), "Translated category name")
+
+    def test_own_matches_first(self):
+        # "Dome Tent" comes before "Rain Jacket" by name, but is only found by
+        # its category
+        self.env['product.public.category'].create({
+            'name': 'Rainwear', 'parent_id': self.category.id, 'product_tmpl_ids': [Command.link(self.tent.id)],
+        })
+        products, _fuzzy_term = self._search('rain')
+        self.assertEqual(products.mapped('name'), ['Rain Jacket', 'Dome Tent'])
+        products, _fuzzy_term = self._search('rain', limit=1)
+        self.assertEqual(products.mapped('name'), ['Rain Jacket'])
+        products, _fuzzy_term = self._search('rain jacket')
+        self.assertEqual(products.mapped('name'), ['Rain Jacket'])
+
+        # Each product once, even when found both ways
+        self.jacket.public_categ_ids += self.tent.public_categ_ids
+        count, details, _fuzzy_term = self.website._search_with_fuzzy('products_only', 'rain', limit=None, order='name asc', options={
+            'displayDescription': True, 'displayDetail': False, 'displayExtraLink': False, 'displayImage': False,
+            'allowFuzzy': True, 'category': str(self.category.id),
+        })
+        self.assertEqual((count, details[0]['results'].mapped('name')), (2, ['Rain Jacket', 'Dome Tent']))
+
+    def test_no_category_results(self):
+        self.env['product.public.category'].create({
+            'name': 'Waterproof Gear', 'parent_id': self.category.id, 'product_tmpl_ids': [Command.link(self.tent.id)],
+        })
+        def autocomplete(search_type, limit=5):
+            result = self.make_jsonrpc_request('/website/snippet/autocomplete', {
+                'search_type': search_type, 'term': 'waterproof', 'order': 'name asc', 'limit': limit,
+                'options': {'displayImage': True, 'displayDescription': True, 'displayExtraLink': True, 'displayDetail': True, 'allowFuzzy': True},
+            })
+            return [(product['name'], product['_fa']) for product in result['results']], result['results_count']
+
+        # The search of the shop, then the one of the header, which sorts the
+        # results of all kinds (products, pages...) by name
+        self.assertEqual(autocomplete('products'), (
+            [('Rain Jacket', 'fa-shopping-cart'), ('Dome Tent', 'fa-shopping-cart')], 2,
+        ), "The products, without the category")
+        self.assertEqual(autocomplete('all'), (
+            [('Dome Tent', 'fa-shopping-cart'), ('Rain Jacket', 'fa-shopping-cart')], 2,
+        ), "The products, without the category")
+        self.assertEqual(autocomplete('all', limit=1), ([('Rain Jacket', 'fa-shopping-cart')], 2), "Found by its own tag first")
+        page = html.fromstring(self.url_open('/website/search', params={'search': 'waterproof'}).content)
+        self.assertFalse(page.xpath("//a[contains(@href, '/shop/category/')]//*[contains(text(), 'Waterproof Gear')]"))
+
+    def test_shop_order(self):
+        self.env['product.public.category'].create({
+            'name': 'Rainwear', 'parent_id': self.category.id, 'product_tmpl_ids': [Command.link(self.tent.id)],
+        })
+        self.tent.website_sequence = 1
+        self.jacket.website_sequence = 2
+        self.assertEqual(self._shop('rain'), ['Rain Jacket', 'Dome Tent'], "Found by its own name first")
+        self.assertEqual(self._shop('rain', order='name desc'), ['Rain Jacket', 'Dome Tent'])
+        self.assertEqual(self._shop('rain', order='name asc'), ['Dome Tent', 'Rain Jacket'], "The sort chosen by the visitor")
+
+    def test_shop_filters(self):
+        # The categories of the filters of the shop, from the products found
+        # by their tags or categories too
+        self.env['website'].with_context(website_id=self.website.id).viewref('website_sale.products_categories').active = True
+        sub_category = self.env['product.public.category'].create({
+            'name': 'Rainwear', 'parent_id': self.category.id, 'product_tmpl_ids': [Command.link(self.tent.id)],
+        })
+        for search in ('trekking', 'rainwear'):
+            page = html.fromstring(self.url_open('/shop', params={'search': search}).content)
+            categories = page.xpath("//div[@name='wsale_products_categories_list']//a")
+            self.assertIn('Search Tags', [category.text_content().strip() for category in categories], search)
+        page = html.fromstring(self.url_open(f'/shop/category/{sub_category.id}', params={'search': 'rainwear'}).content)
+        self.assertEqual(self._shop_names(page), ['Dome Tent'])
+
     def test_category_form(self):
         shelter = self.env['product.tag'].create({'name': 'Shelter'})
         with Form(self.env['product.public.category']) as category:
@@ -147,9 +244,7 @@ class TestSearchProductTags(HttpCase, WebsiteSaleCommon):
         self.assertEqual(self._search('shelter'), (self.tent, False))
 
     def test_shop(self):
-        page = html.fromstring(self.url_open('/shop', params={'search': 'trekking'}).content)
-        names = page.xpath("//h2[contains(@class, 'o_wsale_products_item_title')]/a/span[1]")
-        self.assertEqual([name.text_content().strip() for name in names], ['Hiking Boots'])
+        self.assertEqual(self._shop('trekking'), ['Hiking Boots'])
 
     def test_header_suggestions(self):
         result = self.make_jsonrpc_request('/website/snippet/autocomplete', {
