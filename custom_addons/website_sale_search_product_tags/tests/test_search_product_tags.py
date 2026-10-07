@@ -1,7 +1,7 @@
 from lxml import html
 
 from odoo.fields import Command
-from odoo.tests import HttpCase, tagged
+from odoo.tests import Form, HttpCase, tagged
 
 from odoo.addons.website_sale.tests.common import WebsiteSaleCommon
 
@@ -86,6 +86,65 @@ class TestSearchProductTags(HttpCase, WebsiteSaleCommon):
         self.trekking.update_field_translations('name', {'fr_FR': 'Randonnée'})
         self.assertEqual(self._search('randonnée'), (self.boots, False))
         self.assertEqual(self._search('trekking'), (self.boots, False), "Still in English")
+
+    def test_category_tag(self):
+        shelter = self.env['product.tag'].create({'name': 'Shelter'})
+        camping = self.env['product.public.category'].create({'name': 'Camping', 'parent_id': self.category.id})
+        tents = self.env['product.public.category'].create({'name': 'Tents', 'parent_id': camping.id})
+        self.tent.public_categ_ids += tents
+        self.jacket.public_categ_ids += camping
+        self.assertFalse(self._search('shelter', allow_fuzzy=False)[0])
+
+        camping.product_tag_ids = shelter
+        self.assertEqual(self._search('shelter'), (self.jacket | self.tent, False), "Also from a parent category")
+        self.assertEqual(self._search('shelter dome'), (self.tent, False), "A word of the tag and one of the name")
+        self.assertEqual(self._search('sheltre'), (self.jacket | self.tent, 'shelter'), "A typo in a category tag")
+
+        tents.parent_id = self.category
+        self.assertEqual(self._search('shelter'), (self.jacket, False), "No longer in a tagged category")
+        self.jacket.public_categ_ids -= camping
+        self.assertFalse(self._search('shelter', allow_fuzzy=False)[0])
+
+        self.boots.public_categ_ids += camping
+        self.assertEqual(self._search('shelter'), (self.boots, False))
+        camping.product_tag_ids = False
+        self.assertFalse(self._search('shelter', allow_fuzzy=False)[0])
+
+    def test_category_tag_changes(self):
+        shelter = self.env['product.tag'].create({'name': 'Shelter'})
+        camping, tents = self.env['product.public.category'].create([
+            {'name': 'Camping', 'parent_id': self.category.id, 'product_tag_ids': [Command.set(shelter.ids)]},
+            {'name': 'Tents', 'parent_id': self.category.id},
+        ])
+        self.tent.public_categ_ids += tents
+        self.assertFalse(self._search('shelter', allow_fuzzy=False)[0])
+        tents.parent_id = camping
+        self.assertEqual(self._search('shelter'), (self.tent, False), "Moved under a tagged category")
+
+        shelter.name = 'Bivouac'
+        self.assertEqual(self._search('bivouac'), (self.tent, False))
+        self.assertFalse(self._search('shelter', allow_fuzzy=False)[0])
+
+        shelter.visible_to_customers = False
+        self.assertFalse(self._search('bivouac', allow_fuzzy=False)[0])
+        shelter.visible_to_customers = True
+        self.assertEqual(self._search('bivouac'), (self.tent, False))
+
+        self.env['res.lang']._activate_lang('fr_FR')
+        shelter.update_field_translations('name', {'fr_FR': 'Abri'})
+        self.assertEqual(self._search('abri'), (self.tent, False), "Translated category tag")
+
+        camping.unlink()
+        self.assertFalse(self._search('bivouac', allow_fuzzy=False)[0], "Category deleted, with its subcategories")
+
+    def test_category_form(self):
+        shelter = self.env['product.tag'].create({'name': 'Shelter'})
+        with Form(self.env['product.public.category']) as category:
+            category.name = 'Camping'
+            category.parent_id = self.category
+            category.product_tag_ids.add(shelter)
+        self.tent.public_categ_ids += category.record
+        self.assertEqual(self._search('shelter'), (self.tent, False))
 
     def test_shop(self):
         page = html.fromstring(self.url_open('/shop', params={'search': 'trekking'}).content)
