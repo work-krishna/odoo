@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- The icon of Odoo on the home screen of an iPhone -->
+    <template id="webclient_bootstrap" inherit_id="web.webclient_bootstrap" name="App icon of the website">
+        <xpath expr="//link[@rel='apple-touch-icon']" position="attributes">
+            <attribute name="href"/>
+            <attribute name="t-att-href">app_touch_icon_url or '/web/static/img/odoo-icon-ios.png'</attribute>
+        </xpath>
+    </template>
+
+</odoo>
