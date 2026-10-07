@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="products" inherit_id="website_sale.products" name="Shop: Show More Instead of Pages">
+        <!-- To skip a product already shown when the next ones are added (published meanwhile, ...) -->
+        <xpath expr="//section[@id='o_wsale_products_grid']//div[@t-att-data-name='product_block_name']" position="attributes">
+            <attribute name="t-att-data-product-template-id">product.id</attribute>
+        </xpath>
+        <!-- A link to the next page: the JS adds its products to the grid, without JS it opens it -->
+        <xpath expr="//div[@id='o_wsale_pager']/t[@t-call='website.pager']" position="replace">
+            <a
+                t-if="pager['page']['num'] &lt; pager['page_count']"
+                t-att-href="pager['page_next']['url']"
+                rel="next"
+                class="o_wsale_show_more btn btn-outline-primary px-5"
+            >Show more</a>
+        </xpath>
+    </template>
+
+</odoo>
