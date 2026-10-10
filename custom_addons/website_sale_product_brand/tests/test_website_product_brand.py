@@ -5,7 +5,7 @@ from html import unescape
 from odoo.fields import Command
 from odoo.tests import HttpCase, tagged
 
-BRAND = re.compile(r'<div class="o_wsale_product_brand[^"]*">\s*<span[^>]*>Brand:</span>\s*<a href="([^"]*)">([^<]*)</a>')
+BRAND = re.compile(r'<div class="o_wsale_product_brand[^"]*">\s*<span[^>]*>Product by:</span>\s*<a href="([^"]*)">([^<]*)</a>')
 BRAND_FILTER = re.compile(r'<input type="checkbox" name="brand" class="form-check-input" id="o_products_attributes_brands_\d+" value="([^"]*)"( checked="[^"]*")?')
 JSON_LD = re.compile(r'<script type="application/ld\+json">(.*?)</script>', re.S)
 
