@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Only when the product page is rendered: when the visitor picks a variant, its images are rendered again
+         (/website_sale/get_combination_info), from its image -->
+    <template id="product" inherit_id="website_sale.product" name="Product page: open on the first media">
+        <xpath expr="//t[@t-call='website_sale.shop_product_images']" position="inside">
+            <t t-set="open_on_first_media" t-value="True"/>
+        </xpath>
+    </template>
+
+    <!-- The first media after the image of the variant, if any: the slide and its thumbnail are active -->
+    <template id="shop_product_carousel" inherit_id="website_sale.shop_product_carousel" name="Product carousel: open on the first media">
+        <xpath expr="//div[@id='o-carousel-product']" position="before">
+            <t t-set="active_image_index" t-value="1 if open_on_first_media and len(product_images) > 1 else 0"/>
+        </xpath>
+        <xpath expr="//div[hasclass('carousel-inner')]/t[@t-foreach='product_images']/div" position="attributes">
+            <attribute name="t-attf-class">carousel-item h-100 w-100 text-center#{' active' if product_image_index == active_image_index else ''}</attribute>
+        </xpath>
+    </template>
+
+    <template id="carousel_product_indicators" inherit_id="website_sale.carousel_product_indicators" name="Product carousel thumbnails: open on the first media">
+        <xpath expr="//li[@t-foreach='product_images']" position="attributes">
+            <attribute name="t-attf-class">align-top position-relative {{'active' if product_image_index == (active_image_index or 0) else ''}}</attribute>
+        </xpath>
+    </template>
+</odoo>

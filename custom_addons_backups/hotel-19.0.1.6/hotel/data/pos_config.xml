@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo noupdate="1">
+    <function model="pos.config" name="load_onboarding_retail_scenario">
+        <value name="with_demo_data" model="ir.module.module" eval="obj().search([('name', '=', 'hotel')]).demo"/>
+    </function>
+    <record id="point_of_sale.pos_config_retail" model="pos.config" forcecreate="1">
+        <field name="name">Front Desk</field>
+        <field name="limit_categories" eval="True"/>
+        <field name="iface_available_categ_ids" eval="[Command.link(ref('pos_category_1'))]"/>
+    </record>
+</odoo>
