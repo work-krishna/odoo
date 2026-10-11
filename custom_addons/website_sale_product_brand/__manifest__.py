@@ -3,7 +3,7 @@
     'version': '19.0.1.1.0',
     'summary': "Shows the product's brand on its eCommerce page, and filters the shop on brands",
     'description': """
-On the eCommerce product page, "Brand: Apple" is shown under the product
+On the eCommerce product page, "Product by: Apple" is shown under the product
 rating (under the product name when ratings are off), and is given to search
 engines in the page's structured data. "Apple" links to the shop showing
 only Apple products.

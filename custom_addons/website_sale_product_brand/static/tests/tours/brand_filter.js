@@ -53,7 +53,7 @@ registry.category('web_tour.tours').add('website_sale_product_brand_filter', {
         },
         {
             content: 'Follow its brand',
-            trigger: '.o_wsale_product_brand:contains(Brand:) a:contains(Apple)',
+            trigger: '.o_wsale_product_brand:contains(Product by:) a:contains(Apple)',
             run: 'click',
             expectUnloadPage: true,
         },
