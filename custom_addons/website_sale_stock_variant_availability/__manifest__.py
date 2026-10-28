@@ -22,19 +22,36 @@ With this module, the customer also sees it before choosing:
 - In the shop, a product is only out of stock (no quick Add to Cart, "Out of
   stock" ribbon) when all its variants are, not as soon as its first one is.
 
-This only applies to products whose inventory is tracked, and which are not
-allowed to be sold when out of stock: product form > Sales > "Sell when
-Out-of-Stock" unticked (Website > Settings > Inventory Defaults > Out-of-Stock
-"Continue Selling" is the default of new products).
+This applies to products whose inventory is tracked, and which are not allowed
+to be sold when out of stock: product form > Sales > "Sell when Out-of-Stock"
+unticked (Website > Settings > Inventory Defaults > Out-of-Stock "Continue
+Selling" is the default of new products).
+
+Without counting stock, each variant can also be marked out of stock by hand:
+the "Out of Stock" switch of the list of variants (Inventory > Products >
+Product Variants), or of the form of a variant. A variant marked out of stock
+is out of stock on the website as above, whatever its quantity and whether its
+inventory is tracked or not: grayed out, "Out of Stock" on its product page,
+not sold, also in the window to choose the options of a product and in the
+cart (a cart that has it can't be paid). The product is out of stock (its
+"when out of stock" ribbon, no quick Add to Cart) when all its variants are.
+
+The form of a variant also tells which of its fields are its product's, for all
+its variants: its "Ribbon" is now "Product Ribbon", next to the variant's own
+"Variant Ribbon".
 """,
     'category': 'Website/Website',
     'author': 'EMI Platform',
     'license': 'LGPL-3',
     'depends': ['website_sale_stock', 'website_sale_variant_picker_fix'],
     'data': [
+        'views/product_views.xml',
         'views/templates.xml',
     ],
     'assets': {
+        'web.assets_frontend': [
+            'website_sale_stock_variant_availability/static/src/interactions/**/*',
+        ],
         'web.assets_tests': [
             'website_sale_stock_variant_availability/static/tests/tours/**/*',
         ],

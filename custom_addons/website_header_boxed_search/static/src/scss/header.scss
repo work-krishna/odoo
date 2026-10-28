@@ -6,3 +6,27 @@
     flex: 1 1 0;
     min-width: 12rem;
 }
+
+// The field and its search button make one pill: the focus ring goes around
+// both, instead of around the field alone, with a straight end before the
+// button. Same for the search field of the mobile menu, which looks the same.
+#o_main_nav > .o_header_boxed_search,
+#top_menu_collapse_mobile {
+    .o_searchbar_form > .input-group {
+        border-radius: $border-radius-pill;
+
+        &:focus-within {
+            box-shadow: $input-focus-box-shadow;
+        }
+
+        > .oe_search_box:focus {
+            box-shadow: none;
+        }
+    }
+}
+
+// At the top of the mobile menu, which hides what goes beyond its scrolled
+// area: room for the focus ring above the field
+#top_menu_collapse_mobile .o_searchbar_form {
+    margin-top: $input-btn-focus-width;
+}

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- List of variants: mark each variant out of stock without opening it -->
+    <record id="product_product_tree_view" model="ir.ui.view">
+        <field name="name">product.product.list.variant.out.of.stock</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_product_tree_view"/>
+        <field name="arch" type="xml">
+            <field name="product_template_variant_value_ids" position="after">
+                <field name="is_variant_out_of_stock" widget="boolean_toggle" optional="show"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Form of a variant (Inventory > Products > Product Variants): which fields are the product's, for all its variants -->
+    <record id="product_normal_form_view" model="ir.ui.view">
+        <field name="name">product.product.form.variant.out.of.stock</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_normal_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='extra_info']//field[@name='website_ribbon_id']" position="attributes">
+                <attribute name="string">Product Ribbon</attribute>
+                <attribute name="help">Shown on all the variants of the product, unless they have their own ribbon</attribute>
+            </xpath>
+            <xpath expr="//group[@name='extra_info']//field[@name='website_ribbon_id']" position="after">
+                <field name="variant_ribbon_id" options="{'no_quick_create': True}"/>
+            </xpath>
+            <xpath expr="//group[@name='extra_info']//field[@name='allow_out_of_stock_order']" position="attributes">
+                <attribute name="help">For all the variants of the product, depending on their quantity</attribute>
+            </xpath>
+            <xpath expr="//group[@name='extra_info']//field[@name='allow_out_of_stock_order']" position="before">
+                <field name="is_variant_out_of_stock" widget="boolean_toggle"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Form of a variant, from its product's Variants -->
+    <record id="product_variant_easy_edit_view" model="ir.ui.view">
+        <field name="name">product.product.view.form.easy.variant.out.of.stock</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_variant_easy_edit_view"/>
+        <field name="arch" type="xml">
+            <group name="sales" position="inside">
+                <field name="is_variant_out_of_stock" widget="boolean_toggle"/>
+            </group>
+        </field>
+    </record>
+</odoo>

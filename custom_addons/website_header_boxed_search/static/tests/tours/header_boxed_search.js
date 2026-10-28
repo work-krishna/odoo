@@ -23,6 +23,41 @@ function checkLayout() {
     return fieldBox.width;
 }
 
+// Once the field is clicked, the focus ring goes around the field and its
+// search button, as one pill
+function focusRingSteps(field) {
+    return [
+        {
+            content: 'Click the search field',
+            trigger: `${field} input[name="search"]`,
+            run: 'click',
+        },
+        {
+            content: 'The focus ring is around the field and its button',
+            trigger: `${field} .input-group:focus-within`,
+            run() {
+                const group = document.querySelector(`${field} .input-group`);
+                const input = group.querySelector('input[name="search"]');
+                const button = group.querySelector('.oe_search_button');
+                if (getComputedStyle(group).boxShadow === 'none') {
+                    throw new Error('No focus ring around the field and its button');
+                }
+                if (getComputedStyle(input).boxShadow !== 'none') {
+                    throw new Error('Still a focus ring around the field alone');
+                }
+                const box = group.getBoundingClientRect();
+                const buttonBox = button.getBoundingClientRect();
+                if (buttonBox.left < box.left || buttonBox.right > box.right + 0.5) {
+                    throw new Error('The search button is outside the ring');
+                }
+                if (parseFloat(getComputedStyle(group).borderTopRightRadius) < box.height / 2) {
+                    throw new Error('The ring is not round at the end of the button');
+                }
+            },
+        },
+    ];
+}
+
 registry.category('web_tour.tours').add('website_header_boxed_search', {
     url: '/',
     steps: () => [
@@ -43,6 +78,7 @@ registry.category('web_tour.tours').add('website_header_boxed_search', {
             trigger: `${menu}:not(:has(.o_extra_menu_items))`,
             run: checkLayout,
         },
+        ...focusRingSteps(search),
         {
             content: 'Search from the field',
             trigger: `${search} input[name="search"]`,
@@ -74,5 +110,22 @@ registry.category('web_tour.tours').add('website_header_boxed_search_long_menu',
                 }
             },
         },
+    ],
+});
+
+// The search field of the mobile menu
+registry.category('web_tour.tours').add('website_header_boxed_search_mobile', {
+    url: '/',
+    steps: () => [
+        {
+            content: 'Open the mobile menu',
+            trigger: 'header#top .o_header_mobile [data-bs-target="#top_menu_collapse_mobile"]',
+            run: 'click',
+        },
+        {
+            content: 'The menu is open',
+            trigger: '#top_menu_collapse_mobile.show',
+        },
+        ...focusRingSteps('#top_menu_collapse_mobile'),
     ],
 });

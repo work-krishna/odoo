@@ -12,6 +12,10 @@ The menu keeps its room: when the menu bar is too narrow, the field shrinks
 down to a minimum width, then the last menu items go into the "+" dropdown,
 as before.
 
+The field and its search button make one rounded field: clicking the field
+rings both of them, not the field alone. The search field of the mobile menu
+gets the same ring, whatever the header.
+
 Nothing else changes: the field searches like the search window did, with
 the suggestions shown while typing, and the "Search Bar" button of the
 header's options in the website editor still shows or hides it. The other

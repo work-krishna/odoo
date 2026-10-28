@@ -60,3 +60,8 @@ class TestHeaderBoxedSearch(HttpCase):
             'website_id': self.website.id,
         } for number in range(1, 16)])
         self.start_tour('/', 'website_header_boxed_search_long_menu')
+
+    def test_tour_mobile(self):
+        self.browser_size = '375x667'
+        self.touch_enabled = True
+        self.start_tour('/', 'website_header_boxed_search_mobile')

@@ -1,4 +1,5 @@
-from odoo import models
+from odoo import api, models
+from odoo.http import request
 
 
 class ProductTemplate(models.Model):
@@ -8,8 +9,8 @@ class ProductTemplate(models.Model):
         """ Override of `website_sale_stock`: the product is sold out when none of its variants can be sold, not as soon
         as its first variant can't.
         """
-        if not self.is_storable or self.allow_out_of_stock_order:
-            return False
+        if not self.product_variant_ids:
+            return super()._is_sold_out()
         # The free quantities of all the variants are computed at once
         return all(variant._is_sold_out() for variant in self.product_variant_ids)
 
@@ -20,13 +21,56 @@ class ProductTemplate(models.Model):
         :rtype: list
         """
         self.ensure_one()
-        if not self.is_storable or self.allow_out_of_stock_order:
-            return []
         return [
             variant.product_template_attribute_value_ids.ids
             for variant in self.product_variant_ids
             if variant.product_template_attribute_value_ids and variant._is_sold_out()
         ]
+
+    def _get_additionnal_combination_info(self, product_or_template, quantity, uom, date, website):
+        """ Override of `website_sale_stock`: the product page of a variant marked out of stock shows Odoo's "Out of
+        Stock", without Add to Cart, even if its inventory isn't tracked.
+        """
+        res = super()._get_additionnal_combination_info(product_or_template, quantity, uom, date, website)
+        if not (
+            self.env.context.get('website_sale_stock_get_quantity')
+            and product_or_template.is_product_variant
+            and product_or_template.is_variant_out_of_stock
+        ):
+            return res
+        product_sudo = product_or_template.sudo()
+        res.update({
+            'is_storable': True,
+            'allow_out_of_stock_order': False,
+            'available_threshold': product_sudo.available_threshold,
+            'free_qty': 0,
+            'cart_qty': 0,
+            'uom_name': uom.name,
+            'uom_rounding': uom.rounding,
+            'show_availability': False,
+            'out_of_stock_message': product_sudo.out_of_stock_message,
+        })
+        # Set by `website_sale_stock` for the products whose inventory is tracked
+        res.setdefault('has_stock_notification', (
+            product_sudo._has_stock_notification(self.env.user.partner_id)
+            or bool(request and product_sudo.id in request.session.get('product_with_stock_notification_enabled', []))
+        ))
+        res.setdefault('stock_notification_email', request and request.session.get('stock_notification_email', ''))
+        return res
+
+    @api.model
+    def _get_additional_configurator_data(
+        self, product_or_template, date, currency, pricelist, *, uom=None, **kwargs
+    ):
+        """ Override of `website_sale_stock`: the window to choose the options of a product doesn't sell the variants
+        marked out of stock either.
+        """
+        data = super()._get_additional_configurator_data(
+            product_or_template, date, currency, pricelist, uom=uom, **kwargs
+        )
+        if product_or_template.is_product_variant and product_or_template.is_variant_out_of_stock:
+            data['free_qty'] = 0
+        return data
 
     def _add_sold_out_combinations(self, attribute_exclusions):
         """ Have the product page's variant selector gray out the out-of-stock variants like the archived ones, by

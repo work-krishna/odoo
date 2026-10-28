@@ -2,6 +2,7 @@ import json
 import re
 from html import unescape
 
+from odoo.exceptions import ValidationError
 from odoo.fields import Command
 from odoo.tests import HttpCase, tagged
 
@@ -216,6 +217,16 @@ class TestVariantAvailability(VariantAvailabilityCommon):
             self.assertEqual(cart.order_line.product_id, blue_256)
             self.assertEqual(cart.order_line.product_uom_qty, 2)
 
+    def test_variant_marked_out_of_stock_whatever_its_quantity(self):
+        blue_128 = self._variant(self.phone, 'Blue', '128 GB')
+        blue_128.is_variant_out_of_stock = True
+        self.assertEqual(blue_128.qty_available, 7)
+        self.assertTrue(blue_128._is_sold_out())
+        self.assertEqual(
+            self._combinations(self.phone._get_sold_out_combinations()),
+            self._sold_out(self.phone, ('Red', '128 GB'), ('Red', '256 GB'), ('Blue', '128 GB')),
+        )
+
     def test_variant_picker_tour(self):
         self._set_stocks(self.phone, {('Black', '128 GB'): 0})
         self.start_tour(self.phone.website_url, 'website_sale_stock_variant_availability')
@@ -229,3 +240,117 @@ class TestVariantAvailabilityMobile(VariantAvailabilityCommon):
     def test_variant_picker_tour(self):
         self._set_stocks(self.phone, {('Black', '128 GB'): 0})
         self.start_tour(self.phone.website_url, 'website_sale_stock_variant_availability')
+
+
+@tagged('post_install', '-at_install')
+class TestVariantMarkedOutOfStock(HttpCase, WebsiteSaleStockCommon):
+    """ The variants marked out of stock by hand, of a product whose inventory isn't tracked """
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.color, cls.storage = cls.env['product.attribute'].create([{
+            'name': 'Color', 'display_type': 'color',
+            'value_ids': [Command.create({'name': name, 'html_color': html_color}) for name, html_color in (
+                ('Black', '#000000'), ('Blue', '#0000FF'), ('Red', '#FF0000'),
+            )],
+        }, {
+            'name': 'Storage', 'display_type': 'pills',
+            'value_ids': [Command.create({'name': name}) for name in ('128 GB', '256 GB')],
+        }])
+        cls.category = cls.env['product.public.category'].create({'name': 'Marked Out of Stock'})
+        cls.phone = cls.env['product.template'].create({
+            'name': 'Marked Phone', 'list_price': 100, 'is_storable': False, 'website_published': True,
+            'public_categ_ids': [Command.set(cls.category.ids)],
+            'attribute_line_ids': [
+                Command.create({'attribute_id': attribute.id, 'value_ids': [Command.set(attribute.value_ids.ids)]})
+                for attribute in (cls.color, cls.storage)
+            ],
+        })
+        cls.ribbon = cls.env.ref('website_sale.out_of_stock_ribbon')
+        cls.ribbon.assign = 'out_of_stock'
+
+    def _variant(self, *names):
+        return self.phone.product_variant_ids.filtered(
+            lambda variant: sorted(variant.product_template_attribute_value_ids.mapped('name')) == sorted(names)
+        )
+
+    def _product_page(self, variant=None):
+        params = {}
+        if variant:
+            params['attribute_values'] = ','.join(map(str, variant.product_template_attribute_value_ids.product_attribute_value_id.ids))
+        html = self.url_open(self.phone.website_url, params=params).text
+        exclusions = json.loads(unescape(ATTRIBUTE_EXCLUSIONS.search(html).group(1)))
+        return int(PRODUCT_ID.search(html).group(1)), exclusions, html
+
+    def _combination_info(self, variant):
+        return self.make_jsonrpc_request('/website_sale/get_combination_info', {
+            'product_template_id': self.phone.id, 'product_id': 0,
+            'combination': variant.product_template_attribute_value_ids.ids, 'add_qty': 1,
+        })
+
+    def test_marked_variant_is_out_of_stock(self):
+        red_128 = self._variant('Red', '128 GB')
+        red_128.is_variant_out_of_stock = True
+        self.assertTrue(red_128._is_sold_out())
+        self.assertFalse(self.phone._is_sold_out())
+
+        product_id, exclusions, html = self._product_page()
+        self.assertEqual(product_id, self._variant('Black', '128 GB').id)
+        self.assertEqual(exclusions['archived_combinations'], [red_128.product_template_attribute_value_ids.ids])
+        self.assertNotIn(f'data-ribbon-id="{self.ribbon.id}"', html)
+
+        info = self._combination_info(red_128)
+        self.assertEqual((info['is_storable'], info['allow_out_of_stock_order'], info['free_qty']), (True, False, 0))
+        self.assertNotIn('free_qty', self._combination_info(self._variant('Red', '256 GB')), "Not tracked")
+
+        # Its product page, from a link to it
+        _product_id, _exclusions, html = self._product_page(red_128)
+        self.assertIn(f'data-ribbon-id="{self.ribbon.id}"', html)
+
+        # Opens on a variant that isn't
+        self._variant('Black', '128 GB').is_variant_out_of_stock = True
+        self.assertEqual(self._product_page()[0], self._variant('Black', '256 GB').id)
+
+    def test_marked_variant_cannot_be_bought(self):
+        red_128, blue_128 = self._variant('Red', '128 GB'), self._variant('Blue', '128 GB')
+        red_128.is_variant_out_of_stock = True
+        cart = self.empty_cart
+        with MockRequest(self.env, website=self.website, sale_order_id=cart.id):
+            self.assertEqual(cart._cart_add(product_id=red_128.id, quantity=1)['quantity'], 0)
+            self.assertFalse(cart.order_line)
+            cart._cart_add(product_id=blue_128.id, quantity=2)
+            self.assertEqual(cart.order_line.product_uom_qty, 2)
+
+            # Marked once in the cart
+            blue_128.is_variant_out_of_stock = True
+            with self.assertRaises(ValidationError):
+                cart._check_cart_is_ready_to_be_paid()
+
+        values = self.make_jsonrpc_request('/website_sale/product_configurator/get_values', {
+            'product_template_id': self.phone.id, 'quantity': 1, 'currency_id': self.phone.currency_id.id,
+            'so_date': '2026-01-01 00:00:00', 'ptav_ids': red_128.product_template_attribute_value_ids.ids,
+        })['products'][0]
+        self.assertEqual(values['free_qty'], 0)
+
+    def test_shop_out_of_stock_when_all_variants_are(self):
+        shop_url = f"/shop/category/{self.env['ir.http']._slug(self.category)}"
+        out_of_stock_ribbon = f'data-ribbon-id="{self.ribbon.id}"'
+        self._variant('Black', '128 GB').is_variant_out_of_stock = True
+        self.assertNotIn(out_of_stock_ribbon, self.url_open(shop_url).text)
+        self.phone.product_variant_ids.is_variant_out_of_stock = True
+        self.assertTrue(self.phone._is_sold_out())
+        self.assertIn(out_of_stock_ribbon, self.url_open(shop_url).text)
+
+    def test_marked_variant_tour(self):
+        self._variant('Red', '128 GB').is_variant_out_of_stock = True
+        self.start_tour(self.phone.website_url, 'website_sale_stock_variant_marked_out_of_stock')
+
+    def test_variant_list_toggle_tour(self):
+        self.start_tour(
+            '/odoo/action-product.product_normal_action_sell?view_type=list',
+            'website_sale_stock_variant_marked_out_of_stock_list', login='admin',
+        )
+        self.assertEqual(
+            self.phone.product_variant_ids.filtered('is_variant_out_of_stock'), self._variant('Red', '128 GB'),
+        )
