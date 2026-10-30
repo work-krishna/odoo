@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- The column of the copyright bar holding the promotion, which Odoo already hides while editing: hidden, rather
+         than removed, so that the views changing it still apply -->
+    <template id="layout" inherit_id="website.layout" name="Hide the brand promotion">
+        <xpath expr="//t[@t-call='web.brand_promotion']/.." position="attributes">
+            <attribute name="t-if">False</attribute>
+        </xpath>
+    </template>
+</odoo>
