@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Only applies with the Buy now button. The classes are added / removed rather than replaced, so that the large
+         buttons (btn-lg) of the editor's options stay -->
+    <template id="product_buy_now" inherit_id="website_sale.product_buy_now" name="Buy Now Button: in place of Add to cart">
+        <!-- Buy now: next to the quantity, filled -->
+        <xpath expr="//a[@id='add_to_cart']" position="before">
+            <xpath expr="//a[contains(@t-attf-class, 'o_we_buy_now')]" position="move"/>
+        </xpath>
+        <xpath expr="//a[contains(@t-attf-class, 'o_we_buy_now')]" position="attributes">
+            <attribute name="t-attf-class" remove="btn-outline-primary w-100" add="btn-primary flex-grow-1" separator=" "/>
+        </xpath>
+        <!-- Add to cart: below, outlined -->
+        <xpath expr="//a[@id='add_to_cart']" position="attributes">
+            <attribute name="t-attf-class" remove="btn-primary flex-grow-1" add="btn-outline-primary w-100" separator=" "/>
+        </xpath>
+    </template>
+</odoo>
