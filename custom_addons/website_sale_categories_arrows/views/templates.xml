@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Hidden until the categories overflow (o_wsale_filmstrip_scrollable) -->
+    <template id="filmstrip_categories" inherit_id="website_sale.filmstrip_categories" name="Categories Filmstrip: arrows">
+        <xpath expr="//div[hasclass('o_wsale_filmstrip_wrapper')]" position="before">
+            <button type="button" class="o_wsale_filmstrip_arrow o_wsale_filmstrip_arrow_prev" title="Previous categories" aria-label="Previous categories">
+                <i class="oi oi-chevron-left" aria-hidden="true"/>
+            </button>
+        </xpath>
+        <xpath expr="//div[hasclass('o_wsale_filmstrip_wrapper')]" position="after">
+            <button type="button" class="o_wsale_filmstrip_arrow o_wsale_filmstrip_arrow_next" title="Next categories" aria-label="Next categories">
+                <i class="oi oi-chevron-right" aria-hidden="true"/>
+            </button>
+        </xpath>
+    </template>
+</odoo>

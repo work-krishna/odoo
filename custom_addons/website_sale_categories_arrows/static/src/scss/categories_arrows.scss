@@ -1,0 +1,32 @@
+#o_wsale_categories_filmstrip {
+    .o_wsale_filmstrip_arrow {
+        display: none;
+        flex: 0 0 auto;
+        align-self: center;
+        align-items: center;
+        justify-content: center;
+        width: 1.75rem;
+        height: 1.75rem;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        background: transparent;
+        color: inherit;
+        font-size: .875rem;
+        opacity: .6;
+        transition: opacity .15s ease-in-out;
+
+        &:hover, &:focus-visible {
+            opacity: 1;
+        }
+
+        // At the start / end of the categories: hidden, but keeps its place so that the categories don't move
+        &:disabled {
+            visibility: hidden;
+        }
+    }
+
+    &.o_wsale_filmstrip_scrollable .o_wsale_filmstrip_arrow {
+        display: flex;
+    }
+}
