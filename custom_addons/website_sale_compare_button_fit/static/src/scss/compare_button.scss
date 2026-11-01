@@ -1,0 +1,20 @@
+// With the large buttons (Product Page > Large CTA), "Add to compare" is one
+// line high (an icon-only square on computers). When its name doesn't fit
+// next to its icon, the name goes to a second line, out of the button, which
+// then only shows its icon, centered.
+.oe_website_sale .o_add_compare_dyn.btn-lg {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    justify-content: center;
+    // The second line starts under the bottom padding, so none of it shows.
+    row-gap: 100%;
+    overflow: hidden;
+
+    > * {
+        display: inline-flex;
+        align-items: center;
+        height: 100%;
+        white-space: nowrap;
+    }
+}
