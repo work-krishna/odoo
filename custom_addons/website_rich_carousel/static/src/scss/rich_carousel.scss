@@ -1,0 +1,241 @@
+// Options added to the carousels by "Banner options" in the editor. They are
+// all scoped to `.o_rich_carousel`, so that a carousel without them keeps
+// Odoo's look.
+
+$-o-rc-ratios: (
+    "4x1": "4 / 1",
+    "3x1": "3 / 1",
+    "12x5": "12 / 5",
+    "21x9": "21 / 9",
+    "2x1": "2 / 1",
+    "3x2": "3 / 2",
+    "4x3": "4 / 3",
+    "1x1": "1 / 1",
+);
+$-o-rc-mobile-ratios: (
+    "2x1": "2 / 1",
+    "16x9": "16 / 9",
+    "4x3": "4 / 3",
+    "1x1": "1 / 1",
+    "4x5": "4 / 5",
+    "3x4": "3 / 4",
+    "9x16": "9 / 16",
+);
+$-o-rc-focuses: (
+    "top": "50% 0%",
+    "center": "50% 50%",
+    "bottom": "50% 100%",
+    "left": "0% 50%",
+    "right": "100% 50%",
+);
+
+.s_carousel.o_rich_carousel {
+    --o-rc-radius: 0px;
+    --o-rc-transition: .6s;
+
+    > .carousel-inner {
+        border-radius: var(--o-rc-radius);
+    }
+
+    // Banner height: the same for all the slides, whatever their content.
+    &.o_rc_height_fixed, &.o_rc_height_ratio {
+        > .carousel-inner > .carousel-item {
+            // Beats the height of the tallest slide given to all of them.
+            min-height: 0 !important;
+            overflow: hidden;
+
+            &.active, &.carousel-item-next, &.carousel-item-prev {
+                display: flex;
+                flex-direction: column;
+            }
+
+            // The slide's container (not by its classes: `.container` is
+            // extended to many selectors).
+            > [class*="container"] {
+                display: flex;
+                flex: 1 1 auto;
+                flex-direction: column;
+                justify-content: var(--o-rc-content-align, center);
+                min-height: 0;
+
+                // Images fill the slide: in the grid, by sharing its height
+                // between the rows (stacked on smaller screens, by taking
+                // what the rest leaves); otherwise, when they're alone in it.
+                > .row.o_grid_mode, > .row:has(> :only-child > img:only-child) {
+                    flex: 1 1 auto;
+                    min-height: 0;
+                }
+                > .row.o_grid_mode {
+                    @include media-breakpoint-up(lg) {
+                        grid-auto-rows: minmax(0, 1fr);
+                    }
+                    @include media-breakpoint-down(lg) {
+                        flex-direction: column;
+                        flex-wrap: nowrap;
+
+                        > .o_grid_item_image {
+                            flex: 1 1 auto;
+                            min-height: 0;
+
+                            img {
+                                width: 100%;
+                                height: 100%;
+                                object-fit: cover;
+                            }
+                        }
+                    }
+                }
+                > .row:not(.o_grid_mode):has(> :only-child > img:only-child) {
+                    flex-direction: column;
+                    flex-wrap: nowrap;
+
+                    > * {
+                        flex: 1 1 auto;
+                        min-height: 0;
+
+                        > img {
+                            width: 100%;
+                            max-width: none;
+                            height: 100%;
+                            object-fit: cover;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    &.o_rc_content_top {
+        --o-rc-content-align: flex-start;
+    }
+    &.o_rc_content_bottom {
+        --o-rc-content-align: flex-end;
+    }
+
+    &.o_rc_height_fixed {
+        // Tablet and mobile fall back on the bigger screens' height.
+        --o-rc-current-height: var(--o-rc-height);
+
+        @include media-breakpoint-down(lg) {
+            --o-rc-current-height: var(--o-rc-height-tablet, var(--o-rc-height));
+        }
+        @include media-breakpoint-down(md) {
+            --o-rc-current-height: var(--o-rc-height-mobile, var(--o-rc-height-tablet, var(--o-rc-height)));
+        }
+
+        > .carousel-inner > .carousel-item {
+            height: var(--o-rc-current-height, auto) !important;
+        }
+    }
+
+    &.o_rc_height_ratio {
+        --o-rc-ratio: 16 / 9;
+        --o-rc-current-ratio: var(--o-rc-ratio);
+
+        @include media-breakpoint-down(md) {
+            --o-rc-current-ratio: var(--o-rc-ratio-mobile, var(--o-rc-ratio));
+        }
+
+        > .carousel-inner > .carousel-item {
+            height: auto !important;
+            aspect-ratio: var(--o-rc-current-ratio);
+        }
+    }
+    @each $name, $ratio in $-o-rc-ratios {
+        &.o_rc_ratio_#{$name} {
+            --o-rc-ratio: #{$ratio};
+        }
+    }
+    @each $name, $ratio in $-o-rc-mobile-ratios {
+        &.o_rc_mobile_ratio_#{$name} {
+            --o-rc-ratio-mobile: #{$ratio};
+        }
+    }
+
+    // Image fit, of the images and of the background images of the slides.
+    &.o_rc_fit_contain {
+        --o-rc-fit: contain;
+        --o-rc-background-size: contain;
+    }
+    &.o_rc_fit_stretch {
+        --o-rc-fit: fill;
+        --o-rc-background-size: 100% 100%;
+    }
+    &.o_rc_fit_contain, &.o_rc_fit_stretch {
+        > .carousel-inner > .carousel-item {
+            &.oe_img_bg {
+                background-size: var(--o-rc-background-size) !important;
+                background-repeat: no-repeat !important;
+            }
+            .o_grid_item_image img,
+            > * > .row:not(.o_grid_mode):has(> :only-child > img:only-child) > * > img {
+                object-fit: var(--o-rc-fit) !important;
+            }
+        }
+    }
+
+    // Image focus: the part of the images kept in view when they're cropped.
+    @each $name, $position in $-o-rc-focuses {
+        &.o_rc_focus_#{$name} {
+            --o-rc-focus: #{$position};
+        }
+    }
+    &.o_rc_focus_top, &.o_rc_focus_center, &.o_rc_focus_bottom,
+    &.o_rc_focus_left, &.o_rc_focus_right {
+        > .carousel-inner > .carousel-item {
+            &.oe_img_bg {
+                background-position: var(--o-rc-focus) !important;
+            }
+            .o_grid_item_image img,
+            > * > .row:not(.o_grid_mode):has(> :only-child > img:only-child) > * > img {
+                object-position: var(--o-rc-focus) !important;
+            }
+        }
+    }
+
+    // Edge to edge: the slides use the whole width of the carousel, under
+    // its arrows, instead of leaving room for them on the sides.
+    &.o_rc_edge_to_edge > .carousel-inner > .carousel-item {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+
+        > [class*="container"] {
+            max-width: none;
+            padding-left: 0;
+            padding-right: 0;
+
+            > .row {
+                margin-left: 0;
+                margin-right: 0;
+            }
+        }
+    }
+
+    // Arrows
+    &.o_rc_arrows_small {
+        --CarouselControllers-size: 2rem;
+    }
+    &.o_rc_arrows_large {
+        --CarouselControllers-size: 4rem;
+    }
+    &.o_rc_arrows_hover {
+        @media (hover: hover) {
+            &:not(:hover, :focus-within) {
+                > .carousel-control-prev, > .carousel-control-next {
+                    opacity: 0;
+                }
+            }
+        }
+    }
+
+    // Transition time
+    @media (prefers-reduced-motion: no-preference) {
+        &:not(.carousel-instant) > .carousel-inner > .carousel-item {
+            transition-duration: var(--o-rc-transition);
+        }
+        // The slide which fades out waits for the one which fades in.
+        &.carousel-fade:not(.carousel-instant) > .carousel-inner > .carousel-item.active:is(.carousel-item-start, .carousel-item-end) {
+            transition-duration: 0s;
+            transition-delay: var(--o-rc-transition);
+        }
+    }
+}

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="website_rich_carousel.RichCarouselOption">
+    <BuilderRow label.translate="Banner options" tooltip.translate="Height, image fit, arrows and sliding of the carousel">
+        <BuilderCheckbox id="'rich_carousel_opt'" action="'richCarouselToggle'"/>
+    </BuilderRow>
+
+    <t t-if="isActiveItem('rich_carousel_opt')">
+        <!-- Height -->
+        <BuilderRow label.translate="Banner height" tooltip.translate="The same for all the slides, whatever their content" level="1">
+            <BuilderSelect>
+                <BuilderSelectItem classAction="''">Auto</BuilderSelectItem>
+                <BuilderSelectItem id="'rc_height_fixed_opt'" classAction="'o_rc_height_fixed'" action="'richCarouselFreezeHeight'">Fixed</BuilderSelectItem>
+                <BuilderSelectItem id="'rc_height_ratio_opt'" classAction="'o_rc_height_ratio'">Ratio</BuilderSelectItem>
+            </BuilderSelect>
+        </BuilderRow>
+        <t t-if="isActiveItem('rc_height_fixed_opt')">
+            <BuilderRow label.translate="Desktop" tooltip.translate="Screens from 992 px wide" level="2">
+                <BuilderNumberInput action="'richCarouselVar'" actionParam="'--o-rc-height'" unit="'px'" min="40" step="10" default="null"/>
+            </BuilderRow>
+            <BuilderRow label.translate="Tablet" tooltip.translate="Screens from 768 to 991 px wide. Empty: the desktop height" level="2">
+                <BuilderNumberInput action="'richCarouselVar'" actionParam="'--o-rc-height-tablet'" unit="'px'" min="40" step="10" default="null"/>
+            </BuilderRow>
+            <BuilderRow label.translate="Mobile" tooltip.translate="Screens up to 767 px wide. Empty: the tablet height" level="2">
+                <BuilderNumberInput action="'richCarouselVar'" actionParam="'--o-rc-height-mobile'" unit="'px'" min="40" step="10" default="null"/>
+            </BuilderRow>
+        </t>
+        <t t-if="isActiveItem('rc_height_ratio_opt')">
+            <BuilderRow label.translate="Ratio" tooltip.translate="Width : height of the banner. The height follows the width of the screen" level="2">
+                <BuilderSelect>
+                    <BuilderSelectItem classAction="'o_rc_ratio_image'" action="'richCarouselMatchImage'">Match image</BuilderSelectItem>
+                    <BuilderSelectItem classAction="'o_rc_ratio_4x1'">4:1</BuilderSelectItem>
+                    <BuilderSelectItem classAction="'o_rc_ratio_3x1'">3:1</BuilderSelectItem>
+                    <BuilderSelectItem classAction="'o_rc_ratio_12x5'">12:5 (1920 × 800)</BuilderSelectItem>
+                    <BuilderSelectItem classAction="'o_rc_ratio_21x9'">21:9</BuilderSelectItem>
+                    <BuilderSelectItem classAction="'o_rc_ratio_2x1'">2:1</BuilderSelectItem>
+                    <BuilderSelectItem classAction="''">16:9</BuilderSelectItem>
+                    <BuilderSelectItem classAction="'o_rc_ratio_3x2'">3:2</BuilderSelectItem>
+                    <BuilderSelectItem classAction="'o_rc_ratio_4x3'">4:3</BuilderSelectItem>
+                    <BuilderSelectItem classAction="'o_rc_ratio_1x1'">1:1</BuilderSelectItem>
+                </BuilderSelect>
+            </BuilderRow>
+            <BuilderRow label.translate="Mobile ratio" tooltip.translate="Screens up to 767 px wide" level="2">
+                <BuilderSelect>
+                    <BuilderSelectItem classAction="''">Same</BuilderSelectItem>
+                    <BuilderSelectItem classAction="'o_rc_mobile_ratio_2x1'">2:1</BuilderSelectItem>
+                    <BuilderSelectItem classAction="'o_rc_mobile_ratio_16x9'">16:9</BuilderSelectItem>
+                    <BuilderSelectItem classAction="'o_rc_mobile_ratio_4x3'">4:3</BuilderSelectItem>
+                    <BuilderSelectItem classAction="'o_rc_mobile_ratio_1x1'">1:1</BuilderSelectItem>
+                    <BuilderSelectItem classAction="'o_rc_mobile_ratio_4x5'">4:5</BuilderSelectItem>
+                    <BuilderSelectItem classAction="'o_rc_mobile_ratio_3x4'">3:4</BuilderSelectItem>
+                    <BuilderSelectItem classAction="'o_rc_mobile_ratio_9x16'">9:16</BuilderSelectItem>
+                </BuilderSelect>
+            </BuilderRow>
+        </t>
+        <t t-if="isActiveItem('rc_height_fixed_opt') || isActiveItem('rc_height_ratio_opt')">
+            <BuilderRow label.translate="Content" tooltip.translate="Where the text of the slides goes" level="2">
+                <BuilderSelect>
+                    <BuilderSelectItem classAction="'o_rc_content_top'">Top</BuilderSelectItem>
+                    <BuilderSelectItem classAction="''">Middle</BuilderSelectItem>
+                    <BuilderSelectItem classAction="'o_rc_content_bottom'">Bottom</BuilderSelectItem>
+                </BuilderSelect>
+            </BuilderRow>
+        </t>
+
+        <!-- Images -->
+        <BuilderRow label.translate="Image fit" tooltip.translate="Cover: fills the banner, cropping the image. Contain: shows the whole image. Stretch: fills the banner, distorting the image" level="1">
+            <BuilderSelect>
+                <BuilderSelectItem classAction="''">Cover</BuilderSelectItem>
+                <BuilderSelectItem classAction="'o_rc_fit_contain'">Contain</BuilderSelectItem>
+                <BuilderSelectItem id="'rc_fit_stretch_opt'" classAction="'o_rc_fit_stretch'">Stretch</BuilderSelectItem>
+            </BuilderSelect>
+        </BuilderRow>
+        <BuilderRow t-if="!isActiveItem('rc_fit_stretch_opt')" label.translate="Image focus" tooltip.translate="The part of the images kept in view. Default: as set on each slide" level="1">
+            <BuilderSelect>
+                <BuilderSelectItem classAction="''">Default</BuilderSelectItem>
+                <BuilderSelectItem classAction="'o_rc_focus_top'">Top</BuilderSelectItem>
+                <BuilderSelectItem classAction="'o_rc_focus_center'">Center</BuilderSelectItem>
+                <BuilderSelectItem classAction="'o_rc_focus_bottom'">Bottom</BuilderSelectItem>
+                <BuilderSelectItem classAction="'o_rc_focus_left'">Left</BuilderSelectItem>
+                <BuilderSelectItem classAction="'o_rc_focus_right'">Right</BuilderSelectItem>
+            </BuilderSelect>
+        </BuilderRow>
+        <BuilderRow label.translate="Edge to edge" tooltip.translate="The slides use the whole width, under the arrows, instead of leaving room for them on the sides" level="1">
+            <BuilderCheckbox classAction="'o_rc_edge_to_edge'"/>
+        </BuilderRow>
+        <BuilderRow label.translate="Rounded corners" level="1">
+            <BuilderRange styleAction="'--o-rc-radius'" min="0" max="48" step="2" unit="'px'" displayRangeValue="true"/>
+        </BuilderRow>
+
+        <!-- Arrows -->
+        <BuilderRow label.translate="Arrow size" level="1">
+            <BuilderSelect>
+                <BuilderSelectItem classAction="'o_rc_arrows_small'">Small</BuilderSelectItem>
+                <BuilderSelectItem classAction="''">Medium</BuilderSelectItem>
+                <BuilderSelectItem classAction="'o_rc_arrows_large'">Large</BuilderSelectItem>
+            </BuilderSelect>
+        </BuilderRow>
+        <BuilderRow label.translate="Arrows on hover" tooltip.translate="On computers, the arrows only show when the mouse is over the banner" level="1">
+            <BuilderCheckbox classAction="'o_rc_arrows_hover'"/>
+        </BuilderRow>
+
+        <!-- Sliding -->
+        <BuilderRow label.translate="Transition time" tooltip.translate="How long going from one slide to the next takes" level="1">
+            <BuilderRange styleAction="'--o-rc-transition'" min="0.2" max="3" step="0.1" unit="'s'" displayRangeValue="true"/>
+        </BuilderRow>
+        <BuilderRow label.translate="Pause on hover" tooltip.translate="The autoplay stops while the mouse is over the banner" level="1">
+            <BuilderCheckbox dataAttributeAction="'bsPause'" dataAttributeActionValue="'false'" inverseAction="true"/>
+        </BuilderRow>
+        <BuilderRow label.translate="Loop" tooltip.translate="After the last slide, the first one comes again" level="1">
+            <BuilderCheckbox dataAttributeAction="'bsWrap'" dataAttributeActionValue="'false'" inverseAction="true"/>
+        </BuilderRow>
+        <BuilderRow label.translate="Swipe" tooltip.translate="On touch screens, the slides change by swiping them" level="1">
+            <BuilderCheckbox dataAttributeAction="'bsTouch'" dataAttributeActionValue="'false'" inverseAction="true"/>
+        </BuilderRow>
+    </t>
+</t>
+
+</templates>
