@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_delivery_carrier_form_ncm" model="ir.ui.view">
+        <field name="name">delivery.carrier.form.ncm</field>
+        <field name="model">delivery.carrier</field>
+        <field name="inherit_id" ref="delivery.view_delivery_carrier_form"/>
+        <field name="arch" type="xml">
+            <field name="tracking_url" position="attributes">
+                <attribute name="invisible">delivery_type not in ('fixed', 'base_on_rule', 'ncm')</attribute>
+            </field>
+            <xpath expr="//page[@name='destination']" position="before">
+                <page string="Nepal Can Move" name="ncm" invisible="delivery_type != 'ncm'">
+                    <div class="alert alert-info" role="status">
+                        <p class="mb-2"><strong>Setting up</strong> (in this order):</p>
+                        <ol class="mb-2 ps-3">
+                            <li>Paste the token from the NCM vendor portal's API page. While the method shows
+                                <em>Test Environment</em>, use the demo token printed on that page.</li>
+                            <li>Click <em>Check account</em> and choose one of the branches it lists as <em>Pickup Branch</em>.</li>
+                            <li>Click <em>Update NCM branches</em> once (it then runs every day).</li>
+                            <li>On the live server: click <em>Register webhook</em>, then paste the same
+                                <em>Webhook URL</em> in the portal's <em>Order Comment Webhook URL</em> field.</li>
+                            <li>Switch to <em>Production</em> with the production token, and publish the method on the website.</li>
+                        </ol>
+                        <p class="mb-0">
+                            The parcel is sent to NCM when its delivery order is validated. If the operation type has
+                            <em>Generate Shipping Labels</em> off, use <em>Send to Shipper</em> on the validated delivery.
+                        </p>
+                    </div>
+                    <group>
+                        <group string="Account">
+                            <field name="ncm_api_token" password="True" groups="base.group_system"/>
+                            <field name="ncm_from_branch_id" options="{'no_create': True}"/>
+                            <field name="ncm_delivery_type"/>
+                            <field name="ncm_use_locations" invisible="1"/>
+                        </group>
+                        <group string="Pricing and customers">
+                            <field name="ncm_extra_kg_price"/>
+                            <field name="ncm_notify_customer"/>
+                        </group>
+                    </group>
+                    <group string="Webhook" groups="base.group_system">
+                        <field name="ncm_webhook_url" widget="CopyClipboardChar"/>
+                    </group>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button name="action_ncm_check_account" type="object" string="Check account" class="btn-secondary"/>
+                        <button name="action_ncm_sync_branches" type="object" string="Update NCM branches" class="btn-secondary"/>
+                        <button name="action_ncm_register_webhook" type="object" string="Register webhook" class="btn-secondary" groups="base.group_system"/>
+                        <button name="action_ncm_test_webhook" type="object" string="Test webhook" class="btn-secondary" groups="base.group_system"/>
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="ncm_comment_wizard_view_form" model="ir.ui.view">
+        <field name="name">ncm.comment.wizard.form</field>
+        <field name="model">ncm.comment.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Message NCM">
+                <p class="text-muted">
+                    Posted as a comment on NCM order <field name="ncm_order_id" readonly="1" class="oe_inline"/>.
+                    NCM accepts one comment per order per minute.
+                </p>
+                <field name="picking_id" invisible="1"/>
+                <field name="message" placeholder="e.g. Customer asks for delivery after 4 pm." nolabel="1"/>
+                <footer>
+                    <button name="action_send" type="object" string="Send" class="btn-primary" data-hotkey="q"/>
+                    <button string="Discard" special="cancel" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

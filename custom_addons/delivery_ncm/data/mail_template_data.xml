@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="mail_template_ncm_out_for_delivery" model="mail.template">
+        <field name="name">NCM: parcel out for delivery</field>
+        <field name="model_id" ref="stock.model_stock_picking"/>
+        <field name="description">Sent to the customer when Nepal Can Move sends the parcel out for delivery ("Email Customers" on the delivery method)</field>
+        <field name="subject">Your order {{ object.sale_id.name or object.origin or object.name }} is on its way</field>
+        <field name="partner_to">{{ (object.sale_id.partner_id or object.partner_id).id }}</field>
+        <field name="email_from">{{ object.company_id.email_formatted or user.email_formatted }}</field>
+        <field name="lang">{{ (object.sale_id.partner_id or object.partner_id).lang }}</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+<div style="margin: 0px; padding: 0px; font-size: 13px;">
+    <p style="margin: 0px; padding: 0px;">
+        Hello <t t-out="object.sale_id.partner_id.name or object.partner_id.parent_id.name or object.partner_id.name or ''">Sita</t>,
+        <br/><br/>
+        Nepal Can Move is delivering your order
+        <strong t-out="object.sale_id.name or object.origin or ''">S00042</strong> today.
+        <t t-if="object.ncm_cod_amount">
+            Please keep <strong>NPR <t t-out="'{:,.2f}'.format(object.ncm_cod_amount)">25,150.00</t></strong> ready to pay the rider.
+        </t>
+        <br/><br/>
+        NCM order number: <strong t-out="object.ncm_order_id or ''">747</strong>
+        <br/><br/>
+        Thank you for shopping with <t t-out="object.company_id.name or ''">us</t>.
+    </p>
+</div>
+        </field>
+    </record>
+
+    <record id="mail_template_ncm_delivered" model="mail.template">
+        <field name="name">NCM: parcel delivered</field>
+        <field name="model_id" ref="stock.model_stock_picking"/>
+        <field name="description">Sent to the customer when Nepal Can Move marks the parcel delivered ("Email Customers" on the delivery method)</field>
+        <field name="subject">Your order {{ object.sale_id.name or object.origin or object.name }} was delivered</field>
+        <field name="partner_to">{{ (object.sale_id.partner_id or object.partner_id).id }}</field>
+        <field name="email_from">{{ object.company_id.email_formatted or user.email_formatted }}</field>
+        <field name="lang">{{ (object.sale_id.partner_id or object.partner_id).lang }}</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+<div style="margin: 0px; padding: 0px; font-size: 13px;">
+    <p style="margin: 0px; padding: 0px;">
+        Hello <t t-out="object.sale_id.partner_id.name or object.partner_id.parent_id.name or object.partner_id.name or ''">Sita</t>,
+        <br/><br/>
+        Nepal Can Move has delivered your order
+        <strong t-out="object.sale_id.name or object.origin or ''">S00042</strong>.
+        If anything is wrong with it, just reply to this email.
+        <br/><br/>
+        Thank you for shopping with <t t-out="object.company_id.name or ''">us</t>.
+    </p>
+</div>
+        </field>
+    </record>
+
+</odoo>

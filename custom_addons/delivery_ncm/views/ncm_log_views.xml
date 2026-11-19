@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="ncm_api_log_view_list" model="ir.ui.view">
+        <field name="name">ncm.api.log.list</field>
+        <field name="model">ncm.api.log</field>
+        <field name="arch" type="xml">
+            <list create="0" edit="0">
+                <field name="create_date" string="Date"/>
+                <field name="picking_name"/>
+                <field name="vref"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'created'"
+                       decoration-danger="state == 'error'"
+                       decoration-warning="state == 'uncertain'"/>
+                <field name="ncm_order_id"/>
+                <field name="environment" optional="show"/>
+                <field name="message" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="ncm_api_log_view_form" model="ir.ui.view">
+        <field name="name">ncm.api.log.form</field>
+        <field name="model">ncm.api.log</field>
+        <field name="arch" type="xml">
+            <form create="0" edit="0">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="picking_name"/>
+                            <field name="vref"/>
+                            <field name="state"/>
+                            <field name="ncm_order_id"/>
+                        </group>
+                        <group>
+                            <field name="carrier_id"/>
+                            <field name="environment"/>
+                            <field name="create_date" string="Date"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="message"/>
+                        <field name="request_payload"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="ncm_api_log_action" model="ir.actions.act_window">
+        <field name="name">NCM Order Attempts</field>
+        <field name="res_model">ncm.api.log</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="ncm_webhook_event_view_list" model="ir.ui.view">
+        <field name="name">ncm.webhook.event.list</field>
+        <field name="model">ncm.webhook.event</field>
+        <field name="arch" type="xml">
+            <list create="0" edit="0">
+                <field name="create_date" string="Received"/>
+                <field name="carrier_id"/>
+                <field name="ncm_order_id"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'done'"
+                       decoration-info="state == 'pending'"/>
+                <field name="attempts" optional="hide"/>
+                <field name="note"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="ncm_webhook_event_view_form" model="ir.ui.view">
+        <field name="name">ncm.webhook.event.form</field>
+        <field name="model">ncm.webhook.event</field>
+        <field name="arch" type="xml">
+            <form create="0" edit="0">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="carrier_id"/>
+                            <field name="ncm_order_id"/>
+                            <field name="state"/>
+                        </group>
+                        <group>
+                            <field name="create_date" string="Received"/>
+                            <field name="attempts"/>
+                            <field name="note"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="payload"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="ncm_webhook_event_action" model="ir.actions.act_window">
+        <field name="name">NCM Webhook Calls</field>
+        <field name="res_model">ncm.webhook.event</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- NCM progress under each delivery on the customer's order page. -->
+    <template id="sale_order_portal_content_ncm" name="Nepal Can Move tracking on orders"
+              inherit_id="sale_stock.sale_order_portal_content_inherit_sale_stock">
+        <xpath expr="//div[@name='delivery_details']" position="after">
+            <div t-if="picking.delivery_type == 'ncm' and picking.ncm_state" name="ncm_tracking" class="small mt-1">
+                <span class="badge rounded-pill text-bg-light border" t-field="picking.ncm_state"/>
+                <span t-if="picking.ncm_status_date" class="text-muted">
+                    since <span t-field="picking.ncm_status_date" t-options="{'widget': 'datetime'}"/>
+                </span>
+                <div t-if="picking.carrier_id.ncm_use_locations and picking.ncm_dest_branch_id">
+                    Collect it at the NCM <t t-out="picking.ncm_dest_branch_id.name.title()"/> branch
+                    <t t-if="picking.ncm_dest_branch_id.address">(<t t-out="picking.ncm_dest_branch_id.address"/>)</t><t t-if="picking.ncm_dest_branch_id.phone">,
+                        phone <a t-attf-href="tel:{{ picking.ncm_dest_branch_id.phone }}" t-out="picking.ncm_dest_branch_id.phone"/></t>.
+                </div>
+                <div t-if="picking.ncm_cod_amount and picking.ncm_state not in ('delivered', 'returned', 'cancelled')">
+                    To pay on delivery: <strong>NPR <t t-out="'{:,.2f}'.format(picking.ncm_cod_amount)"/></strong>
+                </div>
+            </div>
+        </xpath>
+    </template>
+
+</odoo>

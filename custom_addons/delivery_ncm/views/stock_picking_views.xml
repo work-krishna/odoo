@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_picking_form_ncm" model="ir.ui.view">
+        <field name="name">stock.picking.form.ncm</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock_delivery.view_picking_withcarrier_out_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_ncm_refresh" type="object" string="Refresh NCM"
+                        invisible="delivery_type != 'ncm' or not carrier_tracking_ref"/>
+                <button name="action_ncm_message" type="object" string="Message NCM"
+                        invisible="delivery_type != 'ncm' or not carrier_tracking_ref"/>
+                <button name="%(delivery_ncm.action_report_ncm_label)d" type="action" string="NCM Label"
+                        invisible="delivery_type != 'ncm' or not carrier_tracking_ref"/>
+            </xpath>
+            <xpath expr="//sheet" position="before">
+                <field name="ncm_needs_check" invisible="1"/>
+                <div class="alert alert-warning mb-0" role="alert" invisible="not ncm_needs_check">
+                    <p class="mb-1">
+                        <strong>NCM did not answer the last order creation, so the order may exist.</strong>
+                        Look for this transfer's reference in the NCM vendor portal before sending it again.
+                    </p>
+                    <p class="mb-0">
+                        Found it? Type its number in <em>NCM Order</em> below, then
+                        <button name="action_ncm_link_order" type="object" string="Use this NCM order" class="btn btn-link p-0 align-baseline"/>.
+                        Not there?
+                        <button name="action_ncm_force_create" type="object" string="Create NCM order anyway" class="btn btn-link p-0 align-baseline"
+                                confirm="Only do this if the NCM portal has no order for this transfer, or the customer gets two deliveries. Continue?"/>
+                    </p>
+                </div>
+            </xpath>
+            <xpath expr="//group[@name='carrier_data']" position="inside">
+                <field name="ncm_state" invisible="1"/>
+                <field name="ncm_dest_branch_id" options="{'no_create': True}"
+                       invisible="delivery_type != 'ncm'"
+                       readonly="ncm_state not in (False, 'cancel_requested', 'cancelled')"/>
+                <field name="ncm_cod_amount"
+                       invisible="delivery_type != 'ncm'"
+                       readonly="ncm_state not in (False, 'cancel_requested', 'cancelled')"/>
+                <field name="ncm_instruction"
+                       invisible="delivery_type != 'ncm'"
+                       readonly="ncm_state not in (False, 'cancel_requested', 'cancelled')"/>
+                <field name="ncm_order_id"
+                       invisible="delivery_type != 'ncm' or (not ncm_order_id and not ncm_needs_check)"
+                       readonly="not ncm_needs_check"/>
+                <field name="ncm_state" string="NCM Stage" widget="badge"
+                       invisible="not ncm_state"
+                       decoration-success="ncm_state == 'delivered'"
+                       decoration-danger="ncm_state in ('returned', 'cancelled', 'exception')"
+                       decoration-warning="ncm_state in ('returning', 'cancel_requested', 'unknown')"
+                       decoration-info="ncm_state in ('created', 'pickup', 'picked_up', 'in_transit', 'out_for_delivery')"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Nepal Can Move" name="ncm" invisible="not ncm_order_id">
+                    <group>
+                        <group>
+                            <field name="ncm_status"/>
+                            <field name="ncm_status_date"/>
+                            <field name="ncm_payment_status"/>
+                            <field name="ncm_delivery_charge"/>
+                        </group>
+                        <group>
+                            <field name="ncm_vref"/>
+                            <field name="ncm_track_id"/>
+                            <field name="ncm_package_description"/>
+                            <field name="ncm_weight"/>
+                        </group>
+                    </group>
+                    <separator string="Status history"/>
+                    <field name="ncm_status_ids" readonly="1" nolabel="1">
+                        <list>
+                            <field name="date"/>
+                            <field name="status"/>
+                            <field name="ncm_state" widget="badge"/>
+                            <field name="ncm_order_id" optional="hide"/>
+                        </list>
+                    </field>
+                    <separator string="Comments"/>
+                    <field name="ncm_comment_ids" readonly="1" nolabel="1">
+                        <list>
+                            <field name="date"/>
+                            <field name="added_by"/>
+                            <field name="body"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

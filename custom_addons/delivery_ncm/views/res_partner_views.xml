@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_partner_form_ncm" model="ir.ui.view">
+        <field name="name">res.partner.form.ncm</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//span[@name='address_name']/following-sibling::div[hasclass('o_address_format')][1]" position="after">
+                <field name="country_code" invisible="1"/>
+                <field name="ncm_area_id"
+                       invisible="country_code and country_code != 'NP'"
+                       placeholder="e.g. Baneshwor"
+                       options="{'no_create': True, 'no_open': True}"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

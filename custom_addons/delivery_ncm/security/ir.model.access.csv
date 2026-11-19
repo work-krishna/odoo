@@ -1,0 +1,14 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ncm_branch_user,ncm.branch user,model_ncm_branch,base.group_user,1,0,0,0
+access_ncm_branch_manager,ncm.branch manager,model_ncm_branch,stock.group_stock_manager,1,1,1,1
+access_ncm_area_user,ncm.area user,model_ncm_area,base.group_user,1,0,0,0
+access_ncm_area_manager,ncm.area manager,model_ncm_area,stock.group_stock_manager,1,1,1,1
+access_ncm_order_status_user,ncm.order.status user,model_ncm_order_status,stock.group_stock_user,1,0,0,0
+access_ncm_order_status_manager,ncm.order.status manager,model_ncm_order_status,stock.group_stock_manager,1,1,1,1
+access_ncm_order_comment_user,ncm.order.comment user,model_ncm_order_comment,stock.group_stock_user,1,0,0,0
+access_ncm_order_comment_manager,ncm.order.comment manager,model_ncm_order_comment,stock.group_stock_manager,1,1,1,1
+access_ncm_api_log_manager,ncm.api.log manager,model_ncm_api_log,stock.group_stock_manager,1,0,0,0
+access_ncm_api_log_system,ncm.api.log system,model_ncm_api_log,base.group_system,1,1,1,1
+access_ncm_webhook_event_manager,ncm.webhook.event manager,model_ncm_webhook_event,stock.group_stock_manager,1,0,0,0
+access_ncm_webhook_event_system,ncm.webhook.event system,model_ncm_webhook_event,base.group_system,1,1,1,1
+access_ncm_comment_wizard_user,ncm.comment.wizard user,model_ncm_comment_wizard,stock.group_stock_user,1,1,1,0

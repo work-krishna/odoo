@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="product_product_ncm_delivery" model="product.product">
+        <field name="name">Nepal Can Move Delivery</field>
+        <field name="default_code">Delivery_NCM</field>
+        <field name="type">service</field>
+        <field name="categ_id" ref="delivery.product_category_deliveries"/>
+        <field name="sale_ok" eval="False"/>
+        <field name="purchase_ok" eval="False"/>
+        <field name="list_price">0.0</field>
+        <field name="invoice_policy">order</field>
+    </record>
+
+    <record id="delivery_carrier_ncm" model="delivery.carrier">
+        <field name="name">Home delivery (Nepal Can Move)</field>
+        <field name="delivery_type">ncm</field>
+        <field name="product_id" ref="product_product_ncm_delivery"/>
+        <field name="allow_cash_on_delivery" eval="True"/>
+        <field name="ncm_delivery_type">Door2Door</field>
+    </record>
+
+    <record id="delivery_carrier_ncm_branch" model="delivery.carrier">
+        <field name="name">Collect at an NCM branch</field>
+        <field name="delivery_type">ncm</field>
+        <field name="product_id" ref="product_product_ncm_delivery"/>
+        <field name="allow_cash_on_delivery" eval="True"/>
+        <field name="ncm_delivery_type">Door2Branch</field>
+        <field name="sequence">11</field>
+    </record>
+
+</odoo>

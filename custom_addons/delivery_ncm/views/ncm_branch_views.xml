@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="ncm_branch_view_list" model="ir.ui.view">
+        <field name="name">ncm.branch.list</field>
+        <field name="model">ncm.branch</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="branch_type"/>
+                <field name="district"/>
+                <field name="province" optional="show"/>
+                <field name="phone" optional="show"/>
+                <field name="surcharge" optional="show"/>
+                <field name="area_count" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="ncm_branch_view_form" model="ir.ui.view">
+        <field name="name">ncm.branch.form</field>
+        <field name="model">ncm.branch</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="branch_type"/>
+                            <field name="district"/>
+                            <field name="province"/>
+                            <field name="ncm_id"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="address"/>
+                            <field name="phone"/>
+                            <field name="phone2"/>
+                            <field name="surcharge"/>
+                            <field name="latitude"/>
+                            <field name="longitude"/>
+                        </group>
+                    </group>
+                    <field name="area_ids">
+                        <list editable="bottom">
+                            <field name="name"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="ncm_branch_view_search" model="ir.ui.view">
+        <field name="name">ncm.branch.search</field>
+        <field name="model">ncm.branch</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="district"/>
+                <field name="province"/>
+                <field name="area_ids" string="Area"/>
+                <filter name="filter_branch" string="Branches" domain="[('branch_type', '=', 'Branch')]"/>
+                <filter name="filter_logistics" string="Logistics points" domain="[('branch_type', '=', 'Logistics')]"/>
+                <separator/>
+                <filter name="filter_archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_province" string="Province" context="{'group_by': 'province'}"/>
+                    <filter name="group_district" string="District" context="{'group_by': 'district'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="ncm_branch_action" model="ir.actions.act_window">
+        <field name="name">NCM Branches</field>
+        <field name="res_model">ncm.branch</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No NCM branches yet</p>
+            <p>They are downloaded from Nepal Can Move every day. Use "Update NCM branches" on the delivery method to fetch them now.</p>
+        </field>
+    </record>
+
+    <record id="ncm_area_view_list" model="ir.ui.view">
+        <field name="name">ncm.area.list</field>
+        <field name="model">ncm.area</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="district"/>
+                <field name="branch_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="ncm_area_view_search" model="ir.ui.view">
+        <field name="name">ncm.area.search</field>
+        <field name="model">ncm.area</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="district"/>
+                <field name="branch_id"/>
+                <separator/>
+                <filter name="filter_archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_district" string="District" context="{'group_by': 'district'}"/>
+                    <filter name="group_branch" string="Branch" context="{'group_by': 'branch_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="ncm_area_action" model="ir.actions.act_window">
+        <field name="name">NCM Delivery Areas</field>
+        <field name="res_model">ncm.area</field>
+        <field name="view_mode">list</field>
+    </record>
+
+</odoo>

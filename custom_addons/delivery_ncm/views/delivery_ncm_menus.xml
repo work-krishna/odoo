@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem id="menu_ncm_branch" action="ncm_branch_action" parent="stock.menu_delivery" sequence="20"/>
+    <menuitem id="menu_ncm_area" action="ncm_area_action" parent="stock.menu_delivery" sequence="21"/>
+    <menuitem id="menu_ncm_api_log" action="ncm_api_log_action" parent="stock.menu_delivery" sequence="22" groups="base.group_no_one"/>
+    <menuitem id="menu_ncm_webhook_event" action="ncm_webhook_event_action" parent="stock.menu_delivery" sequence="23" groups="base.group_no_one"/>
+
+</odoo>

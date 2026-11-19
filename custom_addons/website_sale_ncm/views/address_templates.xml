@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- District + area picker, shown for Nepal addresses on checkout and on "My addresses". -->
+    <template id="address_form_fields_ncm" inherit_id="portal.address_form_fields">
+        <xpath expr="//div[@id='div_state']" position="after">
+            <t t-set="ncm_area_sudo" t-value="partner_sudo.sudo().ncm_area_id"/>
+            <t t-set="ncm_district" t-value="ncm_area_sudo.district"/>
+            <t t-set="ncm_country" t-value="country or partner_sudo.country_id"/>
+            <div id="div_ncm_area" t-attf-class="col-12 mb-2 {{ '' if ncm_country.code == 'NP' else 'd-none' }}">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label class="col-form-label label-optional" for="o_ncm_district">District</label>
+                        <select id="o_ncm_district" name="ncm_district" class="form-select">
+                            <option value="">District...</option>
+                            <option t-foreach="request.env['ncm.area']._ncm_frontend_districts()" t-as="district"
+                                    t-att-value="district"
+                                    t-att-selected="district == ncm_district"
+                                    t-out="district.title()"/>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="col-form-label label-optional" for="o_ncm_area_id">Delivery area</label>
+                        <select id="o_ncm_area_id" name="ncm_area_id" class="form-select">
+                            <option value="">Area...</option>
+                            <t t-if="ncm_district">
+                                <option t-foreach="request.env['ncm.area']._ncm_frontend_areas(ncm_district)" t-as="area"
+                                        t-att-value="area['id']"
+                                        t-att-selected="area['id'] == ncm_area_sudo.id"
+                                        t-out="area['label']"/>
+                            </t>
+                        </select>
+                    </div>
+                </div>
+                <small class="form-text text-muted">
+                    Our courier, Nepal Can Move, uses this to send your parcel to the right branch.
+                    Area not listed? Leave it empty and include it in your address.
+                </small>
+            </div>
+        </xpath>
+    </template>
+
+</odoo>
