@@ -15,6 +15,13 @@
                         invisible="delivery_type != 'ncm' or not carrier_tracking_ref"/>
             </xpath>
             <xpath expr="//sheet" position="before">
+                <field name="ncm_branch_conflict" invisible="1"/>
+                <div class="alert alert-danger mb-0" role="alert"
+                     invisible="not ncm_branch_conflict or ncm_state not in (False, 'cancel_requested', 'cancelled')">
+                    <strong>This transfer mixes products from several NCM pickup branches
+                        (<field name="ncm_branch_conflict" readonly="1" class="d-inline"/>).</strong>
+                    An NCM order leaves from one branch: move each branch's products to their own transfer before validating.
+                </div>
                 <field name="ncm_needs_check" invisible="1"/>
                 <div class="alert alert-warning mb-0" role="alert" invisible="not ncm_needs_check">
                     <p class="mb-1">
@@ -32,6 +39,9 @@
             </xpath>
             <xpath expr="//group[@name='carrier_data']" position="inside">
                 <field name="ncm_state" invisible="1"/>
+                <field name="ncm_from_branch_id" options="{'no_create': True}"
+                       invisible="delivery_type != 'ncm'"
+                       readonly="ncm_state not in (False, 'cancel_requested', 'cancelled')"/>
                 <field name="ncm_dest_branch_id" options="{'no_create': True}"
                        invisible="delivery_type != 'ncm'"
                        readonly="ncm_state not in (False, 'cancel_requested', 'cancelled')"/>

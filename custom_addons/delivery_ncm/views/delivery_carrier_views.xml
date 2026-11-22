@@ -16,7 +16,9 @@
                         <ol class="mb-2 ps-3">
                             <li>Paste the token from the NCM vendor portal's API page. While the method shows
                                 <em>Test Environment</em>, use the demo token printed on that page.</li>
-                            <li>Click <em>Check account</em> and choose one of the branches it lists as <em>Pickup Branch</em>.</li>
+                            <li>Click <em>Check account</em> and choose one of the branches it lists as <em>Default Pickup Branch</em>.
+                                Products that leave from another branch get it in their own <em>NCM Pickup Branch</em>
+                                (product form, Inventory tab); an order mixing branches ships as one parcel per branch.</li>
                             <li>Click <em>Update NCM branches</em> once (it then runs every day).</li>
                             <li>On the live server: click <em>Register webhook</em>, then paste the same
                                 <em>Webhook URL</em> in the portal's <em>Order Comment Webhook URL</em> field.</li>

@@ -54,6 +54,16 @@ class StockPicking(models.Model):
         string="NCM Order", copy=False, index='btree_not_null',
         help="Order number in the NCM portal.",
     )
+    ncm_from_branch_id = fields.Many2one(
+        'ncm.branch', string="NCM Pickup Branch", copy=False,
+        compute='_compute_ncm_from_branch_id', store=True, readonly=False,
+        help="The NCM branch this parcel leaves from: the products' pickup branch, else the warehouse's, "
+             "else the delivery method's default.",
+    )
+    ncm_branch_conflict = fields.Char(
+        compute='_compute_ncm_branch_conflict',
+        help="Pickup branches of this transfer's products, when there are several.",
+    )
     ncm_dest_branch_id = fields.Many2one(
         'ncm.branch', string="NCM Destination Branch", copy=False,
         compute='_compute_ncm_dest_branch_id', store=True, readonly=False,
@@ -95,8 +105,44 @@ class StockPicking(models.Model):
             else:
                 picking.ncm_dest_branch_id = picking._ncm_customer()._ncm_get_dest_branch()
 
+    def _ncm_move_branches(self):
+        """Pickup branches of this transfer's products."""
+        self.ensure_one()
+        carrier = self.carrier_id
+        warehouse = self.picking_type_id.warehouse_id
+        return self.env['ncm.branch'].union(*(
+            carrier._ncm_pickup_branch_for(move.product_id, warehouse)
+            for move in self.move_ids if move.state != 'cancel' and move.product_id
+        ))
+
     @api.depends(
-        'carrier_id.delivery_type', 'sale_id.amount_total',
+        'carrier_id.delivery_type', 'carrier_id.ncm_from_branch_id', 'move_ids.product_id',
+        'move_ids.product_id.ncm_pickup_branch_id', 'picking_type_id.warehouse_id.ncm_pickup_branch_id',
+    )
+    def _compute_ncm_from_branch_id(self):
+        for picking in self:
+            if picking.carrier_id.delivery_type != 'ncm':
+                picking.ncm_from_branch_id = picking.ncm_from_branch_id
+            elif picking.ncm_state not in NOT_SENT_STATES:
+                picking.ncm_from_branch_id = picking.ncm_from_branch_id  # Already at NCM: keep.
+            else:
+                branches = picking._ncm_move_branches()
+                if len(branches) <= 1:
+                    picking.ncm_from_branch_id = branches or picking.carrier_id.ncm_from_branch_id
+                else:
+                    picking.ncm_from_branch_id = picking.ncm_from_branch_id  # Mixed: see the warning.
+
+    @api.depends('carrier_id', 'move_ids.product_id', 'move_ids.state')
+    def _compute_ncm_branch_conflict(self):
+        for picking in self:
+            branches = self.env['ncm.branch']
+            if picking.carrier_id.delivery_type == 'ncm':
+                branches = picking._ncm_move_branches()
+            picking.ncm_branch_conflict = ', '.join(branches.mapped('name')) if len(branches) > 1 else False
+
+    @api.depends(
+        'carrier_id.delivery_type', 'ncm_from_branch_id', 'move_ids.product_uom_qty', 'move_ids.quantity',
+        'move_ids.state', 'sale_id.amount_total', 'sale_id.ncm_rate_breakdown',
         'sale_id.transaction_ids.state', 'sale_id.transaction_ids.amount',
     )
     def _compute_ncm_cod_amount(self):
@@ -105,18 +151,51 @@ class StockPicking(models.Model):
             sale = picking.sale_id
             if picking.ncm_state not in NOT_SENT_STATES:
                 picking.ncm_cod_amount = picking.ncm_cod_amount  # Already at NCM: keep.
-            elif picking.carrier_id.delivery_type != 'ncm' or not sale:
+            elif picking.carrier_id.delivery_type != 'ncm' or not sale or not sale.amount_total:
                 picking.ncm_cod_amount = 0.0
             else:
-                # Only the first NCM shipment of an order collects the cash.
-                others = sale.picking_ids.filtered(
-                    lambda p: p != picking and p.ncm_order_id and p.ncm_state not in NOT_SENT_STATES
-                )
-                due = sale.amount_total - sale.amount_paid
+                # Each parcel collects for its own items and its share of the delivery charge,
+                # less the part of the order already paid online.
+                unpaid_ratio = min(max((sale.amount_total - sale.amount_paid) / sale.amount_total, 0.0), 1.0)
+                cod = picking._ncm_parcel_amount() * unpaid_ratio
                 if sale.currency_id != npr:
-                    due = sale.currency_id._convert(due, npr, picking.company_id, fields.Date.today())
-                due -= sum(others.mapped('ncm_cod_amount'))
-                picking.ncm_cod_amount = float_round(max(due, 0.0), precision_digits=2)
+                    cod = sale.currency_id._convert(cod, npr, picking.company_id, fields.Date.today())
+                picking.ncm_cod_amount = float_round(cod, precision_digits=2)
+
+    def _ncm_parcel_amount(self):
+        """What this parcel is worth to the customer, in the order's currency: its items, taxes
+        included, plus its share of the delivery charge."""
+        self.ensure_one()
+        goods = 0.0
+        for move in self.move_ids.filtered(lambda m: m.state != 'cancel' and m.sale_line_id):
+            line = move.sale_line_id
+            if not line.product_uom_qty:
+                continue
+            quantity = move.quantity if move.state == 'done' else move.product_uom_qty
+            quantity = move.product_uom._compute_quantity(quantity, line.product_uom_id)
+            goods += line.price_total / line.product_uom_qty * quantity
+        return goods + self._ncm_delivery_share()
+
+    def _ncm_delivery_share(self):
+        """This parcel's part of the order's delivery charge: each pickup branch's first parcel
+        carries that branch's share, weighted by NCM's quotes for the branches."""
+        self.ensure_one()
+        sale = self.sale_id
+        delivery_total = sum(sale.order_line.filtered('is_delivery').mapped('price_total'))
+        if not delivery_total:
+            return 0.0
+        parcels = sale.picking_ids.filtered(
+            lambda p: p.picking_type_code == 'outgoing' and p.state != 'cancel' and p.carrier_id.delivery_type == 'ncm'
+        )
+        same_branch = parcels.filtered(lambda p: p.ncm_from_branch_id == self.ncm_from_branch_id)
+        if not same_branch or min(same_branch, key=lambda p: p.id) != self:
+            return 0.0
+        branches = parcels.ncm_from_branch_id
+        breakdown = sale.ncm_rate_breakdown or {}
+        quotes = {branch.id: float(breakdown.get(str(branch.id)) or 0.0) for branch in branches}
+        if all(quotes.values()):
+            return delivery_total * quotes[self.ncm_from_branch_id.id] / sum(quotes.values())
+        return delivery_total / (len(branches) or 1)
 
     def _compute_ncm_needs_check(self):
         for picking in self:
@@ -197,9 +276,16 @@ class StockPicking(models.Model):
         partner = self._ncm_customer()
         phone, phone2 = self._ncm_phones()
         address = self._ncm_address()
+        if self.ncm_branch_conflict:
+            raise UserError(_(
+                "%(picking)s holds products from several NCM pickup branches (%(branches)s), but an NCM "
+                "order leaves from one branch. Move the products of each branch to their own transfer, "
+                "or set the products' NCM pickup branch.",
+                picking=self.name, branches=self.ncm_branch_conflict,
+            ))
         missing = []
-        if not carrier.ncm_from_branch_id:
-            missing.append(_("the pickup branch on the delivery method"))
+        if not self.ncm_from_branch_id:
+            missing.append(_("the NCM pickup branch (on the products, or a default on the delivery method)"))
         if not self.ncm_dest_branch_id:
             missing.append(_("the NCM destination branch (set the customer's NCM delivery area)"))
         if not (partner.name or partner.parent_id.name):
@@ -219,7 +305,7 @@ class StockPicking(models.Model):
             'phone2': phone2,
             'cod_charge': format_amount(self.ncm_cod_amount),
             'address': address,
-            'fbranch': carrier.ncm_from_branch_id.name,
+            'fbranch': self.ncm_from_branch_id.name,
             'branch': self.ncm_dest_branch_id.name,
             'package': self._ncm_package_description(),
             'vref_id': self._ncm_reference(),
@@ -258,9 +344,9 @@ class StockPicking(models.Model):
             self._ncm_apply_detail(client.get_order(order_id))
         except NcmError as e:
             _logger.warning("NCM order %s created, but reading it back failed: %s", order_id, e.message)
-        if not self.ncm_delivery_charge and self.ncm_dest_branch_id:
+        if not self.ncm_delivery_charge and self.ncm_from_branch_id and self.ncm_dest_branch_id:
             try:
-                self.ncm_delivery_charge = self.carrier_id._ncm_get_rate(self.ncm_dest_branch_id)
+                self.ncm_delivery_charge = self.carrier_id._ncm_get_rate(self.ncm_from_branch_id, self.ncm_dest_branch_id)
             except (NcmError, UserError):
                 pass
         try:

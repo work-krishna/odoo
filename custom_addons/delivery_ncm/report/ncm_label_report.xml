@@ -33,7 +33,7 @@
         <t t-call="web.basic_layout">
             <t t-set="carrier" t-value="o.carrier_id"/>
             <t t-set="partner" t-value="o._ncm_customer()"/>
-            <t t-set="from_branch" t-value="carrier.ncm_from_branch_id"/>
+            <t t-set="from_branch" t-value="o.ncm_from_branch_id or carrier.ncm_from_branch_id"/>
             <t t-set="to_branch" t-value="o.ncm_dest_branch_id"/>
             <t t-set="collect" t-value="carrier.ncm_delivery_type in ('Door2Branch', 'Branch2Branch')"/>
             <div class="page" style="font-family: Arial, sans-serif; font-size: 11px; line-height: 1.25;">

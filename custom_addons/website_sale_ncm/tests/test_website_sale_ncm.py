@@ -30,6 +30,24 @@ class TestWebsiteSaleNcm(NcmCommon, HttpCase):
         self.assertIn('Asan (New Road branch)', labels)
         self.assertIn('Asan (Tinkune branch)', labels)
 
+    def test_shop_hides_ncm_methods_that_cannot_ship(self):
+        self.ncm.is_published = True
+        order = self.env['sale.order'].create({
+            'partner_id': self.customer.id,
+            'website_id': self.env['website'].get_current_website().id,
+            'order_line': [Command.create({'product_id': self.phone_product.id})],
+        })
+        self.assertIn(self.ncm, order._get_delivery_methods())
+
+        self.ncm.ncm_from_branch_id = False  # The phone now has no pickup branch at all.
+        self.assertNotIn(self.ncm, order._get_delivery_methods())
+
+        self.phone_product.ncm_pickup_branch_id = self.branch_tinkune
+        self.assertIn(self.ncm, order._get_delivery_methods())
+
+        self.ncm.ncm_api_token = False
+        self.assertNotIn(self.ncm, order._get_delivery_methods())
+
     def test_customer_sets_area_in_address_form(self):
         self.env['res.users'].create({
             'name': "NCM Portal User",

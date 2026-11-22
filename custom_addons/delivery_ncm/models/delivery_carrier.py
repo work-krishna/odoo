@@ -50,9 +50,10 @@ class DeliveryCarrier(models.Model):
         help="From the NCM vendor portal's API page. Use the demo token while this method is in test mode.",
     )
     ncm_from_branch_id = fields.Many2one(
-        'ncm.branch', string="Pickup Branch",
-        help="The NCM branch your parcels leave from. It must be one of the branches NCM assigned to "
-             "your account ('Check account' lists them).",
+        'ncm.branch', string="Default Pickup Branch",
+        help="The NCM branch parcels leave from, unless the product (or its warehouse) sets its own "
+             "NCM pickup branch. Pickup branches must be ones NCM assigned to your account "
+             "('Check account' lists them).",
     )
     ncm_delivery_type = fields.Selection(const.DELIVERY_TYPES, string="NCM Service", default='Door2Door')
     # Read by Odoo's checkout and quotation wizard as `<delivery_type>_use_locations`.
@@ -116,14 +117,77 @@ class DeliveryCarrier(models.Model):
             return 0.0
         return math.ceil(round(weight_kg - 1, 3)) * self.ncm_extra_kg_price
 
-    def _ncm_get_rate(self, to_branch):
-        """NCM's delivery charge in NPR to `to_branch`, cached for a day."""
+    def _ncm_pickup_branch_for(self, product, warehouse=None):
+        """The NCM branch `product` leaves from: the product's own, else its warehouse's, else
+        this delivery method's default."""
         self.ensure_one()
-        if not self.ncm_from_branch_id:
-            raise UserError(_("Set the NCM pickup branch on the delivery method %s.", self.name))
+        candidates = (
+            product.ncm_pickup_branch_id,
+            warehouse.ncm_pickup_branch_id if warehouse else None,
+            self.ncm_from_branch_id,
+        )
+        return next((branch for branch in candidates if branch and branch.active), self.env['ncm.branch'])
+
+    @api.model
+    def _ncm_goods_lines(self, order):
+        return order.order_line.filtered(
+            lambda line: not line.is_delivery and not line.display_type and line.product_id.type == 'consu'
+        )
+
+    def _ncm_is_ready_for_order(self, order):
+        """Whether this method can ship `order`: an API token, and a pickup branch for each product."""
+        self.ensure_one()
+        if self.delivery_type != 'ncm':
+            return True
+        return bool(self.sudo().ncm_api_token) and all(
+            self._ncm_pickup_branch_for(line.product_id, order.warehouse_id)
+            for line in self._ncm_goods_lines(order)
+        )
+
+    def _ncm_rate_groups(self, order):
+        """NCM's charge (NPR) for each parcel of `order`: one per pickup branch its goods leave from.
+
+        :return: list of (pickup branch, charge) tuples
+        :raise UserError: when a product has no pickup branch, or the destination is unknown
+        :raise NcmError: when NCM cannot quote
+        """
+        self.ensure_one()
+        weights = {}
+        missing = []
+        for line in self._ncm_goods_lines(order):
+            product = line.product_id
+            branch = self._ncm_pickup_branch_for(product, order.warehouse_id)
+            if not branch:
+                missing.append(product.display_name)
+                continue
+            quantity = line.product_uom_id._compute_quantity(line.product_uom_qty, product.uom_id)
+            weights[branch] = weights.get(branch, 0.0) + self._ncm_to_kg(product.weight * quantity)
+        if missing:
+            raise UserError(_(
+                "No NCM pickup branch for %(products)s: set one on the product, or a default pickup "
+                "branch on the delivery method %(method)s.",
+                products=', '.join(missing), method=self.name,
+            ))
+        destination = order._ncm_get_dest_branch(carrier=self)
+        groups = []
+        for branch, weight in weights.items():
+            # Checkout needs a price before the customer can open the branch selector: quote the
+            # pickup branch's own city until a branch is chosen (the order is then re-priced).
+            to_branch = destination or (branch if self.ncm_use_locations else destination)
+            if not to_branch:
+                raise UserError(_(
+                    "Choose the NCM delivery area of the shipping address, so we know which NCM branch "
+                    "delivers there."
+                ))
+            groups.append((branch, self._ncm_get_rate(branch, to_branch) + self._ncm_extra_weight_charge(weight)))
+        return groups
+
+    def _ncm_get_rate(self, from_branch, to_branch):
+        """NCM's delivery charge in NPR from `from_branch` to `to_branch`, cached for a day."""
+        self.ensure_one()
         key = (
             self._ncm_environment(),
-            self.ncm_from_branch_id.name,
+            from_branch.name,
             to_branch.name,
             const.RATE_TYPES[self.ncm_delivery_type or 'Door2Door'],
         )
@@ -149,21 +213,15 @@ class DeliveryCarrier(models.Model):
     # Shipping provider API -----------------------------------------------------------------
 
     def ncm_rate_shipment(self, order):
+        """The total of NCM's charges for the order's parcels (one per pickup branch)."""
         self.ensure_one()
-        branch = order._ncm_get_dest_branch(carrier=self)
-        if not branch and self.ncm_use_locations:
-            # Checkout needs a price before the customer can open the branch selector; quote the
-            # pickup branch's own city until a branch is chosen (then the order is re-priced).
-            branch = self.ncm_from_branch_id
-        if not branch:
-            return self._ncm_rate_error(_(
-                "Choose the NCM delivery area of the shipping address, so we know which NCM branch delivers there."
-            ))
         try:
-            price = self._ncm_get_rate(branch)
-        except (NcmError, UserError) as e:
-            return self._ncm_rate_error(_("Nepal Can Move could not quote this delivery: %s", e))
-        price += self._ncm_extra_weight_charge(self._ncm_to_kg(order._get_estimated_weight()))
+            groups = self._ncm_rate_groups(order)
+        except UserError as e:
+            return self._ncm_rate_error(str(e))
+        except NcmError as e:
+            return self._ncm_rate_error(_("Nepal Can Move could not quote this delivery: %s", e.message))
+        price = sum(charge for _branch, charge in groups)
         price = self._ncm_npr()._convert(
             price, order.currency_id, order.company_id, order.date_order or fields.Date.today(),
         )
@@ -360,8 +418,17 @@ class DeliveryCarrier(models.Model):
                 _("Token works"), _("NCM has not assigned any pickup branch to this account yet."), 'warning', True,
             )
         message = _("Pickup branches assigned to this account: %s.", ', '.join(branches))
-        if self.ncm_from_branch_id and self.ncm_from_branch_id.name not in branches:
-            message += ' ' + _("The pickup branch set here (%s) is not one of them.", self.ncm_from_branch_id.name)
+        used = (
+            self.ncm_from_branch_id
+            | self.env['product.template'].search([('ncm_pickup_branch_id', '!=', False)]).ncm_pickup_branch_id
+            | self.env['stock.warehouse'].search([('ncm_pickup_branch_id', '!=', False)]).ncm_pickup_branch_id
+        )
+        unassigned = used.filtered(lambda branch: branch.name not in branches)
+        if unassigned:
+            message += ' ' + _(
+                "These pickup branches set on this method, products or warehouses are not among them: %s.",
+                ', '.join(unassigned.mapped('name')),
+            )
             return self._ncm_notify(_("Token works"), message, 'warning', True)
         return self._ncm_notify(_("Token works"), message, sticky=True)
 

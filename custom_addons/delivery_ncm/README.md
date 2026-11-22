@@ -28,13 +28,13 @@ Open **Inventory → Configuration → Delivery Methods**. Installing the module
 
 1. **Company**: set the company that owns the NCM account.
 2. **Token**: on the *Nepal Can Move* tab, paste the token. The method starts in *Test Environment*, which talks to NCM's demo server: use the demo token printed on the portal's API page. The demo server knows only a few branches (Tinkune to Pokhara works).
-3. **Pickup branch**: click **Check account**. It lists the branches NCM assigned to your account; choose one of them as *Pickup Branch*.
+3. **Pickup branches**: click **Check account**. It lists the branches NCM assigned to your account; choose one of them as *Default Pickup Branch*. A product that leaves from another branch gets that branch in its own *NCM Pickup Branch* (product form → Inventory tab → Logistics). A warehouse can have one too, used for its products that have none. The order of precedence is product, then warehouse, then this default. *Check account* also flags product and warehouse branches NCM did not assign to you.
 4. **Branches**: click **Update NCM branches** once. The list of about 650 branches and 5,800 delivery areas is then refreshed every night.
 5. **Webhook** (production server only, it needs a public HTTPS address): click **Register webhook**. NCM's API only sets the delivery webhook, so copy the *Webhook URL* into the portal's *Order Comment Webhook URL* field too, then click **Test webhook**. Status updates also arrive every 30 minutes without the webhook, so it only makes them faster.
 6. **Go live**: click the *Test Environment* button to switch to *Production*, and paste the production token from the portal.
 7. **Prices**: NCM's quote is used as is. *Margin on Rate*, *Additional margin* and *Free if order amount is above* work as for any delivery method. NCM's price API ignores weight, so *Extra Charge per kg* adds that amount for each kg above 1 kg until NCM confirms its weight charges.
 8. **Customer emails** (optional): tick *Email Customers* to email the customer when the parcel goes out for delivery and when it is delivered.
-9. **Website**: publish both methods (the *Published* toggle on each). Both allow cash on delivery: enable the *Cash on Delivery* payment provider in Website → Configuration → Payment Providers if you want to offer it.
+9. **Website**: publish both methods (the *Published* toggle on each). Both allow cash on delivery: enable the *Cash on Delivery* payment provider in Website → Configuration → Payment Providers if you want to offer it. The shop hides an NCM method while it cannot ship the cart: no token, or a product without any pickup branch.
 10. **Delivery operation type**: keep *Generate Shipping Labels* ticked on Inventory → Configuration → Operation Types → Delivery Orders. That is what makes validating a delivery send it to NCM.
 
 The *Nepal Can Move* tab repeats these steps for whoever opens the method later.
@@ -51,9 +51,11 @@ The *Nepal Can Move* tab repeats these steps for whoever opens the method later.
 Validate the delivery order as usual. Odoo creates the NCM order, and the delivery order shows:
 
 - **Tracking Reference**: the NCM order number.
-- **NCM Destination Branch**, **Cash to Collect** and **Delivery Instruction**: what was sent to NCM. Check them *before* validating: they can't be changed afterwards. *Cash to Collect* is what the customer still owes on the order, delivery included, and is 0 when they paid online. Set it to 0 yourself for orders paid another way (bank transfer, cash at the counter).
+- **NCM Pickup Branch**, **NCM Destination Branch**, **Cash to Collect** and **Delivery Instruction**: what was sent to NCM. Check them *before* validating: they can't be changed afterwards. *Cash to Collect* is what the customer owes for this parcel: its items, taxes included, plus its delivery charge. It is 0 when they paid online. Set it to 0 yourself for orders paid another way (bank transfer, cash at the counter).
 - **A label** in the chatter (100 × 150 mm). Print it again with the **NCM Label** button.
 - **Shipping Cost**: NCM's actual charge for the order.
+
+**One parcel per pickup branch.** When an order mixes products from different pickup branches, confirming it creates one delivery order per branch, and each becomes its own NCM order with its own label. At checkout the customer paid the total of NCM's quotes. Each parcel collects for its own items plus its own quote, so the parcels' cash adds up to the order total. If a parcel goes out in two parts (a backorder), the first part carries the delivery charge.
 
 If NCM refuses the order, the message gives NCM's reason (for example *phone: Invalid Phone Number*). Fix it and validate again.
 
@@ -86,6 +88,9 @@ Returns, exchanges, redirects, pickup requests and COD transfer requests are not
 | You see | Why | What to do |
 | --- | --- | --- |
 | *Choose the NCM delivery area of the shipping address…* | Odoo can't tell which branch delivers to that address (many area names exist in several places) | Set the customer's *NCM Delivery Area*, or the *NCM Destination Branch* on the delivery order |
+| *No NCM pickup branch for (a product)…* | Neither the product, its warehouse nor the delivery method has a pickup branch | Set the product's *NCM Pickup Branch*, or a *Default Pickup Branch* on the method |
+| An NCM method doesn't show at checkout | The shop hides it when it can't ship the cart: no token, or a product without a pickup branch | Fix as in the row above, and check the token |
+| Red banner: *This transfer mixes products from several NCM pickup branches* | The transfer was made or edited by hand with products of different branches | Move each branch's products to their own transfer |
 | *Nepal Can Move refused the order…: phone: Invalid Phone Number* | NCM wants a 10-digit Nepali number | Fix the customer's phone; `+977` and spaces are removed automatically |
 | *NCM returned an unexpected response (HTTP 500). … Branch matching query does not exist* | That NCM server doesn't know the branch, which is usual on the demo server | On demo, use branches it knows (Tinkune, Pokhara…). In production, click *Update NCM branches* |
 | The delivery has no label, and a note says the label could not be generated | wkhtmltopdf is missing on the server | Install wkhtmltopdf, then use **NCM Label** |
@@ -98,9 +103,10 @@ Returns, exchanges, redirects, pickup requests and COD transfer requests are not
 
 ### How a parcel flows
 
-1. **Quote.** `delivery.carrier.ncm_rate_shipment()` asks `sale.order._ncm_get_dest_branch()` for the branch (chosen pickup branch → contact's area → guess from the address) and calls `/api/v1/shipping-rate`, cached for 24 hours per route.
-2. **Send.** Validating calls `stock_delivery`'s `send_to_shipper()` → `ncm_send_shipping()` → `_ncm_send_picking()`, which builds the payload in `stock.picking._ncm_prepare_order_values()` and calls `/api/v1/order/create`.
-3. **Track.** The webhook (`/delivery_ncm/webhook/<secret>`) only queues an `ncm.webhook.event`; a job re-reads the order from NCM's API, so the payload is never trusted. Jobs also poll `/api/v1/orders/statuses` in batches of 100 and `/api/v1/order/getbulkcomments`.
+1. **Quote.** `delivery.carrier._ncm_rate_groups()` groups the order's goods by pickup branch (`_ncm_pickup_branch_for()`: product → warehouse → method default). `sale.order._ncm_get_dest_branch()` gives the destination (chosen pickup branch → contact's area → guess from the address). Then each branch's parcel is quoted with `/api/v1/shipping-rate`, cached for 24 hours per route. `ncm_rate_shipment()` returns the total, and `set_delivery_line()` stores the per-branch quotes in `sale.order.ncm_rate_breakdown`.
+2. **Split.** `stock.move._key_assign_picking()` and `_search_picking_for_assignation_domain()` include the move's pickup branch, so confirming an order creates one transfer per branch (`stock.picking.ncm_from_branch_id`). Each transfer's `ncm_cod_amount` is its items (taxes included) plus its share of the delivery charge, weighted by `ncm_rate_breakdown`, times the unpaid part of the order.
+3. **Send.** Validating calls `stock_delivery`'s `send_to_shipper()` → `ncm_send_shipping()` → `_ncm_send_picking()`, which builds the payload in `stock.picking._ncm_prepare_order_values()` and calls `/api/v1/order/create`.
+4. **Track.** The webhook (`/delivery_ncm/webhook/<secret>`) only queues an `ncm.webhook.event`; a job re-reads the order from NCM's API, so the payload is never trusted. Jobs also poll `/api/v1/orders/statuses` in batches of 100 and `/api/v1/order/getbulkcomments`.
 
 ### Duplicate protection
 

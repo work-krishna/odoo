@@ -223,7 +223,7 @@ class TestNcmShipping(NcmCommon):
         self.assertEqual(picking.carrier_tracking_ref, '748')
         self.assertEqual(picking.ncm_state, 'created')
 
-    def test_second_shipment_does_not_collect_again(self):
+    def test_each_shipment_collects_for_its_own_items(self):
         order = self._confirmed_order(quantity=2)
         picking = order.picking_ids
         self._route_created_order()
@@ -233,8 +233,8 @@ class TestNcmShipping(NcmCommon):
         Form.from_action(self.env, action).save().process()
         backorder = order.picking_ids - picking
         self.assertEqual(len(backorder), 1)
-        self.assertEqual(picking.ncm_cod_amount, order.amount_total)
-        backorder.invalidate_recordset(['ncm_cod_amount'])
-        backorder._compute_ncm_cod_amount()
-        self.assertEqual(backorder.ncm_cod_amount, 0.0)
+        # The first parcel carries one phone and the delivery charge; the rest follows later.
+        self.assertEqual(self._created_payload()['cod_charge'], '25150')
+        self.assertEqual(picking.ncm_cod_amount, 25150.0)
+        self.assertEqual(backorder.ncm_cod_amount, 25000.0)
         self.assertEqual(backorder._ncm_reference(), f"{order.name}-{backorder.name.rsplit('/', 1)[-1]}")

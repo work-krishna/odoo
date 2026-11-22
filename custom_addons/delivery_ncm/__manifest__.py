@@ -21,6 +21,7 @@
         'views/ncm_branch_views.xml',
         'views/ncm_log_views.xml',
         'views/portal_templates.xml',
+        'views/product_warehouse_views.xml',
         'views/res_partner_views.xml',
         'views/stock_picking_views.xml',
         'wizard/ncm_comment_wizard_views.xml',

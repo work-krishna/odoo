@@ -2,11 +2,36 @@
 
 import json
 
-from odoo import _, models
+from odoo import _, fields, models
+from odoo.exceptions import UserError
+
+from odoo.addons.delivery_ncm.models.ncm_request import NcmError
 
 
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
+
+    ncm_rate_breakdown = fields.Json(
+        copy=False,
+        help="Technical: NCM's quote (NPR) per pickup branch id, used to split the delivery charge "
+             "between the order's parcels.",
+    )
+
+    def set_delivery_line(self, carrier, amount):
+        res = super().set_delivery_line(carrier, amount)
+        self._ncm_store_rate_breakdown(carrier)
+        return res
+
+    def _ncm_store_rate_breakdown(self, carrier):
+        """Remember each parcel's quote. Right after a quote, NCM's answers are still cached."""
+        for order in self:
+            breakdown = False
+            if carrier.delivery_type == 'ncm':
+                try:
+                    breakdown = {str(branch.id): charge for branch, charge in carrier._ncm_rate_groups(order)}
+                except (UserError, NcmError):
+                    breakdown = False
+            order.ncm_rate_breakdown = breakdown
 
     def _ncm_pickup_branch(self, carrier=None):
         """The NCM branch chosen as pickup point, if `carrier` is the order's collect-at-branch
@@ -54,7 +79,8 @@ class SaleOrder(models.Model):
         if rate.get('success'):
             location = self.pickup_location_data
             self.set_delivery_line(carrier, rate['price'])  # website_sale resets the location here...
-            self.pickup_location_data = location           # ...so put it back.
+            self.pickup_location_data = location           # ...so put it back,
+            self._ncm_store_rate_breakdown(carrier)        # and quote parcels to that branch again.
 
     def _ncm_set_pickup_branch(self, branch):
         """Choose `branch` as this order's pickup point (used by tests and scripts)."""
