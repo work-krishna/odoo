@@ -4,6 +4,7 @@ from odoo.fields import Command
 from odoo.tests import HttpCase, tagged
 
 from odoo.addons.delivery_ncm.tests.common import NcmCommon
+from odoo.addons.website_sale.tests.common import MockRequest
 
 
 @tagged('post_install', '-at_install')
@@ -47,6 +48,27 @@ class TestWebsiteSaleNcm(NcmCommon, HttpCase):
 
         self.ncm.ncm_api_token = False
         self.assertNotIn(self.ncm, order._get_delivery_methods())
+
+    def test_delivery_list_refresh_shows_branch_collection(self):
+        """The list re-rendered after an address change, on a site without in-store pickup."""
+        collect = self.env.ref('delivery_ncm.delivery_carrier_ncm_branch')
+        collect.write({'is_published': True, 'ncm_api_token': 'test-token', 'ncm_from_branch_id': self.branch_tinkune.id})
+        self.ncm.is_published = True
+        self.env['delivery.carrier'].search([('delivery_type', '=', 'in_store')]).is_published = False
+        website = self.env['website'].get_current_website()
+        order = self.env['sale.order'].create({
+            'partner_id': self.customer.id,
+            'website_id': website.id,
+            'order_line': [Command.create({'product_id': self.phone_product.id})],
+        })
+        order.set_delivery_line(self.ncm, 150.0)
+
+        with MockRequest(self.env, website=website, sale_order_id=order.id):
+            router = self.env['ir.http'].routing_map(key=website.id).bind('localhost')
+            endpoint, _args = router.match('/shop/delivery_methods', method='POST')
+            html = endpoint()
+        self.assertIn(f'o_delivery_{collect.id}', html)
+        self.assertIn(f'o_delivery_{self.ncm.id}', html)
 
     def test_customer_sets_area_in_address_form(self):
         self.env['res.users'].create({

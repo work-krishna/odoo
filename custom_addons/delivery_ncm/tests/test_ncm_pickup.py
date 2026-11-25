@@ -38,7 +38,11 @@ class TestNcmPickup(NcmCommon):
         return order
 
     def _location_names(self, order, search=None):
-        return [location['name'] for location in order._get_pickup_locations(search)['pickup_locations']]
+        # Like the shop's route, pass the address country with a search (website_sale_collect,
+        # when installed, otherwise looks it up by GeoIP, which needs an HTTP request).
+        country = self.env.ref('base.np') if search else None
+        locations = order._get_pickup_locations(search, country)['pickup_locations']
+        return [location['name'] for location in locations]
 
     def test_collect_service_uses_locations(self):
         self.assertTrue(self.ncm_collect.ncm_use_locations)
@@ -64,7 +68,7 @@ class TestNcmPickup(NcmCommon):
         self.assertEqual(self._location_names(order, 'asan')[0], 'NCM New Road')
         # A postal code is not searchable: fall back to the delivery address.
         self.assertEqual(self._location_names(order, '33700'), ['NCM Pokhara'])
-        self.assertIn('error', order._get_pickup_locations('Nowhere'))
+        self.assertIn('error', order._get_pickup_locations('Nowhere', self.env.ref('base.np')))
 
     def test_price_before_a_branch_is_chosen(self):
         stranger = self.env['res.partner'].create({'name': 'Hari', 'city': 'Somewhere', 'phone': '9800000001'})

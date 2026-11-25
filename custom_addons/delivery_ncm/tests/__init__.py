@@ -2,6 +2,7 @@
 
 from . import test_ncm_request
 from . import test_ncm_branches
+from . import test_ncm_cash_on_delivery
 from . import test_ncm_multi_branch
 from . import test_ncm_pickup
 from . import test_ncm_shipping
