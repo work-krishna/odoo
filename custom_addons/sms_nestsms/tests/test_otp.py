@@ -16,20 +16,26 @@ OTP_TEXT = "Flagship-Store: Your OTP for login is {otp}. It is valid for 10 minu
 
 @tagged('post_install', '-at_install')
 class TestOtp(NestSmsCommon):
+    """NestSMS as the SMS channel of the one-time-code engine (auth_otp). The engine's own
+    rules (tries, expiry, cooldown, caps) are tested in auth_otp."""
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         approve_otp(cls.company, 'login')
-        cls.Otp = cls.env['sms.nestsms.otp']
+        cls.Otp = cls.env['auth.otp']
+
+    def _issue(self, purpose='login', phone='9841234567', **kwargs):
+        return self.Otp._otp_issue(purpose, phone=phone, company=self.company, **kwargs)
 
     def _sent_code(self):
         """The code in the last template send."""
         return self.nestsms.calls[-1]['payload']['variables']['otp']
 
     def test_send_and_verify(self):
-        otp, error = self.Otp._nestsms_send('login', '+977 984-1234567')
-        self.assertFalse(error)
+        result = self._issue(phone='+977 984-1234567')
+        self.assertFalse(result['error'])
+        self.assertEqual(result['channels'], ['sms'])
         [call] = self.nestsms.calls
         self.assertEqual(call['payload']['to'], '9841234567')
         self.assertEqual(call['payload']['template_id'], TEMPLATE_ID)
@@ -37,125 +43,59 @@ class TestOtp(NestSmsCommon):
         self.assertNotIn('message', call['payload'], "OTPs never go as raw text.")
         code = self._sent_code()
         self.assertRegex(code, r'^\d{6}$')
+        otp = result['otp']
+        self.assertEqual(otp.phone, '9841234567')
         self.assertEqual(otp.nestsms_message_id, MESSAGE_ID)
-        self.assertNotIn(code, otp.sudo().code_hash)
 
-        record, error = self.Otp._nestsms_verify('login', '9841234567', f" {code[:3]} {code[3:]} ")
+        record, error = self.Otp._otp_verify('login', f" {code[:3]} {code[3:]} ", phone='9841234567')
         self.assertEqual(record, otp)
-        self.assertFalse(error)
-        self.assertEqual(otp.state, 'verified')
-        # Used up.
-        record, error = self.Otp._nestsms_verify('login', '9841234567', code)
-        self.assertFalse(record)
+        self.assertFalse(self.Otp._otp_verify('login', code, phone='9841234567')[0], "Used up.")
 
-    def test_wrong_codes_block(self):
-        self.Otp._nestsms_send('login', '9841234567')
-        code = self._sent_code()
-        wrong = '000000' if code != '000000' else '111111'
-        for left in (4, 3, 2, 1):
-            record, error = self.Otp._nestsms_verify('login', '9841234567', wrong)
-            self.assertFalse(record)
-            self.assertIn(f"{left} tries left", error)
-        record, error = self.Otp._nestsms_verify('login', '9841234567', wrong)
-        self.assertIn("can no longer be used", error)
-        # Even the right code is dead now.
-        record, error = self.Otp._nestsms_verify('login', '9841234567', code)
-        self.assertFalse(record)
+    def test_phone_checks_never_email(self):
+        result = self._issue(email='sita@example.com')
+        self.assertEqual(result['channels'], ['sms'], "Login, checkout and EMI prove the phone: SMS only.")
 
     def test_code_is_per_purpose(self):
         approve_otp(self.company, 'checkout')
-        self.Otp._nestsms_send('login', '9841234567')
-        record, error = self.Otp._nestsms_verify('checkout', '9841234567', self._sent_code())
-        self.assertFalse(record)
+        self._issue('login')
+        self.assertFalse(self.Otp._otp_verify('checkout', self._sent_code(), phone='9841234567')[0])
 
-    def test_expiry(self):
-        self.Otp._nestsms_send('login', '9841234567')
-        code = self._sent_code()
-        with freeze_time(fields.Datetime.now() + timedelta(minutes=11)):
-            record, error = self.Otp._nestsms_verify('login', '9841234567', code)
-        self.assertFalse(record)
-        self.assertIn("expired", error)
-
-    def test_new_code_replaces_old(self):
-        self.Otp._nestsms_send('login', '9841234567')
-        first = self._sent_code()
-        with freeze_time(fields.Datetime.now() + timedelta(seconds=61)):
-            self.Otp._nestsms_send('login', '9841234567')
-        second = self._sent_code()
-        if first != second:
-            self.assertFalse(self.Otp._nestsms_verify('login', '9841234567', first)[0])
-        self.assertTrue(self.Otp._nestsms_verify('login', '9841234567', second)[0])
-
-    def test_resend_cooldown_and_hourly_cap(self):
-        self.Otp._nestsms_send('login', '9841234567')
-        otp, error = self.Otp._nestsms_send('login', '9841234567')
-        self.assertFalse(otp)
-        self.assertIn("wait a minute", error)
-        self.assertEqual(len(self.nestsms.calls), 1)
-
-        now = fields.Datetime.now()
-        for minutes in (2, 4, 6, 8):
-            with freeze_time(now + timedelta(minutes=minutes)):
-                self.assertTrue(self.Otp._nestsms_send('login', '9841234567')[0])
-        with freeze_time(now + timedelta(minutes=10)):
-            otp, error = self.Otp._nestsms_send('login', '9841234567')
-        self.assertFalse(otp)
-        self.assertIn("Too many codes", error)
-        self.assertEqual(len(self.nestsms.calls), 5)
-
-    def test_site_wide_ceiling(self):
-        self.env['ir.config_parameter'].sudo().set_param('sms_nestsms.otp_max_per_hour', 2)
-        self.assertTrue(self.Otp._nestsms_send('login', '9841234567')[0])
-        self.assertTrue(self.Otp._nestsms_send('login', '9801234567')[0])
-        otp, error = self.Otp._nestsms_send('login', '9861234567')
-        self.assertFalse(otp)
-        self.assertEqual(len(self.nestsms.calls), 2)
-
-    def test_proxy_ip_not_capped(self):
-        Otp = self.Otp
-        self.assertFalse(Otp._is_public_ip('172.22.1.13'))
-        self.assertFalse(Otp._is_public_ip('127.0.0.1'))
-        self.assertFalse(Otp._is_public_ip(False))
-        self.assertTrue(Otp._is_public_ip('103.10.28.5'))
-
-    def test_refusals(self):
-        otp, error = self.Otp._nestsms_send('login', '+91 9812345678')
-        self.assertIn("Nepali mobile", error)
-        self.company.sms_otp_signup = False
-        otp, error = self.Otp._nestsms_send('signup', '9841234567')  # switched off
-        self.assertIn("not available", error)
+    def test_foreign_number_refused(self):
+        result = self._issue(phone='+91 9812345678')
+        self.assertTrue(result['error'])
         self.assertFalse(self.nestsms.calls)
 
-    def test_nestsms_refusal_is_recorded(self):
+    def test_switched_off_or_unapproved_never_sends(self):
+        self.company.sms_otp_login = False
+        self.assertIn("not available", self._issue()['error'])
+        self.company.sms_otp_login = True
+        self.company.sms_otp_login_template = '11111111-2222-3333-4444-555555555555'  # edited after Check
+        self.assertIn("not available", self._issue()['error'])
+        self.assertFalse(self.nestsms.calls)
+
+    def test_rejected_template_switches_the_flow_off(self):
         self.nestsms.replies = [fake_response(400, {
             'success': False, 'error': "Missing template variables", 'code': 'TEMPLATE_VARIABLES_MISSING',
             'missing_variables': ['otp'],
         })]
-        otp, error = self.Otp._nestsms_send('login', '9841234567')
-        self.assertFalse(otp)
-        self.assertIn("could not send", error)
-        failed = self.Otp.search([('number', '=', '9841234567')])
+        result = self._issue()
+        self.assertIn("could not send", result['error'])
+        failed = self.Otp.search([('phone', '=', '9841234567')])
         self.assertEqual(failed.state, 'failed')
         self.assertIn('TEMPLATE_VARIABLES_MISSING', failed.failure_reason)
-        # The template is unusable: the flow stops instead of failing for every customer.
         self.assertFalse(self.company._sms_otp_enabled('login'))
-        otp, error = self.Otp._nestsms_send('login', '9801234567')
-        self.assertIn("not available", error)
+        self.assertIn("not available", self._issue(phone='9801234567')['error'])
         self.assertEqual(len(self.nestsms.calls), 1, "No second attempt with a rejected template.")
 
     def test_passing_errors_keep_the_flow_on(self):
         self.nestsms.replies = [fake_response(400, {
             'success': False, 'error': "Wallet balance too low", 'code': 'INSUFFICIENT_BALANCE',
         })]
-        self.assertFalse(self.Otp._nestsms_send('login', '9841234567')[0])
+        self.assertTrue(self._issue()['error'])
         self.assertTrue(self.company._sms_otp_enabled('login'), "Not a template problem: no reason to stop.")
 
-    def test_unapproved_template_never_sends(self):
-        self.company.sms_otp_login_template = '11111111-2222-3333-4444-555555555555'  # edited after Check
-        self.assertFalse(self.company._sms_otp_enabled('login'))
-        otp, error = self.Otp._nestsms_send('login', '9841234567')
-        self.assertIn("not available", error)
-        self.assertFalse(self.nestsms.calls)
+    def test_texted_code_lasts_what_the_template_says(self):
+        self.assertEqual(self._issue()['otp']._otp_minutes(), 10)
 
 
 @tagged('post_install', '-at_install')
@@ -200,7 +140,7 @@ class TestOtpTemplateCheck(NestSmsCommon):
         action = self.env['res.config.settings'].create({}).with_context(
             sms_otp_purpose='login').action_sms_otp_check_template()
         self.assertEqual(action['params']['type'], 'success', action['params']['message'])
-        self.env['sms.nestsms.otp']._nestsms_send('login', '9841234567')
+        self.env['auth.otp']._otp_issue('login', phone='9841234567', company=self.company)
         return self.nestsms.calls[-1]['payload']['variables']
 
     def test_placeholders_are_filled(self):

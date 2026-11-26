@@ -4,7 +4,11 @@ from odoo import _, http
 from odoo.exceptions import UserError
 from odoo.http import request
 
-from odoo.addons.web.controllers.home import Home
+from odoo.addons.auth_signup.controllers.main import AuthSignupHome
+from odoo.addons.web.controllers.home import SIGN_UP_REQUEST_PARAMS, Home
+
+# Let the sign-up form's mobile number (shown when sign-up codes also go by SMS) through.
+SIGN_UP_REQUEST_PARAMS.add('phone')
 
 
 class SignupVerification(Home):
@@ -33,13 +37,14 @@ class SignupVerification(Home):
         if user.signup_email_verified:  # activated meanwhile, e.g. with the link on another device
             return self._signup_finish_login(user, redirect)
 
-        values = {'redirect': redirect, 'validity': user._signup_validity()}
+        values = {'redirect': redirect}
         if request.httprequest.method == 'POST':
             if resend:
-                if user._signup_send_verification():
+                sent, error = user._signup_send_verification()
+                if sent:
                     values['message'] = user._signup_message('resent')
                 else:
-                    values['error'] = user._signup_message('cooldown')
+                    values['error'] = error
             else:
                 try:
                     user._signup_check_code(code)
@@ -47,11 +52,15 @@ class SignupVerification(Home):
                     values['error'] = error.args[0]
                 else:
                     return self._signup_finish_login(user, redirect)
-        elif not user._signup_has_valid_code() and user._signup_send_verification():
+        elif not user._signup_has_valid_code() and user._signup_send_verification()[0]:
             # Back after the code expired (or it was used up): a fresh one is on its way.
             values['message'] = user._signup_message('expired')
-        # Read last: a resend may have switched the channel.
-        values.update(channel=user._signup_channel(), sent_to=user._signup_sent_to(), email=user._signup_sent_to())
+        # Read last: a resend changes where the code went and how long it lasts.
+        pending = user._signup_pending()
+        values.update(
+            sent_to=user._signup_sent_to(),
+            validity=pending._otp_minutes() if pending else user._signup_validity(),
+        )
         response = request.render('auth_signup_email_otp.signup_verify', values)
         response.headers['Cache-Control'] = 'no-cache'
         return response
@@ -68,3 +77,21 @@ class SignupVerification(Home):
         return request.redirect('/web/login?' + url_encode({
             'login': user.login, 'message': _("Your account is activated. Log in to continue."),
         }))
+
+
+class SignupMobileNumber(AuthSignupHome):
+    """Where sign-up codes also go by SMS, the sign-up form asks for the mobile number."""
+
+    def get_auth_signup_qcontext(self):
+        qcontext = super().get_auth_signup_qcontext()
+        qcontext['signup_phone_enabled'] = request.env['auth.otp'].sudo()._otp_sms_available('signup', request.env.company)
+        return qcontext
+
+    def _prepare_signup_values(self, qcontext):
+        values = super()._prepare_signup_values(qcontext)
+        if qcontext.get('signup_phone_enabled') and not qcontext.get('token'):
+            phone = (qcontext.get('phone') or '').strip()
+            if not phone:
+                raise UserError(_("Enter your mobile number: we also text your activation code to it."))
+            values['phone'] = phone
+        return values

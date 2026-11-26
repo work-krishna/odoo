@@ -1,6 +1,6 @@
 {
     "name": "Email OTP Login Authentication",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.1.0",
     "category": "Website/Authentication",
     "summary": "Secure passwordless login using Email OTP verification",
     "description": """
@@ -50,7 +50,8 @@ provides a seamless authentication experience.
     "depends": [
         "base",
         "mail",
-        "website"
+        "website",
+        "auth_otp"
     ],
     "data": [
         "data/mail_template_data.xml",

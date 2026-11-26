@@ -22,11 +22,13 @@ Each flow needs its own approved NestSMS OTP template, and is switched on in Set
 | Module | Flow |
 |---|---|
 | `sms_nestsms_login` | Customers log in with a code texted to their **verified** number. The login page shows a "Log in with an SMS code" link. Staff accounts can't log in this way: they keep their password and two-factor authentication. |
-| `sms_nestsms_signup` | Website sign-ups enter their mobile number, and the activation code goes by SMS instead of email. Numbers outside Nepal, or a failed SMS, fall back to email. Builds on `auth_signup_email_otp`. |
-| `sms_nestsms_website_sale` | After the address step, shoppers confirm their mobile number before choosing delivery and paying. This is asked once per customer and number; a number proven at sign-up counts. The payment route refuses unconfirmed carts, so the step can't be skipped. |
+| `sms_nestsms_signup` | Website sign-ups enter their mobile number and get **the same activation code by email and by SMS**. Either copy activates the account, and the activation page names both destinations. A number outside Nepal, or a failed SMS, still leaves the email. Builds on `auth_signup_email_otp`. |
+| `sms_nestsms_website_sale` | After the address step, shoppers confirm their mobile number before choosing delivery and paying. This is asked once per customer and number. The payment route refuses unconfirmed carts, so the step can't be skipped. |
 | `sms_nestsms_emi` | EMI applicants confirm their number before the form. The application always carries the proven number, whatever the form sends. |
 
-A number proven in any flow is stored on the contact as **Phone Verified by SMS**. Login by SMS only works for such numbers: otherwise a typo in a customer's phone number would let a stranger who owns that number into their account.
+**One code engine.** Every code on the site comes from `auth_otp` (the One-Time Codes module): sign-up, email login, SMS login, checkout and EMI. It generates one code, stores only a keyed hash, and enforces the expiry, the tries and the rate limits in one place. Email and SMS are just ways of delivering that code. This module is the SMS channel.
+
+A number proven by a code sent **only** by SMS (checkout, EMI application, SMS login) is stored on the contact as **Phone Verified by SMS**. The sign-up code goes to the email address as well, so entering it proves the email or the phone, not the phone. Login by SMS only works for verified numbers: otherwise a typo in a customer's phone number would let a stranger who owns that number into their account.
 
 ## Setup
 
@@ -82,8 +84,8 @@ One-time codes:
 - A code stops working after 5 wrong tries.
 - After a code is sent, another can be requested after 60 seconds.
 - At most 5 codes go to one number per hour, and at most 10 to one IP address per hour.
-- A site-wide ceiling of 200 codes per hour stops bots draining the wallet. It is set by the system parameter `sms_nestsms.otp_max_per_hour`.
-- Every code request is listed under Settings > Technical > Phone / SMS > SMS One-Time Codes.
+- A site-wide ceiling of 200 codes per hour stops bots draining the wallet. It is set by the system parameter `auth_otp.max_per_hour`.
+- Every code request is listed under Settings > Technical > Security > One-Time Codes, with where it went (email, SMS) and why a send failed.
 
 The per-IP limit needs the real visitor address. Behind a reverse proxy, start Odoo with `proxy_mode = True` and have the proxy send `X-Forwarded-For`. Otherwise every visitor shows the proxy's private address, the per-IP limit is skipped, and only the per-number limits and the site-wide ceiling apply.
 
@@ -103,7 +105,7 @@ The per-IP limit needs the real visitor address. Behind a reverse proxy, start O
 | Server Error | NestSMS was unreachable, failed, or rate-limited the key. Resend later. |
 | Not Delivered | NestSMS reported the handset unreachable. The reason gives their message. |
 
-If customers report that codes don't arrive, check the code log (SMS One-Time Codes): the **Not Sent** rows give NestSMS's reason.
+If customers report that codes don't arrive, check the code log (One-Time Codes): the **Not Sent** rows, and the failure reason on rows that only reached one channel, give NestSMS's reason.
 
 ## Known limits
 
@@ -117,7 +119,8 @@ If customers report that codes don't arrive, check the code log (SMS One-Time Co
 - Errors map only to failure types that `sms.sms`, `mail.notification` and `mailing.trace` all accept, so recording a failure can't crash. A test checks this.
 - Customer texts: call `record._sms_nestsms_notify(template_or_xmlid, partner)`. It queues the SMS, logs it on the chatter, and returns False when it skips.
 - One-time codes:
-  - Send with `env['sms.nestsms.otp']._nestsms_send(purpose, number, company, code=None)` and check with `_nestsms_verify(purpose, number, code)`.
+  - Issue with `env['auth.otp']._otp_issue(purpose, user=..., email=..., phone=..., company=..., with_link=False, email_sender=None)` and check with `_otp_verify(purpose, code, user=/email=/phone=)` (auth_otp).
+  - This module plugs into that engine as the SMS channel through `_otp_sms_available`, `_otp_send_sms`, `_otp_normalize_phone` (Nepali mobiles only) and `_otp_sms_max_validity` (10 minutes, as the approved template text says). Login, checkout and EMI are SMS-only purposes (`SMS_ONLY_PURPOSES`).
   - Both return `(record, False)` or `(False, message)` and never raise, so a wrong guess stays counted even when the caller shows an error.
   - Mark a proven number with `partner._sms_mark_phone_verified(number)`.
   - Purposes and their company fields (`sms_otp_<purpose>`, `sms_otp_<purpose>_template`) live in this module. Each flow module only adds its own row in Settings.

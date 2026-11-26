@@ -35,16 +35,17 @@ class WebsiteSaleSmsCheckout(WebsiteSale):
             'sent_to': number and f"{number[:3]}*****{number[-2:]}",
             'edit_url': f'/shop/address?partner_id={partner.id}&address_type=billing',
         }
-        Otp = request.env['sms.nestsms.otp']
+        Otp = request.env['auth.otp']
         if request.httprequest.method == 'POST' and number:
             if send:
-                otp, error = Otp._nestsms_send('checkout', number, order_sudo.website_id.company_id)
+                result = Otp._otp_issue('checkout', phone=number, company=order_sudo.website_id.company_id)
+                otp, error = result['otp'], result['error']
                 if otp:
                     request.session[SESSION_KEY] = number
                     values['message'] = _("We texted you a code.")
                 values['error'] = error
             elif code is not None:
-                otp, error = Otp._nestsms_verify('checkout', number, code)
+                otp, error = Otp._otp_verify('checkout', code, phone=number)
                 if otp:
                     partner._sms_mark_phone_verified(number)
                     request.session.pop(SESSION_KEY, None)

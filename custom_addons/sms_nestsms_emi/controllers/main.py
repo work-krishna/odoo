@@ -63,13 +63,14 @@ class EmiApplySms(EmiApply):
                 if not mobile:
                     values['error'] = _("Enter a Nepali mobile number (98XXXXXXXX).")
                 else:
-                    otp, error = request.env['sms.nestsms.otp']._nestsms_send('emi', mobile, request.env.company)
+                    result = request.env['auth.otp']._otp_issue('emi', phone=mobile, company=request.env.company)
+                    otp, error = result['otp'], result['error']
                     if otp:
                         request.session[SESSION_KEY] = number = mobile
                         values['message'] = _("We texted you a code.")
                     values['error'] = error
             elif code is not None and number:
-                otp, error = request.env['sms.nestsms.otp']._nestsms_verify('emi', number, code)
+                otp, error = request.env['auth.otp']._otp_verify('emi', code, phone=number)
                 if otp:
                     partner._sms_mark_phone_verified(number)
                     request.session.pop(SESSION_KEY, None)

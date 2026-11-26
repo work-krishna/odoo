@@ -28,7 +28,7 @@ class ResUsers(models.Model):
         user = self.env.user
         if self._sms_login_user(credential.get('number')) != user:
             raise AccessDenied()
-        otp, error = self.env['sms.nestsms.otp']._nestsms_verify('login', credential['number'], credential.get('code'))
+        otp, error = self.env['auth.otp']._otp_verify('login', credential.get('code'), user=user, phone=credential['number'])
         if not otp:
             raise AccessDenied(error)
         # 'default': a customer who turned on two-factor authentication still gets asked for it.

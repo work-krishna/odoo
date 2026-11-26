@@ -1,30 +1,22 @@
-import re
-import secrets
+"""Website sign-ups activate their account with a one-time code (or the emailed link).
+
+The code itself (generation, hashing, expiry, wrong tries, resend cooldown, rate limits) comes
+from the one-time-code engine, auth_otp: ONE code per request, emailed to the account's
+address and, where SMS codes are on for sign-up, texted to its mobile number too. Either copy
+activates the account.
+"""
 from datetime import timedelta
 
 from werkzeug.urls import url_encode
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
-from odoo.tools import consteq
-from odoo.tools.misc import hmac
+
+from odoo.addons.auth_otp.models.auth_otp import mask_email
 
 VALIDITY_PARAM = 'auth_signup_email_otp.validity_minutes'
 DEFAULT_VALIDITY = 15  # minutes
-RESEND_COOLDOWN = timedelta(seconds=60)
-MAX_ATTEMPTS = 5
-
-
-def _new_code():
-    return f"{secrets.randbelow(10 ** 6):06d}"
-
-
-def _new_token():
-    return secrets.token_urlsafe(32)
-
-
-def _digest(env, scope, message):
-    return hmac(env(su=True), f'auth_signup_email_otp.{scope}', message)
+PURPOSE = 'signup'
 
 
 class ResUsers(models.Model):
@@ -64,7 +56,7 @@ class ResUsers(models.Model):
         return not self.sudo().signup_email_verified or super()._rpc_api_keys_only()
 
     # ------------------------------------------------------------------
-    # Code and link
+    # Code and link (auth_otp)
     # ------------------------------------------------------------------
 
     @api.model
@@ -77,116 +69,104 @@ class ResUsers(models.Model):
         return max(minutes, 1)
 
     def _signup_pending(self):
+        """The activation code waiting to be entered (an auth.otp record), if any."""
         self.ensure_one()
-        return self.env['auth.signup.verification'].sudo().search([('user_id', '=', self.id)])
+        return self.env['auth.otp']._otp_live(PURPOSE, user=self)
 
     def _signup_has_valid_code(self):
         pending = self._signup_pending()
-        return bool(pending) and pending.attempts < MAX_ATTEMPTS and pending.expires_at > fields.Datetime.now()
+        return bool(pending) and pending.expires_at > fields.Datetime.now()
 
     def _signup_send_verification(self):
-        """Email a new code and activation link, replacing the previous ones.
-        Returns False, sending nothing, when the last email is under a minute old."""
+        """Send one new activation code to the account's email address (with an activation
+        link) and, where SMS codes are on for sign-up, the same code to its mobile number. It
+        replaces the previous code. Returns ``(sent, error)``."""
         self.ensure_one()
-        pending = self._signup_pending()
-        now = fields.Datetime.now()
-        if pending and now - pending.sent_at < RESEND_COOLDOWN:
-            return False
-        code, token, minutes = _new_code(), _new_token(), self._signup_validity()
-        vals = {
-            'user_id': self.id,
-            'code_hash': _digest(self.env, 'code', f'{self.id}:{code}'),
-            'token_hash': _digest(self.env, 'link', token),
-            'expires_at': now + timedelta(minutes=minutes),
-            'sent_at': now,
-            'attempts': 0,
-        }
-        if pending:
-            pending.write(vals)
-        else:
-            pending = self.env['auth.signup.verification'].sudo().create(vals)
-        link = f"{self.get_base_url()}/web/signup/activate?{url_encode({'token': token})}"
-        pending.channel = self._signup_deliver_verification(code, link, minutes)
-        return True
+        result = self.env['auth.otp']._otp_issue(
+            PURPOSE, user=self, email=self.email, phone=self.partner_id.phone, company=self.company_id,
+            with_link=True, email_sender=self._signup_email_sender,
+        )
+        return bool(result['otp']), result['error']
 
-    def _signup_deliver_verification(self, code, link, minutes):
-        """Send the new code (and link) to the person; returns the channel used. Override
-        to deliver another way, e.g. by SMS."""
-        self.ensure_one()
+    def _signup_email_sender(self, otp, code, token):
+        link = f"{self.get_base_url()}/web/signup/activate?{url_encode({'token': token})}"
         template = self.env.ref('auth_signup_email_otp.mail_template_signup_verification')
-        template.sudo().with_context(signup_code=code, signup_link=link, signup_validity=minutes).send_mail(
+        template.sudo().with_context(signup_code=code, signup_link=link, signup_validity=otp._otp_minutes()).send_mail(
             self.id, force_send=True,
         )
-        return 'email'
-
-    def _signup_channel(self):
-        """How the pending code was sent: 'email', or a channel added by another module."""
-        self.ensure_one()
-        return self._signup_pending().channel or 'email'
-
-    def _signup_sent_to(self):
-        """Where the pending code went, masked for display."""
-        self.ensure_one()
-        local, _sep, domain = (self.email or '').partition('@')
-        if len(local) > 2:
-            local = f"{local[0]}{'*' * (len(local) - 2)}{local[-1]}"
-        return f"{local}@{domain}" if domain else self.email
-
-    def _signup_message(self, kind):
-        """Text for the verify page: 'resent' (new code on its way), 'cooldown' (asked again
-        too soon), 'expired' (old code dead, new one sent)."""
-        self.ensure_one()
-        return {
-            'resent': _("We emailed you a new code and link."),
-            'cooldown': _("We sent you a code less than a minute ago. Check your inbox and spam "
-                          "folder, or try again in a moment."),
-            'expired': _("Your previous code has expired, so we emailed you a new one."),
-        }[kind]
 
     def _signup_check_code(self, code):
-        """Activate the account if ``code`` is the one last emailed; otherwise
-        raise a UserError saying why not."""
+        """Activate the account if ``code`` is the live one; otherwise raise a UserError
+        saying why not."""
         self.ensure_one()
-        pending = self._signup_pending()
-        if not pending or pending.attempts >= MAX_ATTEMPTS:
-            raise UserError(_("This code can no longer be used. Send yourself a new one."))
-        if pending.expires_at <= fields.Datetime.now():
-            raise UserError(_("This code has expired. Send yourself a new one."))
-        code = re.sub(r'\s', '', code or '')
-        if not consteq(pending.code_hash, _digest(self.env, 'code', f'{self.id}:{code}')):
-            pending.attempts += 1
-            left = MAX_ATTEMPTS - pending.attempts
-            if not left:
-                raise UserError(_("That code is not right, and it cannot be used any more. Send yourself a new one."))
-            raise UserError(_("That code is not right. %(left)s tries left.", left=left))
+        otp, error = self.env['auth.otp']._otp_verify(PURPOSE, code, user=self)
+        if not otp:
+            raise UserError(error)
         self._signup_mark_verified()
 
     @api.model
     def _signup_check_link(self, token):
-        """Account of an activation link, now activated; raises a UserError if
-        the link is unknown, replaced by a newer one, or expired."""
-        pending = self.env['auth.signup.verification'].sudo().search(
-            [('token_hash', '=', _digest(self.env, 'link', token or ''))], limit=1)
-        if not token or not pending:
-            raise UserError(_("This activation link is not valid, or a newer one was sent since."))
-        if pending.expires_at <= fields.Datetime.now():
-            raise UserError(_("This activation link has expired."))
-        user = pending.user_id
+        """Account of an activation link, now activated; raises a UserError if the link is
+        unknown, replaced by a newer one, or expired."""
+        otp, error = self.env['auth.otp']._otp_verify_link(PURPOSE, token)
+        if not otp:
+            raise UserError(error)
+        user = otp.user_id
         user._signup_mark_verified()
         return user
 
     def _signup_mark_verified(self):
         users = self.sudo().filtered(lambda u: not u.signup_email_verified)
         users.signup_email_verified = True
-        self.env['auth.signup.verification'].sudo().search([('user_id', 'in', self.ids)]).unlink()
+        for user in self:
+            self.env['auth.otp']._otp_close(PURPOSE, user=user)
         # The welcome email auth_signup sends at sign-up was held back until now.
         welcome = self.env.ref('auth_signup.mail_template_user_signup_account_created', raise_if_not_found=False)
         for user in users.filtered(lambda u: u.share and u.email):
             if welcome:
                 welcome.sudo().send_mail(user.id, force_send=True)
 
+    def _signup_sent_to(self):
+        """Where the live code went, masked for display: {'email': ..., 'sms': ...}."""
+        self.ensure_one()
+        pending = self._signup_pending()
+        return pending._otp_sent_to() if pending else {'email': mask_email(self.email)}
+
+    def _signup_message(self, kind):
+        """Text for the verify page: 'resent' (new code on its way) or 'expired' (old code
+        dead, new one sent)."""
+        self.ensure_one()
+        sent_to = self._signup_sent_to()
+        if sent_to.get('email') and sent_to.get('sms'):
+            return {
+                'resent': _("We sent you a new code by email and SMS."),
+                'expired': _("Your previous code has expired, so we sent you a new one by email and SMS."),
+            }[kind]
+        if sent_to.get('sms'):
+            return {
+                'resent': _("We texted you a new code."),
+                'expired': _("Your previous code has expired, so we texted you a new one."),
+            }[kind]
+        return {
+            'resent': _("We emailed you a new code and link."),
+            'expired': _("Your previous code has expired, so we emailed you a new one."),
+        }[kind]
+
     def action_signup_send_verification(self):
-        """Settings > Users: email a new activation code to accounts not activated yet."""
+        """Settings > Users: send a new activation code to accounts not activated yet."""
         for user in self.filtered(lambda u: not u.signup_email_verified):
             user._signup_send_verification()
         return True
+
+
+class AuthOtp(models.Model):
+    _inherit = 'auth.otp'
+
+    @api.model
+    def _otp_policy(self, purpose, company):
+        policy = super()._otp_policy(purpose, company)
+        if purpose == PURPOSE:
+            # Settings > Sign-up Activation. A texted code may be capped shorter (its approved
+            # message states the minutes): see auth.otp._otp_sms_max_validity.
+            policy = dict(policy, validity=timedelta(minutes=self.env['res.users']._signup_validity()))
+        return policy

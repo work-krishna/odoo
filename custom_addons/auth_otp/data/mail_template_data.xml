@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Used when a flow doesn't bring its own email (sign-up and email login do). -->
+    <record id="mail_template_otp_code" model="mail.template">
+        <field name="name">One-Time Code</field>
+        <field name="model_id" ref="auth_otp.model_auth_otp"/>
+        <field name="subject">{{ ctx.get('otp_code') }} is your verification code</field>
+        <field name="email_from">{{ (object.company_id.email_formatted or user.email_formatted) }}</field>
+        <field name="email_to">{{ object.email }}</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+<div style="margin: 0px; padding: 0px; font-family: Arial, sans-serif;">
+    <p>Your verification code for <t t-out="object.company_id.name or ''">your account</t> is:</p>
+    <p style="font-size: 28px; font-weight: bold; letter-spacing: 6px;" t-out="ctx.get('otp_code')">000000</p>
+    <p>It expires in <t t-out="ctx.get('otp_minutes')">10</t> minutes. Never share it with anyone: we will never ask you for it.</p>
+    <p style="color: #888888;">If you didn't ask for this code, you can ignore this email.</p>
+</div>
+        </field>
+    </record>
+</odoo>

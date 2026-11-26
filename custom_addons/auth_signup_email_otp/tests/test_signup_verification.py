@@ -9,7 +9,8 @@ from odoo.tests.common import new_test_user
 
 from odoo.addons.auth_signup_email_otp.models.res_users import VALIDITY_PARAM
 
-MODULE = 'odoo.addons.auth_signup_email_otp.models.res_users'
+# Codes and link tokens come from the one-time-code engine.
+MODULE = 'odoo.addons.auth_otp.models.auth_otp'
 PASSWORD = 'Str0ng-Signup-Pass'
 
 
@@ -48,8 +49,8 @@ class TestSignupEmailOtp(HttpCase):
         return self.url_open('/web/login_successful').url.endswith('/web/login_successful')
 
     def _age(self, user, **delta):
-        """Move the pending code's clock back."""
-        pending = user._signup_pending()
+        """Move the latest code's clock back (even a used-up one: it sets the resend cooldown)."""
+        pending = self.env['auth.otp'].sudo().search([('purpose', '=', 'signup'), ('user_id', '=', user.id)], limit=1)
         pending.write({'sent_at': pending.sent_at - timedelta(**delta),
                        'expires_at': pending.expires_at - timedelta(**delta)})
 

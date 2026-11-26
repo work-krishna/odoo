@@ -58,9 +58,11 @@ class SmsLogin(Home):
                 else:
                     # Same answer whether or not the number has an account, so the page
                     # can't be used to find out who is a customer.
-                    if request.env['res.users']._sms_login_user(mobile):
-                        _otp, error = request.env['sms.nestsms.otp']._nestsms_send('login', mobile, request.env.company)
-                        values['error'] = error
+                    user = request.env['res.users']._sms_login_user(mobile)
+                    if user:
+                        values['error'] = request.env['auth.otp']._otp_issue(
+                            'login', user=user, phone=mobile, company=request.env.company,
+                        )['error']
                     if not values.get('error'):
                         request.session[SESSION_KEY] = number = mobile
                         values['message'] = _("If this number belongs to an account, we have texted it a code.")
