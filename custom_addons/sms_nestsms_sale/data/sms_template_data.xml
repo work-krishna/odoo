@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Plain GSM characters only ("Rs." not the rupee sign): one non-GSM character makes
+         the whole SMS Unicode, which fits 70 characters per credit instead of 160. -->
+    <record id="sms_template_order_confirmed" model="sms.template">
+        <field name="name">Sales: Order Confirmed</field>
+        <field name="model_id" ref="sale.model_sale_order"/>
+        <field name="body">{{ object.company_id.sms_brand_name or object.company_id.name }}: Your order {{ object.name }} (Rs. {{ '%.2f' % object.amount_total }}) is confirmed. Thank you for shopping with us!</field>
+    </record>
+</odoo>

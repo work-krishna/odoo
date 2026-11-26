@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="login_sms_link" inherit_id="web.login" name="Login: Log In with an SMS Code">
+        <xpath expr="//div[hasclass('oe_login_buttons')]" position="after">
+            <div class="text-center small mt-3" t-if="sms_login_enabled">
+                <a t-att-href="'/web/login/sms' + ('?' + keep_query('redirect') if redirect else '')">Log in with an SMS code</a>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="login_sms" name="Log In with an SMS Code">
+        <t t-call="web.login_layout">
+            <h4 class="mb-3">Log in with an SMS code</h4>
+            <p class="alert alert-success" t-if="message" role="status" t-out="message"/>
+            <p class="alert alert-danger" t-if="error" role="alert" t-out="error"/>
+
+            <form t-if="step == 'phone'" class="oe_login_form" role="form" method="post" action="/web/login/sms">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                <input type="hidden" name="redirect" t-att-value="redirect"/>
+                <p>Enter the mobile number you verified with us. We will text you a 6-digit code.</p>
+                <div class="mb-3">
+                    <label for="sms_login_phone" class="form-label">Mobile number</label>
+                    <input type="tel" name="phone" id="sms_login_phone" class="form-control" required="required"
+                           autofocus="autofocus" autocomplete="tel" inputmode="tel" placeholder="98XXXXXXXX"/>
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">Text me a code</button>
+                </div>
+            </form>
+
+            <t t-if="step == 'code'">
+                <form class="oe_login_form" role="form" method="post" action="/web/login/sms">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <input type="hidden" name="redirect" t-att-value="redirect"/>
+                    <p>Enter the code we texted to <strong t-out="sent_to"/>. It expires 10 minutes after we send it.</p>
+                    <div class="mb-3">
+                        <label for="sms_login_code" class="form-label">Code</label>
+                        <input type="text" name="code" id="sms_login_code" class="form-control form-control-lg text-center"
+                               required="required" autofocus="autofocus" autocomplete="one-time-code"
+                               inputmode="numeric" maxlength="7" placeholder="000000"/>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Log in</button>
+                    </div>
+                </form>
+                <form method="post" action="/web/login/sms" class="text-center mt-3">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <input type="hidden" name="redirect" t-att-value="redirect"/>
+                    <input type="hidden" name="phone" t-att-value="number"/>
+                    <button type="submit" class="btn btn-link">Text me a new code</button>
+                </form>
+                <form method="post" action="/web/login/sms" class="text-center">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <input type="hidden" name="redirect" t-att-value="redirect"/>
+                    <input type="hidden" name="restart" value="1"/>
+                    <button type="submit" class="btn btn-link">Use another number</button>
+                </form>
+            </t>
+            <p class="text-center small mb-0 mt-2">
+                <a t-att-href="'/web/login' + ('?' + keep_query('redirect') if redirect else '')">Log in with your password instead</a>
+            </p>
+        </t>
+    </template>
+</odoo>

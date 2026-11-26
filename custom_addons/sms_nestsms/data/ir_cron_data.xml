@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="ir_cron_nestsms_delivery_status" model="ir.cron">
+        <field name="name">NestSMS: Update Delivery Status</field>
+        <field name="model_id" ref="sms.model_sms_tracker"/>
+        <field name="state">code</field>
+        <field name="code">model._nestsms_cron_update_delivery()</field>
+        <field name="interval_number">15</field>
+        <field name="interval_type">minutes</field>
+    </record>
+</odoo>

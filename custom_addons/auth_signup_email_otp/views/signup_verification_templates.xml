@@ -7,8 +7,8 @@
                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                 <input type="hidden" name="redirect" t-att-value="redirect"/>
                 <h4 class="mb-3">Activate your account</h4>
-                <p>
-                    We emailed a 6-digit code and an activation link to <strong t-out="email"/>.
+                <p id="signup_verify_intro">
+                    We emailed a 6-digit code and an activation link to <strong t-out="sent_to"/>.
                     Enter the code below, or open the link. Both expire <t t-out="validity"/> minutes after we send them.
                 </p>
                 <p class="alert alert-success" t-if="message" role="status" t-out="message"/>
@@ -27,7 +27,7 @@
                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                 <input type="hidden" name="redirect" t-att-value="redirect"/>
                 <input type="hidden" name="resend" value="1"/>
-                <button type="submit" class="btn btn-link">Email me a new code</button>
+                <button type="submit" class="btn btn-link" id="signup_verify_resend">Email me a new code</button>
             </form>
             <p class="text-center small mb-0">
                 <a href="/web/session/logout?redirect=/web/login">Use another account</a>

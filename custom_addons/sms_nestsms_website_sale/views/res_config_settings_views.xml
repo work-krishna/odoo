@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.sms_nestsms_website_sale</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="sms_nestsms.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <div id="sms_nestsms_otp" position="inside">
+                <div class="mt-2">
+                    <field name="sms_otp_checkout" class="w-auto"/>
+                    <label for="sms_otp_checkout" string="Confirm shoppers' mobile numbers by SMS at checkout" class="o_light_label"/>
+                    <div class="row ms-4" invisible="not sms_otp_checkout">
+                        <label for="sms_otp_checkout_template" string="OTP template ID" class="col-lg-4 o_light_label"/>
+                        <field name="sms_otp_checkout_template" class="col-lg-6" placeholder="Approved NestSMS template ID"/>
+                        <button name="action_sms_otp_check_template" type="object" string="Check" class="btn-link col-lg-2"
+                                context="{'sms_otp_purpose': 'checkout'}"/>
+                    </div>
+                </div>
+            </div>
+        </field>
+    </record>
+</odoo>

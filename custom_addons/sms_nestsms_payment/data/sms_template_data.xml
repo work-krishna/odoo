@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Plain GSM characters only ("Rs." not the rupee sign): one non-GSM character makes
+         the whole SMS Unicode, which fits 70 characters per credit instead of 160. -->
+    <record id="sms_template_payment_received" model="sms.template">
+        <field name="name">Payment: Received</field>
+        <field name="model_id" ref="account.model_account_payment"/>
+        <field name="body">{{ object.company_id.sms_brand_name or object.company_id.name }}: We have received your payment of Rs. {{ '%.2f' % object.amount }}{{ (' for ' + object.memo) if object.memo else '' }}. Thank you!</field>
+    </record>
+</odoo>

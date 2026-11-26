@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Replaces core's "...your order n° S00123 has been shipped" text: its "n°" isn't a GSM
+         character, which made every text Unicode (70 characters per credit instead of 160),
+         and it opened with the full company name instead of the one-word brand. -->
+    <record id="sms_template_shipped" model="sms.template">
+        <field name="name">Delivery: Order Shipped</field>
+        <field name="model_id" ref="stock.model_stock_picking"/>
+        <field name="body">{{ object.company_id.sms_brand_name or object.company_id.name }}: Your order {{ object.origin or object.name }} has been shipped.{{ (' Tracking ref: ' + object.carrier_tracking_ref + '.') if hasattr(object, 'carrier_tracking_ref') and object.carrier_tracking_ref else '' }}</field>
+    </record>
+</odoo>

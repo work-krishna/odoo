@@ -104,13 +104,44 @@ class ResUsers(models.Model):
         if pending:
             pending.write(vals)
         else:
-            self.env['auth.signup.verification'].sudo().create(vals)
+            pending = self.env['auth.signup.verification'].sudo().create(vals)
         link = f"{self.get_base_url()}/web/signup/activate?{url_encode({'token': token})}"
+        pending.channel = self._signup_deliver_verification(code, link, minutes)
+        return True
+
+    def _signup_deliver_verification(self, code, link, minutes):
+        """Send the new code (and link) to the person; returns the channel used. Override
+        to deliver another way, e.g. by SMS."""
+        self.ensure_one()
         template = self.env.ref('auth_signup_email_otp.mail_template_signup_verification')
         template.sudo().with_context(signup_code=code, signup_link=link, signup_validity=minutes).send_mail(
             self.id, force_send=True,
         )
-        return True
+        return 'email'
+
+    def _signup_channel(self):
+        """How the pending code was sent: 'email', or a channel added by another module."""
+        self.ensure_one()
+        return self._signup_pending().channel or 'email'
+
+    def _signup_sent_to(self):
+        """Where the pending code went, masked for display."""
+        self.ensure_one()
+        local, _sep, domain = (self.email or '').partition('@')
+        if len(local) > 2:
+            local = f"{local[0]}{'*' * (len(local) - 2)}{local[-1]}"
+        return f"{local}@{domain}" if domain else self.email
+
+    def _signup_message(self, kind):
+        """Text for the verify page: 'resent' (new code on its way), 'cooldown' (asked again
+        too soon), 'expired' (old code dead, new one sent)."""
+        self.ensure_one()
+        return {
+            'resent': _("We emailed you a new code and link."),
+            'cooldown': _("We sent you a code less than a minute ago. Check your inbox and spam "
+                          "folder, or try again in a moment."),
+            'expired': _("Your previous code has expired, so we emailed you a new one."),
+        }[kind]
 
     def _signup_check_code(self, code):
         """Activate the account if ``code`` is the one last emailed; otherwise

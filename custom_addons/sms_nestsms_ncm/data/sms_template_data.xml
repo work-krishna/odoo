@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Plain GSM characters only ("Rs." not the rupee sign): one non-GSM character makes
+         the whole SMS Unicode, which fits 70 characters per credit instead of 160. -->
+    <record id="sms_template_ncm_out_for_delivery" model="sms.template">
+        <field name="name">Delivery: Out for Delivery (NCM)</field>
+        <field name="model_id" ref="stock.model_stock_picking"/>
+        <field name="body">{{ object.company_id.sms_brand_name or object.company_id.name }}: Your order {{ object.sale_id.name or object.origin or object.name }} is out for delivery with Nepal Can Move today.{{ (' Please keep Rs. ' + ('%.2f' % object.ncm_cod_amount) + ' ready.') if object.ncm_cod_amount else '' }}</field>
+    </record>
+
+    <record id="sms_template_ncm_delivered" model="sms.template">
+        <field name="name">Delivery: Delivered (NCM)</field>
+        <field name="model_id" ref="stock.model_stock_picking"/>
+        <field name="body">{{ object.company_id.sms_brand_name or object.company_id.name }}: Your order {{ object.sale_id.name or object.origin or object.name }} has been delivered. Thank you for shopping with us!</field>
+    </record>
+</odoo>

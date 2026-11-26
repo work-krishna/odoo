@@ -1,0 +1,106 @@
+# NestSMS
+
+Sends every SMS Odoo sends through [NestSMS](https://nestsms.com), on Nepal's domestic routes only. It also adds customer texts and one-time codes (OTPs), each switched on separately.
+
+## What it adds
+
+Installing `sms_nestsms` brings in each module below whose app is installed.
+
+**Texts to customers**
+
+| Module | Texts the customer when… | Switch |
+|---|---|---|
+| `sms_nestsms_sale` | their order is confirmed | Settings > General Settings > Send SMS |
+| `sms_nestsms_payment` | their payment is confirmed: online gateways, EMI down payments and instalments, and payments registered by hand | Settings > General Settings > Send SMS |
+| `sms_nestsms_stock` | a delivery is validated ("Your order S00123 has been shipped."). This replaces core `stock_sms`'s wording, whose "n°" character made every text Unicode. | Inventory > Configuration > Settings > SMS Confirmation |
+| `sms_nestsms_ncm` | Nepal Can Move sends the parcel out for delivery (with the cash to keep ready, for cash on delivery), and when it is delivered | the NCM delivery method > Text Customers |
+
+**One-time codes**
+
+Each flow needs its own approved NestSMS OTP template, and is switched on in Settings > General Settings > Send SMS.
+
+| Module | Flow |
+|---|---|
+| `sms_nestsms_login` | Customers log in with a code texted to their **verified** number. The login page shows a "Log in with an SMS code" link. Staff accounts can't log in this way: they keep their password and two-factor authentication. |
+| `sms_nestsms_signup` | Website sign-ups enter their mobile number, and the activation code goes by SMS instead of email. Numbers outside Nepal, or a failed SMS, fall back to email. Builds on `auth_signup_email_otp`. |
+| `sms_nestsms_website_sale` | After the address step, shoppers confirm their mobile number before choosing delivery and paying. This is asked once per customer and number; a number proven at sign-up counts. The payment route refuses unconfirmed carts, so the step can't be skipped. |
+| `sms_nestsms_emi` | EMI applicants confirm their number before the form. The application always carries the proven number, whatever the form sends. |
+
+A number proven in any flow is stored on the contact as **Phone Verified by SMS**. Login by SMS only works for such numbers: otherwise a typo in a customer's phone number would let a stranger who owns that number into their account.
+
+## Setup
+
+1. In the NestSMS dashboard, go to API Integration > API Token > Add Token, and give the key the `sms:*` permission (send, status, balance, templates). Copy the key: it is shown only once. If the key has an IP whitelist, add the Odoo server's IP address.
+2. In Odoo, go to Settings > General Settings > Send SMS:
+   - Paste the key into **NestSMS API Key**.
+   - Fill in **Brand Name**: one word with no spaces, such as `Flagship-Store`. Texts start with it, followed by a colon. It must match your OTP templates.
+   - Click **Send a test SMS**, then **Check balance**.
+3. For each OTP flow:
+   1. Have the template approved in NestSMS, with message type OTP. Example: `Flagship-Store: Your OTP for login is {otp}. It is valid for 10 minutes. Never share this code with anyone.`
+   2. Tick the flow's box, paste the template's ID, and click **Check**. Check confirms the template is approved, has the OTP type, has an `{otp}` placeholder and no other placeholders, starts with the brand name and a colon, and says 10 minutes.
+
+Each company has its own key, brand name and templates. Nothing is sent for a company until it has a key.
+
+The key is kept in the database, readable only by administrators. It is never in the source code (this repository is public). It is cleared when a database is neutralized, so a copied database can't text customers or spend the wallet.
+
+## Rules this module enforces
+
+NestSMS accounts are bound by Nepal Telecommunications Authority (NTA) rules. Breaking them can bring fines or a suspended account.
+
+- **Domestic routes only.** Nothing falls back to Odoo's own SMS service (IAP) or to Twilio, because both route abroad. Twilio can't be installed next to this module. Numbers that aren't Nepali mobiles (96/97/98 followed by 8 digits) are refused.
+- **OTPs only through approved templates.** Codes are sent only as `template_id` plus `{otp}`. Plain text that reads like a code is refused before it reaches NestSMS.
+- **Fair sending.**
+  - Each event texts the customer once.
+  - Numbers on the phone blacklist (opt-outs) get no customer texts.
+  - Texts are transactional only.
+  - If an error would hit every message (bad key, empty wallet, rate limit, NestSMS down), sending stops instead of retrying in a loop.
+- **No waiting on NestSMS.** Customer texts are queued and sent right after the order, payment or status change is saved.
+
+One-time codes:
+
+- Codes are 6 digits, valid 10 minutes, and only a keyed hash is stored.
+- A code stops working after 5 wrong tries.
+- After a code is sent, another can be requested after 60 seconds.
+- At most 5 codes go to one number per hour, and at most 10 to one IP address per hour.
+- A site-wide ceiling of 200 codes per hour stops bots draining the wallet. It is set by the system parameter `sms_nestsms.otp_max_per_hour`.
+- Every code request is listed under Settings > Technical > Phone / SMS > SMS One-Time Codes.
+
+The per-IP limit needs the real visitor address. Behind a reverse proxy, start Odoo with `proxy_mode = True` and have the proxy send `X-Forwarded-For`. Otherwise every visitor shows the proxy's private address, the per-IP limit is skipped, and only the per-number limits and the site-wide ceiling apply.
+
+## Daily use
+
+- Each customer text appears on the chatter of its order, payment or delivery. A cron asks NestSMS every 15 minutes and marks each text **Delivered** or **Failed**, for 2 days after sending. A red SMS icon means it failed: hover over it to see the reason, and use **Resend** once the cause is fixed.
+- To change a customer text, go to Settings > Technical > SMS Templates. Keep to plain characters: "Rs." rather than the rupee sign. Text in Nepali script goes out as Unicode, which fits 70 characters per credit instead of 160.
+
+## Troubleshooting
+
+| Failure shown on the chatter | Cause |
+|---|---|
+| Unregistered Account | Missing, wrong, expired or IP-restricted API key, or the sender ID isn't approved. The reason gives NestSMS's code. |
+| Insufficient Credit | The NestSMS wallet needs a top-up. |
+| Country Not Supported | The number isn't a Nepali mobile. |
+| Country-specific Registration Required | The text looked like an OTP, or a template problem. |
+| Server Error | NestSMS was unreachable, failed, or rate-limited the key. Resend later. |
+| Not Delivered | NestSMS reported the handset unreachable. The reason gives their message. |
+
+If customers report that codes don't arrive, check the code log (SMS One-Time Codes): the **Not Sent** rows give NestSMS's reason.
+
+## Known limits
+
+- When checkout verification is on, express checkout (wallet buttons on the cart) can't pay until the shopper has confirmed their number.
+- Delivery status is checked for 2 days after sending. After that, a text stays "Sent".
+
+## Developer notes
+
+- `tools/sms_api.py` is the only file that talks to NestSMS. Everything goes through `SmsApiNestSms._nestsms_request`, which the tests replace (`tests/common.py: patch_nestsms`).
+- Core `sms.sms._split_by_api` sends the queue through Odoo IAP whatever the company has chosen. `models/sms_sms.py` overrides it to route each company's SMS through NestSMS.
+- Errors map only to failure types that `sms.sms`, `mail.notification` and `mailing.trace` all accept, so recording a failure can't crash. A test checks this.
+- Customer texts: call `record._sms_nestsms_notify(template_or_xmlid, partner)`. It queues the SMS, logs it on the chatter, and returns False when it skips.
+- One-time codes:
+  - Send with `env['sms.nestsms.otp']._nestsms_send(purpose, number, company, code=None)` and check with `_nestsms_verify(purpose, number, code)`.
+  - Both return `(record, False)` or `(False, message)` and never raise, so a wrong guess stays counted even when the caller shows an error.
+  - Mark a proven number with `partner._sms_mark_phone_verified(number)`.
+  - Purposes and their company fields (`sms_otp_<purpose>`, `sms_otp_<purpose>_template`) live in this module. Each flow module only adds its own row in Settings.
+- `OTP_VALIDITY` (10 minutes) must match the approved template text. Check flags any mismatch.
+- Default texts stay within the GSM-7 alphabet (`is_gsm7`, checked by the tests).
+- Tests: `--test-tags /sms_nestsms,/sms_nestsms_sale,/sms_nestsms_payment,/sms_nestsms_stock,/sms_nestsms_ncm,/sms_nestsms_signup,/sms_nestsms_login,/sms_nestsms_website_sale,/sms_nestsms_emi`.

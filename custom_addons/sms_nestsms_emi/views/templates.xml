@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="apply_field_phone_locked" inherit_id="emi_storefront.apply_field" name="EMI form field: mobile proven by SMS">
+        <xpath expr="//input" position="attributes">
+            <attribute name="t-att-readonly">'readonly' if name == 'phone' and sms_phone_locked else None</attribute>
+        </xpath>
+        <xpath expr="//input" position="after">
+            <div t-if="name == 'phone' and sms_phone_locked" class="form-text">
+                Confirmed by SMS. <a t-att-href="sms_verify_url">Use another number</a>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="verify_phone" name="EMI: Confirm Your Mobile Number">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure_not_nearest">
+                <div class="container py-5" style="max-width: 34rem;">
+                    <h3 class="mb-3">Confirm your mobile number</h3>
+                    <p>Your EMI application needs a mobile number that is yours. We text it a 6-digit code.</p>
+                    <p class="alert alert-success" t-if="message" role="status" t-out="message"/>
+                    <p class="alert alert-danger" t-if="error" role="alert" t-out="error"/>
+
+                    <form method="post" t-att-action="'/my/emi/verify-phone?' + keep_query('redirect')">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="send" value="1"/>
+                        <label for="sms_emi_phone" class="form-label">Mobile number</label>
+                        <div class="input-group mb-3">
+                            <input type="tel" name="phone" id="sms_emi_phone" class="form-control" required="required"
+                                   t-att-value="default_phone" autocomplete="tel" inputmode="tel" placeholder="98XXXXXXXX"/>
+                            <button type="submit" t-att-class="'btn btn-outline-primary' if number else 'btn btn-primary'">
+                                <t t-if="number">Text a new code</t>
+                                <t t-else="">Text me a code</t>
+                            </button>
+                        </div>
+                    </form>
+
+                    <form t-if="number" method="post" t-att-action="'/my/emi/verify-phone?' + keep_query('redirect')">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <label for="sms_emi_code" class="form-label">Code sent to <strong t-out="sent_to"/></label>
+                        <input type="text" name="code" id="sms_emi_code" class="form-control form-control-lg text-center mb-1"
+                               required="required" autofocus="autofocus" autocomplete="one-time-code"
+                               inputmode="numeric" maxlength="7" placeholder="000000"/>
+                        <div class="form-text mb-3">It expires 10 minutes after we send it.</div>
+                        <button type="submit" class="btn btn-primary w-100">Confirm and continue</button>
+                    </form>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

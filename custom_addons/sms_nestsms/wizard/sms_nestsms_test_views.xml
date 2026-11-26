@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="sms_nestsms_test_view_form" model="ir.ui.view">
+        <field name="name">sms.nestsms.test.view.form</field>
+        <field name="model">sms.nestsms.test</field>
+        <field name="arch" type="xml">
+            <form string="Send a Test SMS">
+                <group>
+                    <field name="company_id" invisible="1"/>
+                    <field name="number" placeholder="98XXXXXXXX"/>
+                    <field name="body"/>
+                </group>
+                <div class="text-muted small">
+                    This sends a real SMS through NestSMS and uses one credit. Plain-text one-time codes are refused:
+                    NTA allows OTPs only through an approved NestSMS OTP template.
+                </div>
+                <footer>
+                    <button name="action_send" type="object" string="Send" class="btn-primary" data-hotkey="q"/>
+                    <button string="Cancel" special="cancel" class="btn-secondary" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

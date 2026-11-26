@@ -7,13 +7,6 @@ from odoo.http import request
 from odoo.addons.web.controllers.home import Home
 
 
-def _masked(email):
-    local, _sep, domain = (email or '').partition('@')
-    if len(local) > 2:
-        local = f"{local[0]}{'*' * (len(local) - 2)}{local[-1]}"
-    return f"{local}@{domain}" if domain else email
-
-
 class SignupVerification(Home):
 
     def _signup_pending_user(self):
@@ -40,14 +33,13 @@ class SignupVerification(Home):
         if user.signup_email_verified:  # activated meanwhile, e.g. with the link on another device
             return self._signup_finish_login(user, redirect)
 
-        values = {'redirect': redirect, 'email': _masked(user.email), 'validity': user._signup_validity()}
+        values = {'redirect': redirect, 'validity': user._signup_validity()}
         if request.httprequest.method == 'POST':
             if resend:
                 if user._signup_send_verification():
-                    values['message'] = _("We emailed you a new code and link.")
+                    values['message'] = user._signup_message('resent')
                 else:
-                    values['error'] = _("We sent you a code less than a minute ago. Check your inbox and spam "
-                                        "folder, or try again in a moment.")
+                    values['error'] = user._signup_message('cooldown')
             else:
                 try:
                     user._signup_check_code(code)
@@ -57,7 +49,9 @@ class SignupVerification(Home):
                     return self._signup_finish_login(user, redirect)
         elif not user._signup_has_valid_code() and user._signup_send_verification():
             # Back after the code expired (or it was used up): a fresh one is on its way.
-            values['message'] = _("Your previous code has expired, so we emailed you a new one.")
+            values['message'] = user._signup_message('expired')
+        # Read last: a resend may have switched the channel.
+        values.update(channel=user._signup_channel(), sent_to=user._signup_sent_to(), email=user._signup_sent_to())
         response = request.render('auth_signup_email_otp.signup_verify', values)
         response.headers['Cache-Control'] = 'no-cache'
         return response

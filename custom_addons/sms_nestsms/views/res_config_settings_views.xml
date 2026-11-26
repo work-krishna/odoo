@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.sms.nestsms</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="sms.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <setting id="sms" position="attributes">
+                <attribute name="help">Texts go out through NestSMS, on Nepal's domestic routes only</attribute>
+            </setting>
+            <!-- Odoo IAP credits don't apply: nothing is sent through Odoo's international route. -->
+            <xpath expr="//setting[@id='sms']/widget[@service_name='sms']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//setting[@id='sms']/widget[@service_name='sms']" position="before">
+                <div class="content-group" id="sms_nestsms_settings">
+                    <div class="row mt-2">
+                        <label for="sms_nestsms_api_key" string="NestSMS API Key" class="col-lg-4 o_light_label"/>
+                        <field name="sms_nestsms_api_key" password="True" class="col-lg-8"/>
+                    </div>
+                    <div class="row">
+                        <label for="sms_brand_name" string="Brand Name" class="col-lg-4 o_light_label"/>
+                        <field name="sms_brand_name" placeholder="One word, e.g. Flagship-Store" class="col-lg-8"/>
+                    </div>
+                    <!-- Each notification module adds its checkbox here. -->
+                    <div id="sms_nestsms_notifications" class="mt-2"/>
+                    <!-- Each one-time-code module adds its switch and template ID here. -->
+                    <div id="sms_nestsms_otp" class="mt-2"/>
+                    <div class="mt-2">
+                        <button name="action_open_sms_nestsms_test" type="object" string="Send a test SMS"
+                                icon="oi-arrow-right" class="btn-link"/>
+                        <button name="action_sms_nestsms_balance" type="object" string="Check balance"
+                                icon="oi-arrow-right" class="btn-link"/>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

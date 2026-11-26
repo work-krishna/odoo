@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.sms.nestsms.payment</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="sms_nestsms.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <div id="sms_nestsms_notifications" position="inside">
+                <div>
+                    <field name="sms_notify_payment_received" class="w-auto"/>
+                    <label for="sms_notify_payment_received" string="Text customers when their payment is received" class="o_light_label"/>
+                </div>
+            </div>
+        </field>
+    </record>
+</odoo>

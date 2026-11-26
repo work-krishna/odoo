@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="signup_phone_field" inherit_id="auth_signup.signup" name="Sign-up: Mobile Number for the SMS Code">
+        <xpath expr="//div[hasclass('field-login')]" position="after">
+            <div class="mb-3 field-phone" t-if="sms_signup_enabled and not token">
+                <label for="phone" class="form-label">Mobile number</label>
+                <input type="tel" name="phone" t-att-value="phone" id="phone" class="form-control"
+                       required="required" autocomplete="tel" inputmode="tel" placeholder="98XXXXXXXX"/>
+                <div class="form-text">We text your activation code to this number.</div>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="signup_verify_sms" inherit_id="auth_signup_email_otp.signup_verify" name="Activate Your Account: SMS">
+        <xpath expr="//p[@id='signup_verify_intro']" position="attributes">
+            <attribute name="t-if">channel != 'sms'</attribute>
+        </xpath>
+        <xpath expr="//p[@id='signup_verify_intro']" position="after">
+            <p t-if="channel == 'sms'">
+                We texted a 6-digit code to <strong t-out="sent_to"/>.
+                Enter it below. It expires <t t-out="validity"/> minutes after we send it.
+            </p>
+        </xpath>
+        <xpath expr="//button[@id='signup_verify_resend']" position="replace">
+            <button type="submit" class="btn btn-link" id="signup_verify_resend">
+                <t t-if="channel == 'sms'">Text me a new code</t>
+                <t t-else="">Email me a new code</t>
+            </button>
+        </xpath>
+    </template>
+</odoo>
