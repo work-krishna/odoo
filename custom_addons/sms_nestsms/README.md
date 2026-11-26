@@ -107,6 +107,7 @@ The per-IP limit needs the real visitor address. Behind a reverse proxy, start O
 
 If customers report that codes don't arrive, check the code log (One-Time Codes): the **Not Sent** rows, and the failure reason on rows that only reached one channel, give NestSMS's reason.
 
+
 ## Known limits
 
 - When checkout verification is on, express checkout (wallet buttons on the cart) can't pay until the shopper has confirmed their number.
