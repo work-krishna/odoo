@@ -61,6 +61,12 @@ def patch_nestsms(test_case):
     return fake
 
 
+def approve_otp(company, purpose, template_id=TEMPLATE_ID):
+    """Switch codes for `purpose` on, with `template_id` as if Check had approved it."""
+    company.write({f'sms_otp_{purpose}': True, f'sms_otp_{purpose}_template': template_id})
+    company._sms_otp_set_approved(purpose, template_id)
+
+
 def send_sms_queue(env):
     """Send queued SMS like the cron does, minus its commits."""
     env['sms.sms'].search([('state', '=', 'outgoing')]).send(unlink_sent=False)

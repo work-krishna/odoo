@@ -9,11 +9,22 @@
                 <div class="mt-2">
                     <field name="sms_otp_checkout" class="w-auto"/>
                     <label for="sms_otp_checkout" string="Confirm shoppers' mobile numbers by SMS at checkout" class="o_light_label"/>
-                    <div class="row ms-4" invisible="not sms_otp_checkout">
-                        <label for="sms_otp_checkout_template" string="OTP template ID" class="col-lg-4 o_light_label"/>
-                        <field name="sms_otp_checkout_template" class="col-lg-6" placeholder="Approved NestSMS template ID"/>
-                        <button name="action_sms_otp_check_template" type="object" string="Check" class="btn-link col-lg-2"
-                                context="{'sms_otp_purpose': 'checkout'}"/>
+                    <field name="sms_otp_checkout_approved" invisible="1"/>
+                    <div class="ms-4 mt-1" invisible="not sms_otp_checkout">
+                        <div class="d-flex align-items-baseline gap-2">
+                            <label for="sms_otp_checkout_template" string="Template" class="o_light_label text-nowrap"/>
+                            <field name="sms_otp_checkout_template" class="flex-grow-1 small" placeholder="Choose, or paste the ID"/>
+                        </div>
+                        <div>
+                            <button name="action_sms_otp_choose_template" type="object" string="Choose…" icon="oi-arrow-right"
+                                    class="btn-link p-0 me-3" context="{'sms_otp_purpose': 'checkout'}"/>
+                            <button name="action_sms_otp_check_template" type="object" string="Check" icon="oi-arrow-right"
+                                    class="btn-link p-0" context="{'sms_otp_purpose': 'checkout'}"/>
+                        </div>
+                        <div class="small">
+                            <span class="text-success" invisible="not sms_otp_checkout_approved">Approved by NestSMS: codes are on.</span>
+                            <span class="text-warning" invisible="sms_otp_checkout_approved">Codes stay off until you choose an approved template.</span>
+                        </div>
                     </div>
                 </div>
             </div>

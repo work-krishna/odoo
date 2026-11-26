@@ -23,6 +23,14 @@ MAX_PER_NUMBER_HOUR = 5     # codes texted to one number per hour, all purposes 
 MAX_PER_IP_HOUR = 10        # codes requested from one IP address per hour
 MAX_PER_COMPANY_HOUR = 200  # site-wide ceiling (ir.config_parameter sms_nestsms.otp_max_per_hour)
 
+# NestSMS errors that mean the template itself is unusable: stop the flow instead of
+# retrying it for every customer.
+TEMPLATE_ERROR_CODES = {
+    'TEMPLATE_NOT_FOUND', 'MESSAGE_TYPE_MISMATCH', 'MESSAGE_AND_TEMPLATE', 'OTP_REQUIRES_TEMPLATE',
+    'OTP_CONTENT_REQUIRES_TEMPLATE', 'TEMPLATE_VARIABLES_MISSING', 'TEMPLATE_VARIABLES_EMPTY',
+    'INVALID_OTP_VARIABLE', 'UNRESOLVED_OTP_TEMPLATE_VARIABLES',
+}
+
 OTP_PURPOSES = [
     ('login', "Website login"),
     ('signup', "Sign-up activation"),
@@ -81,10 +89,10 @@ class SmsNestsmsOtp(models.Model):
         mobile = nepal_mobile(number)
         if not mobile:
             return False, _("Enter a Nepali mobile number (98XXXXXXXX).")
-        template_id = company._sms_otp_template(purpose)
-        if not company.sms_nestsms_api_key or not template_id:
-            _logger.warning("SMS code for %s requested, but %s has no NestSMS key or template for it.", purpose, company.name)
+        if not company._sms_otp_enabled(purpose):
+            _logger.warning("SMS code for %s requested, but %s has it off or its template isn't approved.", purpose, company.name)
             return False, _("Codes by SMS are not available right now. Please try again later.")
+        template_id = company._sms_otp_template(purpose)
 
         Otp = self.sudo()
         now = fields.Datetime.now()
@@ -119,6 +127,12 @@ class SmsNestsmsOtp(models.Model):
         if not result['ok']:
             otp.write({'state': 'failed', 'failure_reason': result['reason']})
             _logger.warning("SMS code for %s to %s not sent: %s", purpose, otp._masked_number(), result['reason'])
+            if result['code'] in TEMPLATE_ERROR_CODES:
+                company._sms_otp_set_approved(purpose, False)
+                _logger.error(
+                    "NestSMS rejected the %s OTP template of %s (%s): SMS codes for it are off until an "
+                    "administrator clicks Check in Settings again.", purpose, company.name, result['code'],
+                )
             return False, _("We could not send the code. Please try again in a few minutes.")
         otp.nestsms_message_id = result['message_id']
         return otp, False

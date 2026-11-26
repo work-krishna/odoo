@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 from odoo.tests import HttpCase, tagged
 
-from odoo.addons.sms_nestsms.tests.common import TEMPLATE_ID, fake_response, patch_nestsms
+from odoo.addons.sms_nestsms.tests.common import TEMPLATE_ID, approve_otp, fake_response, patch_nestsms
 
 MODULE = 'odoo.addons.auth_signup_email_otp.models.res_users'
 PASSWORD = 'Str0ng-Signup-Pass'
@@ -24,9 +24,8 @@ class TestSignupSms(HttpCase):
             'sms_nestsms_api_key': 'nsms_live_test',
             'sms_brand_name': 'Flagship-Store',
             'country_id': cls.env.ref('base.np').id,
-            'sms_otp_signup': True,
-            'sms_otp_signup_template': TEMPLATE_ID,
         })
+        approve_otp(cls.env.company, 'signup')
 
     def setUp(self):
         super().setUp()
@@ -98,6 +97,7 @@ class TestSignupSms(HttpCase):
         response = self._signup('gita@example.com', phone='9801234567')
         self.assertIn('We emailed a 6-digit code', response.text)
         self.assertEqual(self._user('gita@example.com')._signup_channel(), 'email')
+        self.assertFalse(self.env.company._sms_otp_enabled('signup'), "A rejected template switches SMS codes off.")
 
     def test_switched_off(self):
         self.env.company.sms_otp_signup = False

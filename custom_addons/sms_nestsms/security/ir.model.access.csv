@@ -1,3 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_sms_nestsms_test_system,sms.nestsms.test.system,model_sms_nestsms_test,base.group_system,1,1,1,1
 access_sms_nestsms_otp_system,sms.nestsms.otp.system,model_sms_nestsms_otp,base.group_system,1,0,0,0
+access_sms_nestsms_template_picker_system,sms.nestsms.template.picker.system,model_sms_nestsms_template_picker,base.group_system,1,1,1,1
+access_sms_nestsms_template_picker_line_system,sms.nestsms.template.picker.line.system,model_sms_nestsms_template_picker_line,base.group_system,1,1,1,1

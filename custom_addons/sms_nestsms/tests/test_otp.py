@@ -7,7 +7,9 @@ from freezegun import freeze_time
 from odoo import fields
 from odoo.tests import tagged
 
-from odoo.addons.sms_nestsms.tests.common import MESSAGE_ID, TEMPLATE_ID, NestSmsCommon, fake_response, sent_reply
+from odoo.addons.sms_nestsms.tests.common import (
+    MESSAGE_ID, TEMPLATE_ID, NestSmsCommon, approve_otp, fake_response, sent_reply,
+)
 
 OTP_TEXT = "Flagship-Store: Your OTP for login is {otp}. It is valid for 10 minutes. Never share this code with anyone."
 
@@ -18,7 +20,7 @@ class TestOtp(NestSmsCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.company.write({'sms_otp_login': True, 'sms_otp_login_template': TEMPLATE_ID})
+        approve_otp(cls.company, 'login')
         cls.Otp = cls.env['sms.nestsms.otp']
 
     def _sent_code(self):
@@ -61,7 +63,7 @@ class TestOtp(NestSmsCommon):
         self.assertFalse(record)
 
     def test_code_is_per_purpose(self):
-        self.company.write({'sms_otp_checkout': True, 'sms_otp_checkout_template': TEMPLATE_ID})
+        approve_otp(self.company, 'checkout')
         self.Otp._nestsms_send('login', '9841234567')
         record, error = self.Otp._nestsms_verify('checkout', '9841234567', self._sent_code())
         self.assertFalse(record)
@@ -119,7 +121,8 @@ class TestOtp(NestSmsCommon):
     def test_refusals(self):
         otp, error = self.Otp._nestsms_send('login', '+91 9812345678')
         self.assertIn("Nepali mobile", error)
-        otp, error = self.Otp._nestsms_send('signup', '9841234567')  # not set up
+        self.company.sms_otp_signup = False
+        otp, error = self.Otp._nestsms_send('signup', '9841234567')  # switched off
         self.assertIn("not available", error)
         self.assertFalse(self.nestsms.calls)
 
@@ -134,6 +137,25 @@ class TestOtp(NestSmsCommon):
         failed = self.Otp.search([('number', '=', '9841234567')])
         self.assertEqual(failed.state, 'failed')
         self.assertIn('TEMPLATE_VARIABLES_MISSING', failed.failure_reason)
+        # The template is unusable: the flow stops instead of failing for every customer.
+        self.assertFalse(self.company._sms_otp_enabled('login'))
+        otp, error = self.Otp._nestsms_send('login', '9801234567')
+        self.assertIn("not available", error)
+        self.assertEqual(len(self.nestsms.calls), 1, "No second attempt with a rejected template.")
+
+    def test_passing_errors_keep_the_flow_on(self):
+        self.nestsms.replies = [fake_response(400, {
+            'success': False, 'error': "Wallet balance too low", 'code': 'INSUFFICIENT_BALANCE',
+        })]
+        self.assertFalse(self.Otp._nestsms_send('login', '9841234567')[0])
+        self.assertTrue(self.company._sms_otp_enabled('login'), "Not a template problem: no reason to stop.")
+
+    def test_unapproved_template_never_sends(self):
+        self.company.sms_otp_login_template = '11111111-2222-3333-4444-555555555555'  # edited after Check
+        self.assertFalse(self.company._sms_otp_enabled('login'))
+        otp, error = self.Otp._nestsms_send('login', '9841234567')
+        self.assertIn("not available", error)
+        self.assertFalse(self.nestsms.calls)
 
 
 @tagged('post_install', '-at_install')
@@ -170,12 +192,25 @@ class TestOtpTemplateCheck(NestSmsCommon):
         self.assertIn('start with "Flagship-Store:"', text)
         self.assertIn("5 minutes", text)
 
-    def test_settings_button(self):
-        self.company.sms_otp_login_template = TEMPLATE_ID
+    def test_check_button_approves(self):
+        self.company.write({'sms_otp_login': True, 'sms_otp_login_template': TEMPLATE_ID})
+        self.assertFalse(self.company._sms_otp_enabled('login'), "Off until checked.")
         self.nestsms.replies = [self._template_reply()]
         settings = self.env['res.config.settings'].create({})
+        self.assertFalse(settings.sms_otp_login_approved)
         action = settings.with_context(sms_otp_purpose='login').action_sms_otp_check_template()
         self.assertEqual(action['params']['type'], 'success')
+        self.assertTrue(self.company._sms_otp_enabled('login'))
+        self.assertTrue(self.env['res.config.settings'].create({}).sms_otp_login_approved)
+
+    def test_check_button_withdraws_approval(self):
+        approve_otp(self.company, 'login')
+        self.nestsms.replies = [self._template_reply(is_verified=False)]
+        settings = self.env['res.config.settings'].create({})
+        action = settings.with_context(sms_otp_purpose='login').action_sms_otp_check_template()
+        self.assertEqual(action['params']['type'], 'warning')
+        self.assertIn("stay off", action['params']['message'])
+        self.assertFalse(self.company._sms_otp_enabled('login'))
 
     def test_balance_button(self):
         self.nestsms.replies = [fake_response(200, {'success': True, 'data': {

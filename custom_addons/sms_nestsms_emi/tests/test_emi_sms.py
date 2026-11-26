@@ -6,7 +6,7 @@ from odoo.tests import HttpCase, tagged
 
 from odoo.addons.emi_application.tests.common import EmiCommon
 from odoo.addons.emi_storefront.tests import test_storefront
-from odoo.addons.sms_nestsms.tests.common import TEMPLATE_ID, patch_nestsms
+from odoo.addons.sms_nestsms.tests.common import TEMPLATE_ID, approve_otp, patch_nestsms
 
 
 @tagged('post_install', '-at_install')
@@ -23,9 +23,8 @@ class TestEmiSms(EmiCommon, HttpCase):
         cls.env.company.write({
             'sms_nestsms_api_key': 'nsms_live_test',
             'sms_brand_name': 'Flagship-Store',
-            'sms_otp_emi': True,
-            'sms_otp_emi_template': TEMPLATE_ID,
         })
+        approve_otp(cls.env.company, 'emi')
         cls.slug = cls.env['ir.http']._slug(cls.phone_tmpl)
         cls.apply_url = f'/phones/{cls.slug}/apply'
 

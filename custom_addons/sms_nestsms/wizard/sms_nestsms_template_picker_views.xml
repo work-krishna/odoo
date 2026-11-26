@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="sms_nestsms_template_picker_view_form" model="ir.ui.view">
+        <field name="name">sms.nestsms.template.picker.view.form</field>
+        <field name="model">sms.nestsms.template.picker</field>
+        <field name="arch" type="xml">
+            <form string="Choose the OTP Template">
+                <field name="company_id" invisible="1"/>
+                <field name="purpose" invisible="1"/>
+                <div class="alert alert-danger" role="alert" invisible="not error">
+                    <field name="error"/>
+                </div>
+                <p class="text-muted" invisible="error or line_ids">
+                    No OTP templates in NestSMS yet. Create one there with message type OTP, wait for
+                    NestSMS to approve it, then click Refresh.
+                </p>
+                <p class="text-muted small" invisible="not line_ids">
+                    Your NestSMS templates of type OTP. Codes only go out with an approved one.
+                </p>
+                <field name="line_ids" mode="kanban" nolabel="1" invisible="not line_ids">
+                    <kanban create="0" can_open="0">
+                        <field name="nestsms_id"/>
+                        <field name="is_verified"/>
+                        <field name="is_current"/>
+                        <field name="is_brand_ok"/>
+                        <templates>
+                            <t t-name="card">
+                                <div class="d-flex align-items-start justify-content-between gap-2">
+                                    <field name="name" class="fw-bold"/>
+                                    <div class="text-nowrap">
+                                        <span t-if="record.is_current.raw_value" class="badge text-bg-info me-1">In use</span>
+                                        <span t-if="record.is_verified.raw_value" class="badge text-bg-success">Approved</span>
+                                        <span t-else="" class="badge text-bg-warning">Waiting for approval</span>
+                                    </div>
+                                </div>
+                                <field name="content" class="small text-muted" style="white-space: pre-wrap;"/>
+                                <div t-if="!record.is_brand_ok.raw_value" class="small text-danger">
+                                    Doesn't start with your SMS brand name and a colon, as NTA requires.
+                                </div>
+                                <div class="small text-muted font-monospace"><field name="nestsms_id"/></div>
+                                <div class="mt-2">
+                                    <button name="action_use" type="object" class="btn btn-sm btn-primary" string="Use this template"/>
+                                </div>
+                            </t>
+                        </templates>
+                    </kanban>
+                </field>
+                <footer>
+                    <button name="action_refresh" type="object" string="Refresh" class="btn-secondary" data-hotkey="r"/>
+                    <button special="cancel" string="Close" class="btn-secondary" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

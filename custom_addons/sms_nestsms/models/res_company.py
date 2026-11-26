@@ -64,10 +64,33 @@ class ResCompany(models.Model):
         return (self.sudo()[f'sms_otp_{purpose}_template'] or '').strip()
 
     def _sms_otp_enabled(self, purpose):
-        """Whether codes for `purpose` are switched on and can actually be sent."""
+        """Whether codes for `purpose` are switched on and can actually be sent: the switch is
+        on, there is a key, and the template ID is the one Check last confirmed as approved."""
         self.ensure_one()
         company = self.sudo()
-        return bool(company[f'sms_otp_{purpose}'] and company._sms_otp_template(purpose) and company.sms_nestsms_api_key)
+        return bool(company[f'sms_otp_{purpose}'] and company.sms_nestsms_api_key and company._sms_otp_approved(purpose))
+
+    # NTA: OTPs only through an approved template, and "repeated attempts to bypass the
+    # approval or validation process" can cost the account its OTP service. So a flow only
+    # sends once Check has confirmed its template with NestSMS, and stops by itself if
+    # NestSMS rejects the template later. Kept in system parameters, not a stored field, so
+    # deploying this never needs a module upgrade first.
+
+    def _sms_otp_approval_key(self, purpose):
+        self.ensure_one()
+        return f'sms_nestsms.otp_approved.{self.id}.{purpose}'
+
+    def _sms_otp_approved(self, purpose, template_id=None):
+        """Whether `template_id` (default: the saved one) is the one Check approved."""
+        self.ensure_one()
+        template_id = self._sms_otp_template(purpose) if template_id is None else (template_id or '').strip()
+        approved = self.env['ir.config_parameter'].sudo().get_param(self._sms_otp_approval_key(purpose))
+        return bool(template_id) and approved == template_id
+
+    def _sms_otp_set_approved(self, purpose, template_id):
+        """Record `template_id` as approved for `purpose`, or withdraw approval (False)."""
+        self.ensure_one()
+        self.env['ir.config_parameter'].sudo().set_param(self._sms_otp_approval_key(purpose), template_id or False)
 
     def _sms_otp_check_template(self, purpose):
         """Ask NestSMS about the purpose's template. Returns ``(content, problems)``, where

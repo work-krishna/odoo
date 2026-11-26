@@ -16,6 +16,7 @@ keeps the ones that code can keep:
 import logging
 import re
 from collections import namedtuple
+from urllib.parse import urlencode
 
 import requests
 
@@ -217,6 +218,35 @@ class SmsApiNestSms(SmsApiBase):
         message_id = reply.data.get('message_id') if reply.ok else False
         return {'ok': reply.ok, 'message_id': message_id and str(message_id), 'code': reply.code, 'reason': reply.reason}
 
+    def _nestsms_list_templates(self, message_type=None, max_pages=20):
+        """The organisation's active templates (dicts), following NestSMS's pagination
+        (10 a page). Fetches a template's text separately when the list leaves it out.
+
+        Returns ``(templates, error)``: error is False, or NestSMS's reason for refusing.
+        """
+        templates, offset = [], 0
+        for _page in range(max_pages):
+            query = {'offset': offset}
+            if message_type:
+                query['message_type'] = message_type
+            reply = self._nestsms_get('/sms/templates?' + urlencode(query))
+            if not reply.ok:
+                return templates, reply.reason
+            page = [template for template in reply.data.get('templates') or [] if isinstance(template, dict)]
+            templates += page
+            total = (reply.data.get('pagination') or {}).get('total')
+            offset += len(page)
+            if not page or not isinstance(total, int) or offset >= total:
+                break
+        if message_type:
+            templates = [template for template in templates if template.get('message_type', message_type) == message_type]
+        for template in templates:
+            if 'content' not in template and template.get('id'):
+                detail = self._nestsms_get_template(str(template['id']))
+                if detail.ok:
+                    template['content'] = detail.data.get('content') or ''
+        return templates, False
+
     def _nestsms_get_template(self, template_id):
         """The NestSMS template `template_id` (dict with content, message_type, is_verified...)."""
         if not _UUID_RE.fullmatch(template_id or ''):
@@ -276,6 +306,11 @@ class SmsApiNestSms(SmsApiBase):
         reason = _("NestSMS refused the request (%(code)s): %(detail)s", code=code or response.status_code, detail=detail)
         if body.get('missing_variables'):
             reason += ' ' + _("Missing template variables: %s.", ', '.join(map(str, body['missing_variables'])))
+        if code == 'IP_RESTRICTED' and body.get('your_ip'):
+            reason += ' ' + _(
+                "NestSMS sees this server as %s: add that address to the API key's IP whitelist in NestSMS.",
+                body['your_ip'],
+            )
         if code == 'RATE_LIMIT_EXCEEDED' and body.get('retry_after'):
             reason += ' ' + _("Resend after %s seconds.", body['retry_after'])
         _logger.warning("NestSMS: %s %s refused, HTTP %s, code %s", method, path.split('/')[2] if path.count('/') > 1 else path,

@@ -2,3 +2,4 @@
 
 from . import test_otp
 from . import test_sms_nestsms
+from . import test_template_picker

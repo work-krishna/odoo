@@ -6,7 +6,7 @@ import re
 from odoo.tests import HttpCase, tagged
 from odoo.tests.common import new_test_user
 
-from odoo.addons.sms_nestsms.tests.common import TEMPLATE_ID, patch_nestsms
+from odoo.addons.sms_nestsms.tests.common import TEMPLATE_ID, approve_otp, patch_nestsms
 
 
 @tagged('post_install', '-at_install')
@@ -19,9 +19,8 @@ class TestCheckoutSms(HttpCase):
         cls.website.company_id.write({
             'sms_nestsms_api_key': 'nsms_live_test',
             'sms_brand_name': 'Flagship-Store',
-            'sms_otp_checkout': True,
-            'sms_otp_checkout_template': TEMPLATE_ID,
         })
+        approve_otp(cls.website.company_id, 'checkout')
         cls.product = cls.env['product.product'].create({
             'name': 'Phone Case', 'list_price': 500.0, 'type': 'service', 'sale_ok': True, 'website_published': True,
         })

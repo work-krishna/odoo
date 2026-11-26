@@ -14,6 +14,7 @@
         'data/ir_cron_data.xml',
         'views/res_config_settings_views.xml',
         'views/sms_nestsms_otp_views.xml',
+        'wizard/sms_nestsms_template_picker_views.xml',
         'wizard/sms_nestsms_test_views.xml',
     ],
     'author': "Krishna Kumar Sah",

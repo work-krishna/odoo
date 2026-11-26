@@ -5,7 +5,7 @@ import re
 from odoo.tests import HttpCase, tagged
 from odoo.tests.common import new_test_user
 
-from odoo.addons.sms_nestsms.tests.common import TEMPLATE_ID, patch_nestsms
+from odoo.addons.sms_nestsms.tests.common import TEMPLATE_ID, approve_otp, patch_nestsms
 
 
 @tagged('post_install', '-at_install')
@@ -17,9 +17,8 @@ class TestLoginSms(HttpCase):
         cls.env.company.write({
             'sms_nestsms_api_key': 'nsms_live_test',
             'sms_brand_name': 'Flagship-Store',
-            'sms_otp_login': True,
-            'sms_otp_login_template': TEMPLATE_ID,
         })
+        approve_otp(cls.env.company, 'login')
         cls.customer = new_test_user(cls.env, login='sita@example.com', groups='base.group_portal', name='Sita Gurung')
         cls.customer.partner_id.write({'phone': '9841234567', 'sms_verified_phone': '9841234567'})
 

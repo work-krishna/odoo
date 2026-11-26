@@ -37,7 +37,15 @@ A number proven in any flow is stored on the contact as **Phone Verified by SMS*
    - Click **Send a test SMS**, then **Check balance**.
 3. For each OTP flow:
    1. Have the template approved in NestSMS, with message type OTP. Example: `Flagship-Store: Your OTP for login is {otp}. It is valid for 10 minutes. Never share this code with anyone.`
-   2. Tick the flow's box, paste the template's ID, and click **Check**. Check confirms the template is approved, has the OTP type, has an `{otp}` placeholder and no other placeholders, starts with the brand name and a colon, and says 10 minutes.
+   2. Tick the flow's box and click **Choose…**. Odoo lists your NestSMS templates of type OTP:
+      - each shows its name, an **Approved** or **Waiting for approval** badge, its text in small print, and a warning if it doesn't start with the brand name and a colon;
+      - usable ones come first;
+      - **Use this template** fills in the ID and checks it straight away.
+
+      You can also paste an ID and click **Check**. Either way, Odoo confirms the template is approved, has the OTP type, has an `{otp}` placeholder and no other placeholders, starts with the brand name and a colon, and says 10 minutes.
+   3. **Codes stay off until that check passes.** The row then says "Approved by NestSMS: codes are on". Editing the template ID switches codes off again until it is checked once more.
+
+   If Choose… shows `IP_RESTRICTED`, the API key only works from whitelisted addresses. The message shows the address NestSMS sees: add it to the key's whitelist in NestSMS.
 
 Each company has its own key, brand name and templates. Nothing is sent for a company until it has a key.
 
@@ -48,7 +56,8 @@ The key is kept in the database, readable only by administrators. It is never in
 NestSMS accounts are bound by Nepal Telecommunications Authority (NTA) rules. Breaking them can bring fines or a suspended account.
 
 - **Domestic routes only.** Nothing falls back to Odoo's own SMS service (IAP) or to Twilio, because both route abroad. Twilio can't be installed next to this module. Numbers that aren't Nepali mobiles (96/97/98 followed by 8 digits) are refused.
-- **OTPs only through approved templates.** Codes are sent only as `template_id` plus `{otp}`. Plain text that reads like a code is refused before it reaches NestSMS.
+- **OTPs only through approved templates.** Codes are sent only as `template_id` plus `{otp}`, and only with a template that Check confirmed as approved. Plain text that reads like a code is refused before it reaches NestSMS.
+- **No repeated attempts with a bad template.** NestSMS says repeated attempts to get around template approval can cost the account its OTP service. If NestSMS rejects a flow's template while sending (not found, wrong type, missing variables...), that flow switches itself off at once and logs an error. It stays off until an administrator fixes the template and clicks Check. While off, customers aren't blocked: login falls back to the password, sign-up to email, and checkout and EMI applications go ahead without the code.
 - **Fair sending.**
   - Each event texts the customer once.
   - Numbers on the phone blacklist (opt-outs) get no customer texts.
@@ -101,6 +110,52 @@ If customers report that codes don't arrive, check the code log (SMS One-Time Co
   - Both return `(record, False)` or `(False, message)` and never raise, so a wrong guess stays counted even when the caller shows an error.
   - Mark a proven number with `partner._sms_mark_phone_verified(number)`.
   - Purposes and their company fields (`sms_otp_<purpose>`, `sms_otp_<purpose>_template`) live in this module. Each flow module only adds its own row in Settings.
+  - Approval is kept in the system parameter `sms_nestsms.otp_approved.<company id>.<purpose>`, holding the approved template ID. It is not a stored field, so deploying needs no module upgrade first. `company._sms_otp_enabled(purpose)` is the single gate.
 - `OTP_VALIDITY` (10 minutes) must match the approved template text. Check flags any mismatch.
 - Default texts stay within the GSM-7 alphabet (`is_gsm7`, checked by the tests).
 - Tests: `--test-tags /sms_nestsms,/sms_nestsms_sale,/sms_nestsms_payment,/sms_nestsms_stock,/sms_nestsms_ncm,/sms_nestsms_signup,/sms_nestsms_login,/sms_nestsms_website_sale,/sms_nestsms_emi`.
+
+## Get template-ID:
+Request:
+```
+curl -s -H "X-API-Key: nsms_..." "https://auth.nestsms.com/api/v1/sms/templates"
+```
+Response:
+```json
+{
+   "success":true,
+   "message":"Templates fetched successfully",
+   "data":{
+      "templates":[
+         {
+            "id":"c8ab07bd-a10c-442f-b278-2c4cf4f2685b",
+            "organizationId":"a217df7a-36d4-4be5-a78e-5d71d6c9623e",
+            "name":"OTP",
+            "messageType":"OTP",
+            "encoding":"GSM_7",
+            "content":"{companyName}: Your OTP is {otp}. Valid for {expiry} minutes. Do not share this code with anyone.",
+            "variables":[
+               "companyName",
+               "otp",
+               "expiry"
+            ],
+            "usageCount":0,
+            "isActive":true,
+            "isVerified":true,
+            "verifiedAt":"2026-11-26T11:11:28.813Z",
+            "verifiedBy":"d9374296-7647-4312-bc23-b1f6b3254060",
+            "rejectionReason":null,
+            "activatedAt":"2026-11-26T11:11:28.813Z",
+            "createdAt":"2026-11-26T10:51:59.613Z",
+            "updatedAt":"2026-11-26T11:11:28.814Z",
+            "deletedAt":null
+         }
+      ],
+      "pagination":{
+         "nextCursor":null,
+         "hasNextPage":false,
+         "limit":30
+      }
+   }
+}
+```
