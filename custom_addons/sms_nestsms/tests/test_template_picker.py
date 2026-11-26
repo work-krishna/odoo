@@ -86,6 +86,10 @@ class TestTemplatePicker(NestSmsCommon):
         self.nestsms.replies = [list_reply([template(APPROVED_ID, "Login", content="Your OTP is {otp}")])]
         self.assertFalse(self._open().line_ids.is_brand_ok)
 
+    def test_brand_placeholder_counts_as_the_prefix(self):
+        self.nestsms.replies = [list_reply([template(APPROVED_ID, "Login", content="{companyName}: Your OTP is {otp}.")])]
+        self.assertTrue(self._open().line_ids.is_brand_ok)
+
     def test_ip_restricted_key_explained(self):
         self.nestsms.replies = [fake_response(403, {
             'success': False, 'error': "Access denied from this IP address", 'code': 'IP_RESTRICTED',

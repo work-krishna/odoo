@@ -3,7 +3,7 @@
 from odoo import _, api, fields, models
 from odoo.fields import Command
 
-from odoo.addons.sms_nestsms.models.sms_nestsms_otp import OTP_PURPOSES
+from odoo.addons.sms_nestsms.models.sms_nestsms_otp import OTP_PURPOSES, otp_template_values, render_otp_template
 
 
 class SmsNestsmsTemplatePicker(models.TransientModel):
@@ -41,12 +41,14 @@ class SmsNestsmsTemplatePicker(models.TransientModel):
         templates, error = company._sms_nestsms_api()._nestsms_list_templates(message_type='otp')
         current = company._sms_otp_template(self.purpose)
         prefix = f"{company.sms_brand_name}:" if company.sms_brand_name else None
+
+        def brand_ok(template):  # judged on the text as customers get it
+            content = template.get('content') or ''
+            values, _unknown = otp_template_values(content, self.purpose, company.sms_brand_name, '123456')
+            return bool(prefix) and render_otp_template(content, values).startswith(prefix)
+
         # Usable ones first (approved, with the brand prefix), then by name.
-        templates.sort(key=lambda t: (
-            not t.get('is_verified'),
-            not (prefix and (t.get('content') or '').startswith(prefix)),
-            (t.get('name') or '').lower(),
-        ))
+        templates.sort(key=lambda t: (not t.get('is_verified'), not brand_ok(t), (t.get('name') or '').lower()))
         self.line_ids.unlink()
         self.write({
             'error': error,
@@ -57,7 +59,7 @@ class SmsNestsmsTemplatePicker(models.TransientModel):
                 'content': template.get('content') or '',
                 'is_verified': bool(template.get('is_verified')),
                 'is_current': str(template.get('id')) == current,
-                'is_brand_ok': bool(prefix) and (template.get('content') or '').startswith(prefix),
+                'is_brand_ok': brand_ok(template),
             }) for index, template in enumerate(templates) if template.get('id')],
         })
 
@@ -87,7 +89,7 @@ class SmsNestsmsTemplatePickerLine(models.TransientModel):
         picker = self.picker_id
         company, purpose = picker.company_id, picker.purpose
         company.write({f'sms_otp_{purpose}': True, f'sms_otp_{purpose}_template': self.nestsms_id})
-        _content, problems = company._sms_otp_check_template(purpose)
+        content, problems = company._sms_otp_check_template(purpose)
         if problems:
             company._sms_otp_set_approved(purpose, False)
             params = {
@@ -95,7 +97,7 @@ class SmsNestsmsTemplatePickerLine(models.TransientModel):
                 'message': _("Template selected, but SMS codes stay off: %s", ' '.join(problems)),
             }
         else:
-            company._sms_otp_set_approved(purpose, self.nestsms_id)
+            company._sms_otp_set_approved(purpose, self.nestsms_id, content)
             params = {'type': 'success', 'message': _("Template selected and approved: SMS codes are on.")}
         params['next'] = {'type': 'ir.actions.act_window_close'}
         return {'type': 'ir.actions.client', 'tag': 'display_notification', 'params': params}

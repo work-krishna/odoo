@@ -85,7 +85,7 @@ class ResConfigSettings(models.TransientModel):
             return self._sms_nestsms_notification(
                 'warning', ' '.join(problems) + ' ' + _("SMS codes for this stay off."), sticky=True, reload=True,
             )
-        company._sms_otp_set_approved(purpose, company._sms_otp_template(purpose))
+        company._sms_otp_set_approved(purpose, company._sms_otp_template(purpose), content)
         return self._sms_nestsms_notification('success', _("Approved: SMS codes are on. Text: %s", content), reload=True)
 
     def _sms_nestsms_notification(self, kind, message, sticky=False, reload=False):

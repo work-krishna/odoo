@@ -192,6 +192,44 @@ class TestOtpTemplateCheck(NestSmsCommon):
         self.assertIn('start with "Flagship-Store:"', text)
         self.assertIn("5 minutes", text)
 
+    def _choose_and_send(self, content):
+        """Approve a template with `content` through Check, then text a login code; returns
+        the variables sent to NestSMS."""
+        self.company.write({'sms_otp_login': True, 'sms_otp_login_template': TEMPLATE_ID})
+        self.nestsms.replies = [self._template_reply(content=content)]
+        action = self.env['res.config.settings'].create({}).with_context(
+            sms_otp_purpose='login').action_sms_otp_check_template()
+        self.assertEqual(action['params']['type'], 'success', action['params']['message'])
+        self.env['sms.nestsms.otp']._nestsms_send('login', '9841234567')
+        return self.nestsms.calls[-1]['payload']['variables']
+
+    def test_placeholders_are_filled(self):
+        """A template like NestSMS's own examples: brand, purpose and expiry as variables."""
+        variables = self._choose_and_send(
+            "{companyName}: Your OTP for {purpose} is {otp}. It is valid for {expiry} minutes. Never share it.")
+        self.assertEqual(set(variables), {'companyName', 'purpose', 'otp', 'expiry'}, "Exactly the declared ones.")
+        self.assertEqual(variables['companyName'], 'Flagship-Store')
+        self.assertEqual(variables['purpose'], 'login')
+        self.assertEqual(variables['expiry'], '10')
+        self.assertRegex(variables['otp'], r'^\d{6}$')
+
+    def test_bare_expiry_gets_its_unit(self):
+        variables = self._choose_and_send("{app_name}: Your code is {otp}. It expires in {expiry}.")
+        self.assertEqual(variables['expiry'], '10 minutes')
+        self.assertEqual(variables['app_name'], 'Flagship-Store')
+
+    def test_unfillable_placeholder_blocks_approval(self):
+        _content, problems = self._check(content="{companyName}: Hi {customer}, your OTP is {otp}.")
+        self.assertEqual(len(problems), 1)
+        self.assertIn('{customer}', problems[0])
+
+    def test_prefix_checked_on_filled_text(self):
+        self.company.sms_brand_name = 'FlagshipStore'
+        _content, problems = self._check(content="{companyName}: Your OTP is {otp}. Valid for {expiry} minutes.")
+        self.assertEqual(problems, [])
+        _content, problems = self._check(content="Hello from {companyName}: your OTP is {otp}.")
+        self.assertIn('start with "FlagshipStore:"', ' '.join(problems))
+
     def test_check_button_approves(self):
         self.company.write({'sms_otp_login': True, 'sms_otp_login_template': TEMPLATE_ID})
         self.assertFalse(self.company._sms_otp_enabled('login'), "Off until checked.")

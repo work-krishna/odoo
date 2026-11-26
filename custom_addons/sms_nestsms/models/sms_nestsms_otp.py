@@ -31,6 +31,55 @@ TEMPLATE_ERROR_CODES = {
     'INVALID_OTP_VARIABLE', 'UNRESOLVED_OTP_TEMPLATE_VARIABLES',
 }
 
+# Placeholders an approved template may use, by kind. NestSMS requires every variable an OTP
+# template declares, filled and non-empty ("authorised dynamic variables"), so Odoo fills the
+# ones it understands and refuses templates with any other.
+PLACEHOLDER_RE = re.compile(r'\{(\w+)\}')
+PLACEHOLDER_KINDS = {
+    'code': {'otp', 'code', 'otpcode', 'verificationcode', 'pin', 'passcode'},
+    'brand': {'companyname', 'company', 'appname', 'app', 'applicationname', 'brand', 'brandname',
+              'sitename', 'systemname', 'storename', 'shopname'},
+    'minutes': {'expiry', 'expires', 'expiresin', 'expiryminutes', 'expirytime', 'validity',
+                'validityminutes', 'validfor', 'minutes', 'ttl'},
+    'purpose': {'purpose'},
+}
+PURPOSE_WORDS = {
+    'login': "login",
+    'signup': "account registration",
+    'checkout': "order confirmation",
+    'emi': "EMI application",
+}
+
+
+def otp_template_values(content, purpose, brand, code):
+    """Values for every placeholder in the template `content`: ``(values, unknown)``, where
+    unknown lists the placeholders Odoo can't fill."""
+    minutes = int(OTP_VALIDITY.total_seconds() // 60)
+    values, unknown = {}, []
+    for match in PLACEHOLDER_RE.finditer(content or ''):
+        name = match.group(1)
+        key = re.sub(r'[^a-z0-9]', '', name.lower())
+        kind = next((kind for kind, names in PLACEHOLDER_KINDS.items() if key in names), None)
+        if kind == 'code':
+            values[name] = code
+        elif kind == 'brand':
+            values[name] = brand or ''
+        elif kind == 'minutes':
+            # "{expiry} minutes" wants the number; a bare "{expiry}" the whole duration.
+            says_unit = re.match(r'\s*min', content[match.end():], re.IGNORECASE)
+            values[name] = str(minutes) if says_unit else f"{minutes} minutes"
+        elif kind == 'purpose':
+            values[name] = PURPOSE_WORDS[purpose]
+        elif name not in unknown:
+            unknown.append(name)
+    return values, unknown
+
+
+def render_otp_template(content, values):
+    """The text as the customer will get it."""
+    return PLACEHOLDER_RE.sub(lambda match: values.get(match.group(1), match.group(0)), content or '')
+
+
 OTP_PURPOSES = [
     ('login', "Website login"),
     ('signup', "Sign-up activation"),
@@ -121,9 +170,11 @@ class SmsNestsmsOtp(models.Model):
         })
         otp.code_hash = otp._hash(code)
 
+        approved_text = company._sms_otp_approved_text(purpose)
+        variables, _unknown = otp_template_values(approved_text, purpose, company.sms_brand_name, code)
         sms_api = company._get_sms_api_class()(self.env)
         sms_api._set_company(company)
-        result = sms_api._nestsms_send_template(mobile, template_id, {'otp': code})
+        result = sms_api._nestsms_send_template(mobile, template_id, variables or {'otp': code})
         if not result['ok']:
             otp.write({'state': 'failed', 'failure_reason': result['reason']})
             _logger.warning("SMS code for %s to %s not sent: %s", purpose, otp._masked_number(), result['reason'])

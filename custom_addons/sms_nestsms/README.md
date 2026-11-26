@@ -42,7 +42,18 @@ A number proven in any flow is stored on the contact as **Phone Verified by SMS*
       - usable ones come first;
       - **Use this template** fills in the ID and checks it straight away.
 
-      You can also paste an ID and click **Check**. Either way, Odoo confirms the template is approved, has the OTP type, has an `{otp}` placeholder and no other placeholders, starts with the brand name and a colon, and says 10 minutes.
+      You can also paste an ID and click **Check**. Either way, Odoo confirms the template is approved, has the OTP type, has a placeholder for the code, uses only placeholders Odoo can fill, and, once filled in, starts with the brand name and a colon and says 10 minutes.
+
+      Placeholders Odoo fills (NestSMS requires every one a template declares):
+
+      | Placeholder | Filled with |
+      |---|---|
+      | `{otp}`, `{code}`, `{pin}` | the code |
+      | `{companyName}`, `{app_name}`, `{brand}`, `{appName}`… | the Brand Name above, e.g. `FlagshipStore` |
+      | `{expiry}`, `{validity}`, `{minutes}`… | `10`, or `10 minutes` when the text doesn't already say "minutes" |
+      | `{purpose}` | login / account registration / order confirmation / EMI application |
+
+      So `{companyName}: Your OTP for {purpose} is {otp}. It is valid for {expiry} minutes.` works. Any other placeholder (a customer name, say) blocks the template.
    3. **Codes stay off until that check passes.** The row then says "Approved by NestSMS: codes are on". Editing the template ID switches codes off again until it is checked once more.
 
    If Choose… shows `IP_RESTRICTED`, the API key only works from whitelisted addresses. The message shows the address NestSMS sees: add it to the key's whitelist in NestSMS.

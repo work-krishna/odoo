@@ -7,7 +7,6 @@ from odoo.exceptions import ValidationError
 
 from odoo.addons.sms_nestsms.tools.sms_api import SmsApiNestSms
 
-OTP_VARIABLE_RE = re.compile(r'\{(\w+)\}')
 
 
 class ResCompany(models.Model):
@@ -87,15 +86,26 @@ class ResCompany(models.Model):
         approved = self.env['ir.config_parameter'].sudo().get_param(self._sms_otp_approval_key(purpose))
         return bool(template_id) and approved == template_id
 
-    def _sms_otp_set_approved(self, purpose, template_id):
-        """Record `template_id` as approved for `purpose`, or withdraw approval (False)."""
+    def _sms_otp_set_approved(self, purpose, template_id, content=None):
+        """Record `template_id` (and its text, to know which placeholders to fill) as approved
+        for `purpose`, or withdraw approval (False)."""
         self.ensure_one()
-        self.env['ir.config_parameter'].sudo().set_param(self._sms_otp_approval_key(purpose), template_id or False)
+        params = self.env['ir.config_parameter'].sudo()
+        key = self._sms_otp_approval_key(purpose)
+        params.set_param(key, template_id or False)
+        params.set_param(key + '.text', (template_id and content) or False)
+
+    def _sms_otp_approved_text(self, purpose):
+        """The approved template's text, as NestSMS returned it at approval ('' if unknown)."""
+        self.ensure_one()
+        return self.env['ir.config_parameter'].sudo().get_param(self._sms_otp_approval_key(purpose) + '.text') or ''
 
     def _sms_otp_check_template(self, purpose):
         """Ask NestSMS about the purpose's template. Returns ``(content, problems)``, where
         problems lists, in sentences, whatever stops it from working or breaks NTA rules."""
-        from odoo.addons.sms_nestsms.models.sms_nestsms_otp import OTP_VALIDITY  # noqa: PLC0415
+        from odoo.addons.sms_nestsms.models.sms_nestsms_otp import (  # noqa: PLC0415
+            OTP_VALIDITY, otp_template_values, render_otp_template,
+        )
         self.ensure_one()
         template_id = self._sms_otp_template(purpose)
         if not template_id:
@@ -113,20 +123,26 @@ class ResCompany(models.Model):
         if template.get('message_type') and template['message_type'] != 'otp':
             problems.append(_("Its message type is %s; it must be OTP.", template['message_type']))
         if content:
-            variables = set(OTP_VARIABLE_RE.findall(content))
-            if 'otp' not in variables:
-                problems.append(_("Its text has no {otp} placeholder for the code."))
-            if variables - {'otp'}:
-                problems.append(_(
-                    "Its text also has %s; Odoo only fills in {otp}.",
-                    ', '.join('{%s}' % name for name in sorted(variables - {'otp'})),
-                ))
+            sample_code = '123456'
             brand = self.sms_brand_name
+            values, unknown = otp_template_values(content, purpose, brand, sample_code)
+            if sample_code not in values.values():
+                problems.append(_("Its text has no {otp} placeholder for the code."))
+            if unknown:
+                problems.append(_(
+                    "Its text has %s, which Odoo can't fill in. Odoo fills {otp} (the code), {companyName} or "
+                    "{app_name} (your brand name), {expiry} (the minutes) and {purpose}.",
+                    ', '.join('{%s}' % name for name in unknown),
+                ))
+            rendered = render_otp_template(content, values)
             if not brand:
                 problems.append(_("Set the SMS brand name: NTA requires OTP texts to start with it."))
-            elif not content.startswith(brand + ':'):
-                problems.append(_("NTA requires the text to start with \"%s:\".", brand))
-            minutes = re.search(r'(\d+)\s*min', content, re.IGNORECASE)
+            elif not rendered.startswith(brand + ':'):
+                problems.append(_(
+                    "NTA requires the text to start with \"%(prefix)s\"; filled in, it starts with \"%(start)s\".",
+                    prefix=brand + ':', start=rendered[:len(brand) + 12],
+                ))
+            minutes = re.search(r'(\d+)\s*min', rendered, re.IGNORECASE)
             validity = int(OTP_VALIDITY.total_seconds() // 60)
             if minutes and int(minutes.group(1)) != validity:
                 problems.append(_(
