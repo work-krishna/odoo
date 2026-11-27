@@ -3,24 +3,26 @@
     <template id="verify_phone" name="Checkout: Confirm Your Mobile Number">
         <t t-call="website.layout">
             <div id="wrap" class="oe_structure_not_nearest">
-                <div class="container py-5" style="max-width: 34rem;">
+                <div class="container py-5 o_sms_checkout_verify" style="max-width: 34rem;">
                     <h3 class="mb-3">Confirm your mobile number</h3>
                     <p class="alert alert-success" t-if="message" role="status" t-out="message"/>
                     <p class="alert alert-danger" t-if="error" role="alert" t-out="error"/>
 
-                    <t t-if="not number">
-                        <p>To place your order we need a Nepali mobile number (98XXXXXXXX) on your address.</p>
-                        <a class="btn btn-primary" t-att-href="edit_url">Add my mobile number</a>
+                    <t t-if="not available">
+                        <p class="alert alert-warning" role="alert">
+                            We can't text confirmation codes at the moment, so we can't take your order yet.
+                            Please try again a little later, or <a href="/contactus">contact us</a>.
+                        </p>
                     </t>
                     <t t-else="">
-                        <p>
-                            We text a 6-digit code to <strong t-out="sent_to"/> so the courier can reach you.
-                            <a t-att-href="edit_url">Change number</a>
-                        </p>
-                        <form t-if="code_sent" method="post" action="/shop/verify_phone">
+                        <p>Before you order, we text a 6-digit code to <strong>your own</strong> mobile number to make sure it's really you.</p>
+
+                        <form t-if="sent_to" method="post" action="/shop/verify_phone" class="mb-4">
                             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                             <div class="mb-3">
-                                <label for="sms_checkout_code" class="form-label">Code</label>
+                                <label for="sms_checkout_code" class="form-label">
+                                    Code we texted to <strong t-out="sent_to"/>
+                                </label>
                                 <input type="text" name="code" id="sms_checkout_code" class="form-control form-control-lg text-center"
                                        required="required" autofocus="autofocus" autocomplete="one-time-code"
                                        inputmode="numeric" maxlength="7" placeholder="000000"/>
@@ -28,14 +30,30 @@
                             </div>
                             <button type="submit" class="btn btn-primary w-100">Confirm and continue</button>
                         </form>
-                        <form method="post" action="/shop/verify_phone" t-att-class="'mt-3 text-center' if code_sent else ''">
+
+                        <form method="post" action="/shop/verify_phone">
                             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                             <input type="hidden" name="send" value="1"/>
-                            <button type="submit" t-att-class="'btn btn-link' if code_sent else 'btn btn-primary w-100'">
-                                <t t-if="code_sent">Text me a new code</t>
-                                <t t-else="">Text me a code</t>
-                            </button>
+                            <label for="sms_checkout_mobile" class="form-label">
+                                <t t-if="sent_to">No code, or wrong number?</t>
+                                <t t-else="">Your mobile number</t>
+                            </label>
+                            <div class="input-group">
+                                <input type="tel" name="mobile" id="sms_checkout_mobile" class="form-control"
+                                       required="required" autocomplete="tel-national" inputmode="tel" maxlength="20"
+                                       placeholder="98XXXXXXXX" t-att-value="mobile"
+                                       t-att-autofocus="None if sent_to else 'autofocus'"/>
+                                <button type="submit" t-att-class="'btn btn-outline-primary' if sent_to else 'btn btn-primary'">
+                                    <t t-if="sent_to">Text me a new code</t>
+                                    <t t-else="">Text me a code</t>
+                                </button>
+                            </div>
                         </form>
+
+                        <p class="small text-muted mt-4 mb-0">
+                            Buying for someone else? Put their number on the delivery address: it doesn't need a code.
+                            Only your own number does, and only once.
+                        </p>
                     </t>
                 </div>
             </div>

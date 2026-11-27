@@ -8,8 +8,12 @@
             <div id="sms_nestsms_otp" position="inside">
                 <div class="mt-2">
                     <field name="sms_otp_checkout" class="w-auto"/>
-                    <label for="sms_otp_checkout" string="Confirm shoppers' mobile numbers by SMS at checkout" class="o_light_label"/>
+                    <label for="sms_otp_checkout" string="Require a confirmed mobile number to order" class="o_light_label"/>
                     <field name="sms_otp_checkout_approved" invisible="1"/>
+                    <div class="ms-4 small text-muted" invisible="not sms_otp_checkout">
+                        Strict: no order goes through until the buyer has proven their own number (once; a number
+                        proven at sign-up counts). Delivery addresses may carry any number.
+                    </div>
                     <div class="ms-4 mt-1" invisible="not sms_otp_checkout">
                         <div class="d-flex align-items-baseline gap-2">
                             <label for="sms_otp_checkout_template" string="Template" class="o_light_label text-nowrap"/>
@@ -23,7 +27,9 @@
                         </div>
                         <div class="small">
                             <span class="text-success" invisible="not sms_otp_checkout_approved">Approved by NestSMS: codes are on.</span>
-                            <span class="text-warning" invisible="sms_otp_checkout_approved">Codes stay off until you choose an approved template.</span>
+                            <span class="text-danger fw-bold" invisible="sms_otp_checkout_approved">
+                                Checkout is held for shoppers without a proven number until you choose an approved template.
+                            </span>
                         </div>
                     </div>
                 </div>
