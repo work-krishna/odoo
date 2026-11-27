@@ -2,9 +2,9 @@
 
 {
     'name': "NestSMS: Sign-up Activation Codes by SMS",
-    'version': '1.0',
+    'version': '1.1',
     'category': 'Hidden/Tools',
-    'summary': "Website sign-ups also get their activation code by SMS: the same code as the email, from auth_otp.",
+    'summary': "Website sign-ups also get an activation code by SMS (a different one from the email's); entering it proves the mobile number.",
     'depends': ['auth_signup_email_otp', 'sms_nestsms'],
     'data': [
         'views/res_config_settings_views.xml',

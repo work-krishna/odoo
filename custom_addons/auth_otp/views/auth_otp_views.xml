@@ -12,6 +12,7 @@
                 <field name="phone" optional="show"/>
                 <field name="channels"/>
                 <field name="state" decoration-success="state == 'verified'" decoration-danger="state in ('blocked', 'failed')"/>
+                <field name="verified_by" string="Code Used"/>
                 <field name="attempts"/>
                 <field name="ip_address" optional="hide"/>
                 <field name="failure_reason" optional="show"/>

@@ -2,7 +2,7 @@
 
 {
     'name': "One-Time Codes",
-    'version': '1.0',
+    'version': '1.1',
     'category': 'Hidden/Tools',
     'summary': "One place that issues, delivers (email, SMS) and checks one-time codes for every flow.",
     'description': " ",  # Non-empty string to avoid loading the README file.

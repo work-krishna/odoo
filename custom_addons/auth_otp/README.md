@@ -2,7 +2,8 @@
 
 One place for every one-time code on the site: sign-up activation, email login, SMS login, and the checkout and EMI phone checks.
 
-- **One code per request.** It is generated here, stored only as a keyed hash, and delivered on every channel the flow allows and the person has. Sign-up sends the same code by email (with an activation link) and by SMS.
+- **One request, one code per channel.** Codes are generated here and stored only as keyed hashes. Each channel the flow allows and the person has gets its own code: sign-up emails one (with an activation link) and texts another.
+- **One window.** A request's codes share one record: one expiry, one count of wrong tries. Entering either code closes both, and `verified_by` records which one it was, so the flow knows whether the email address or the mobile number was proven.
 - **One set of rules:**
   - 10 minutes by default, or as the flow sets it;
   - 5 wrong tries;
@@ -20,6 +21,7 @@ result = env['auth.otp']._otp_issue('signup', user=user, email=user.email, phone
                                     company=user.company_id, with_link=True, email_sender=sender)
 # result: {'otp': record|False, 'error': message|False, 'channels': ['email', 'sms'], 'token': ...}
 otp, error = env['auth.otp']._otp_verify('signup', code, user=user)
+otp.verified_by   # 'email' or 'sms': which code was entered
 otp, error = env['auth.otp']._otp_verify_link('signup', token)
 ```
 

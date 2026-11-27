@@ -22,13 +22,13 @@ Each flow needs its own approved NestSMS OTP template, and is switched on in Set
 | Module | Flow |
 |---|---|
 | `sms_nestsms_login` | Customers log in with a code texted to their **verified** number. The login page shows a "Log in with an SMS code" link. Staff accounts can't log in this way: they keep their password and two-factor authentication. |
-| `sms_nestsms_signup` | Website sign-ups enter their mobile number and get **the same activation code by email and by SMS**. Either copy activates the account, and the activation page names both destinations. A number outside Nepal, or a failed SMS, still leaves the email. Builds on `auth_signup_email_otp`. |
+| `sms_nestsms_signup` | Website sign-ups enter their mobile number and get **one activation code by email and a different one by SMS**. Either activates the account and closes the other, and the activation page names both destinations. The SMS code proves the mobile number (the website then reminds them to confirm their email); the email code proves the email (checkout then confirms the mobile). A number outside Nepal, or a failed SMS, still leaves the email. Builds on `auth_signup_email_otp`. |
 | `sms_nestsms_website_sale` | After the address step, shoppers confirm their mobile number before choosing delivery and paying. This is asked once per customer and number. The payment route refuses unconfirmed carts, so the step can't be skipped. |
 | `sms_nestsms_emi` | EMI applicants confirm their number before the form. The application always carries the proven number, whatever the form sends. |
 
-**One code engine.** Every code on the site comes from `auth_otp` (the One-Time Codes module): sign-up, email login, SMS login, checkout and EMI. It generates one code, stores only a keyed hash, and enforces the expiry, the tries and the rate limits in one place. Email and SMS are just ways of delivering that code. This module is the SMS channel.
+**One code engine.** Every code on the site comes from `auth_otp` (the One-Time Codes module): sign-up, email login, SMS login, checkout and EMI. It generates the codes (one per channel), stores only keyed hashes, and enforces the expiry, the tries and the rate limits in one place. This module is the SMS channel.
 
-A number proven by a code sent **only** by SMS (checkout, EMI application, SMS login) is stored on the contact as **Phone Verified by SMS**. The sign-up code goes to the email address as well, so entering it proves the email or the phone, not the phone. Login by SMS only works for verified numbers: otherwise a typo in a customer's phone number would let a stranger who owns that number into their account.
+A number proven by an SMS code (sign-up, checkout, EMI application) is stored on the contact as **Phone Verified by SMS**, and checkout doesn't ask for it again. Login by SMS only works for verified numbers: otherwise a typo in a customer's phone number would let a stranger who owns that number into their account.
 
 ## Setup
 

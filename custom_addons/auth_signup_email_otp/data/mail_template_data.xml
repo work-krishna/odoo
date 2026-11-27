@@ -56,4 +56,59 @@
         </field>
     </record>
 
+    <record id="mail_template_verify_email" model="mail.template">
+        <field name="name">Sign-up: Confirm Email Address</field>
+        <field name="model_id" ref="base.model_res_users"/>
+        <field name="subject">Confirm your email address at {{ object.company_id.name }}</field>
+        <field name="email_from">{{ (object.company_id.email_formatted or user.email_formatted) }}</field>
+        <field name="email_to">{{ object.email_formatted }}</field>
+        <field name="description">Sent to people who activated their account with the SMS code and ask to confirm their email address</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="lang">{{ object.lang }}</field>
+        <field name="body_html" type="html">
+<div style="background-color: #f4f4f4; padding: 20px; font-family: Arial, Helvetica, sans-serif;">
+    <t t-set="base_url" t-value="object.get_base_url()"/>
+    <table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="width: 100%; max-width: 600px; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #e0e0e0;">
+        <tr>
+            <td align="center" style="padding: 40px 20px 20px 20px;">
+                <!-- /logo.png serves the main company's logo unless it is told which company -->
+                <img t-attf-src="{{ base_url }}/logo.png?company={{ object.company_id.id }}" t-att-alt="object.company_id.name" style="max-height: 80px; width: auto; margin-bottom: 15px;"/>
+                <h2 style="margin: 0; color: #8E210B; font-size: 18px; letter-spacing: 2px; text-transform: uppercase; font-weight: bold;" t-out="object.company_id.name or ''">YourCompany</h2>
+                <div style="width: 100%; height: 2px; background-color: #8E210B; margin-top: 25px;"></div>
+            </td>
+        </tr>
+        <tr>
+            <td align="center" style="padding: 30px 40px;">
+                <h1 style="margin: 0; color: #333333; font-size: 24px; font-weight: bold;">Confirm Your Email Address</h1>
+                <p style="margin: 15px 0 0 0; color: #666666; font-size: 15px; line-height: 1.5;">
+                    Hello <t t-out="object.name or ''">Ram</t>, please confirm that this is your email address
+                    for your account at <t t-out="object.company_id.name or ''">YourCompany</t>.
+                </p>
+
+                <div style="margin: 40px 0 30px 0; padding: 30px; border: 2px dashed #D4AF37; border-radius: 12px; background-color: #ffffff;">
+                    <p style="margin: 0 0 15px 0; color: #8E210B; font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1.5px;">
+                        Your Confirmation Code
+                    </p>
+                    <div style="display: inline-block; padding: 15px 30px; border: 2px solid #D4AF37; border-radius: 8px; background-color: #ffffff;">
+                        <span style="font-size: 42px; font-weight: bold; color: #8E210B; letter-spacing: 12px; font-family: 'Courier New', Courier, monospace; -webkit-user-select: all; user-select: all;" t-out="ctx.get('signup_code')">123456</span>
+                    </div>
+                    <p style="margin: 15px 0 0 0; color: #999999; font-size: 12px; font-style: italic;">
+                        This code expires in <t t-out="ctx.get('signup_validity')">15</t> minutes.
+                    </p>
+                </div>
+
+                <p style="margin: 0 0 15px 0; color: #666666; font-size: 15px;">Or confirm it with one click:</p>
+                <a t-att-href="ctx.get('signup_link')" style="display: inline-block; padding: 12px 28px; background-color: #8E210B; color: #ffffff; font-size: 15px; font-weight: bold; text-decoration: none; border-radius: 6px;">Confirm my email address</a>
+
+                <p style="margin: 30px 0 0 0; color: #888888; font-size: 13px; line-height: 1.5;">
+                    If the code and the link expire, ask for new ones from the confirmation page.<br/>
+                    If you did not ask for this, please ignore this email safely.
+                </p>
+            </td>
+        </tr>
+    </table>
+</div>
+        </field>
+    </record>
+
 </odoo>

@@ -2,9 +2,11 @@
 """One place for one-time codes.
 
 Every flow that sends someone a code (sign-up activation, email login, SMS login, checkout and
-EMI phone checks) goes through `auth.otp`. It issues one code, delivers that same code on each
-channel the flow allows (email, SMS), and checks it. Generation, hashing, expiry, wrong tries,
-resend cooldown and rate limits live only here.
+EMI phone checks) goes through `auth.otp`. One request gives each channel the flow allows
+(email, SMS) its own code; they share one record, so one expiry, one count of wrong tries, and
+using either code closes both. The record says which code was used (`verified_by`): that tells
+whether the email address or the mobile number was proven. Generation, hashing, expiry, wrong
+tries, resend cooldown and rate limits live only here.
 
 Channels: email is built in. SMS comes from another module (sms_nestsms), which overrides
 `_otp_sms_available`, `_otp_send_sms`, `_otp_normalize_phone` and `_otp_sms_max_validity`.
@@ -70,8 +72,12 @@ class AuthOtp(models.Model):
         ('blocked', "Too many wrong codes"),
         ('failed', "Not sent"),
     ], required=True, readonly=True, default='sent')
-    channels = fields.Char(readonly=True, help="Where the code went: email, sms.")
-    code_hash = fields.Char(readonly=True, groups='base.group_system')
+    channels = fields.Char(readonly=True, help="Where a code went: email, sms.")
+    verified_by = fields.Selection([('email', "Email"), ('sms', "SMS")], readonly=True,
+                                   help="Which code was entered (the emailed link counts as email), so which of "
+                                        "the email address and the mobile number it proves.")
+    email_code_hash = fields.Char(readonly=True, groups='base.group_system')
+    sms_code_hash = fields.Char(readonly=True, groups='base.group_system')
     token_hash = fields.Char(readonly=True, index='btree_not_null', groups='base.group_system')
     salt = fields.Char(readonly=True, groups='base.group_system')
     sent_at = fields.Datetime(readonly=True, default=fields.Datetime.now)
@@ -132,8 +138,9 @@ class AuthOtp(models.Model):
     @api.model
     def _otp_issue(self, purpose, *, user=None, email=None, phone=None, company=None,
                    with_link=False, email_sender=None):
-        """Issue ONE code for `purpose` and deliver it on every channel the purpose allows and
-        the person has: their email address and/or mobile number.
+        """Issue a code for `purpose` on every channel the purpose allows and the person has
+        (their email address, their mobile number), a different code on each. Both live in one
+        record: one expiry, one count of wrong tries, and either code closes it.
 
         `user`, else `email`, else `phone` identifies whose code it is (one live code each).
 
@@ -187,7 +194,14 @@ class AuthOtp(models.Model):
             validity = min(validity, sms_cap)  # the texted message states how long it lasts
 
         Otp.search([('purpose', '=', purpose), ('state', '=', 'sent')] + subject).state = 'replaced'
-        code = _new_code()
+        codes = {}
+        for channel in channels:
+            code = _new_code()
+            for _attempt in range(5):  # different codes, so the one entered tells the channel apart
+                if code not in codes.values():
+                    break
+                code = _new_code()
+            codes[channel] = code
         token = _new_token() if with_link else False
         otp = Otp.create({
             'purpose': purpose,
@@ -201,12 +215,12 @@ class AuthOtp(models.Model):
             'ip_address': ip,
         })
         otp.write({
-            'code_hash': otp._otp_hash('code', code),
+            **{f'{channel}_code_hash': otp._otp_hash('code', code) for channel, code in codes.items()},
             'token_hash': token and otp._otp_token_hash(token),
         })
 
         delivered, failures = [], []
-        for channel in channels:
+        for channel, code in codes.items():
             if channel == 'email':
                 ok, reason = otp._otp_send_email(code, token, email_sender)
             else:
@@ -216,10 +230,16 @@ class AuthOtp(models.Model):
             else:
                 failures.append(f"{channel}: {reason}")
         if not delivered:
-            otp.write({'state': 'failed', 'failure_reason': '; '.join(failures)})
+            otp.write({'state': 'failed', 'failure_reason': '; '.join(failures),
+                       'email_code_hash': False, 'sms_code_hash': False})
             result['error'] = _("We could not send the code. Please try again in a few minutes.")
             return result
-        otp.write({'channels': ','.join(delivered), 'failure_reason': '; '.join(failures) or False})
+        otp.write({
+            'channels': ','.join(delivered),
+            'failure_reason': '; '.join(failures) or False,
+            # A code that never arrived can't be entered.
+            **{f'{channel}_code_hash': False for channel in codes if channel not in delivered},
+        })
         result.update(otp=otp, channels=delivered, token=token)
         return result
 
@@ -241,9 +261,11 @@ class AuthOtp(models.Model):
 
     @api.model
     def _otp_verify(self, purpose, code, *, user=None, email=None, phone=None):
-        """Check `code` against this person's live code for `purpose`, using it up when it
-        matches. Returns ``(record, False)``, or ``(False, message)`` saying why not. Never
-        raises, so a wrong guess stays counted even when the caller shows an error."""
+        """Check `code` against this person's live codes for `purpose` (one per channel). When
+        it matches one, the record is used up, codes on every channel with it, and its
+        `verified_by` says which channel's code it was. Returns ``(record, False)``, or
+        ``(False, message)`` saying why not. Never raises, so a wrong guess stays counted even
+        when the caller shows an error."""
         user = user or self.env['res.users']
         otp = self._otp_live(purpose, user=user, email=email, phone=phone)
         if not otp:
@@ -252,14 +274,20 @@ class AuthOtp(models.Model):
             otp.state = 'replaced'
             return False, _("This code has expired. Ask for a new one.")
         code = re.sub(r'\s', '', code or '')
-        if not consteq(otp.code_hash, otp._otp_hash('code', code)):
+        entered = otp._otp_hash('code', code)
+        matched = False
+        for channel in CHANNELS:
+            stored = otp[f'{channel}_code_hash']
+            if stored and consteq(stored, entered) and not matched:
+                matched = channel
+        if not matched:
             otp.attempts += 1
             left = MAX_ATTEMPTS - otp.attempts
             if left <= 0:
                 otp.state = 'blocked'
                 return False, _("That code is not right, and it cannot be used any more. Ask for a new one.")
             return False, _("That code is not right. %(left)s tries left.", left=left)
-        otp.state = 'verified'
+        otp.write({'state': 'verified', 'verified_by': matched})
         return otp, False
 
     @api.model
@@ -283,7 +311,7 @@ class AuthOtp(models.Model):
             return False, _("This link has expired.")
         if otp.state != 'sent':
             return False, not_valid
-        otp.state = 'verified'
+        otp.write({'state': 'verified', 'verified_by': 'email'})
         return otp, False
 
     @api.model

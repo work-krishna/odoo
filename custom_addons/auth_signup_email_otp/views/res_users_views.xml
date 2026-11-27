@@ -7,13 +7,17 @@
         <field name="inherit_id" ref="base.view_users_form"/>
         <field name="arch" type="xml">
             <xpath expr="//header" position="inside">
-                <button name="action_signup_send_verification" type="object" string="Send Activation Email"
-                        invisible="signup_email_verified"/>
+                <button name="action_signup_send_verification" type="object" string="Send Activation Codes"
+                        invisible="signup_activated"/>
             </xpath>
             <xpath expr="//div[hasclass('oe_title')]" position="inside">
-                <div invisible="signup_email_verified" class="text-warning">
+                <div invisible="signup_activated" class="text-warning">
+                    <field name="signup_activated" widget="boolean_toggle" class="oe_inline"/>
+                    <span>Not activated yet: this person signed up on the website and has not entered a code we sent.</span>
+                </div>
+                <div invisible="not signup_activated or signup_email_verified" class="text-muted">
                     <field name="signup_email_verified" widget="boolean_toggle" class="oe_inline"/>
-                    <span>Not activated yet: this person signed up on the website and has not entered the emailed code.</span>
+                    <span>Email address not confirmed: this person activated their account with the SMS code.</span>
                 </div>
             </xpath>
         </field>

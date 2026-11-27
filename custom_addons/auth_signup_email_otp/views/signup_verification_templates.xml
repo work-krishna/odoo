@@ -7,19 +7,29 @@
                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                 <input type="hidden" name="redirect" t-att-value="redirect"/>
                 <h4 class="mb-3">Activate your account</h4>
+                <t t-set="both_channels" t-value="sent_to.get('email') and sent_to.get('sms')"/>
                 <p id="signup_verify_intro">
-                    We sent a 6-digit code to
-                    <t t-if="sent_to.get('email')"><strong t-out="sent_to['email']"/></t>
-                    <t t-if="sent_to.get('email') and sent_to.get('sms')"> and </t>
-                    <t t-if="sent_to.get('sms')"><strong t-out="sent_to['sms']"/> by SMS</t>.
-                    <t t-if="sent_to.get('email')">Enter it below, or open the activation link in the email.</t>
-                    <t t-else="">Enter it below.</t>
-                    It expires <t t-out="validity"/> minutes after we send it.
+                    <t t-if="both_channels">
+                        We emailed a 6-digit code to <strong t-out="sent_to['email']"/> and texted another one to
+                        <strong t-out="sent_to['sms']"/>. Enter either code below, or open the activation link
+                        in the email. They expire <t t-out="validity"/> minutes after we send them.
+                    </t>
+                    <t t-else="">
+                        We sent a 6-digit code to
+                        <t t-if="sent_to.get('email')"><strong t-out="sent_to['email']"/></t>
+                        <t t-if="sent_to.get('sms')"><strong t-out="sent_to['sms']"/> by SMS</t>.
+                        <t t-if="sent_to.get('email')">Enter it below, or open the activation link in the email.</t>
+                        <t t-else="">Enter it below.</t>
+                        It expires <t t-out="validity"/> minutes after we send it.
+                    </t>
                 </p>
                 <p class="alert alert-success" t-if="message" role="status" t-out="message"/>
                 <p class="alert alert-danger" t-if="error" role="alert" t-out="error"/>
                 <div class="mb-3">
-                    <label for="signup_code" class="form-label">Activation code</label>
+                    <label for="signup_code" class="form-label">
+                        <t t-if="both_channels">Code from the email or the SMS</t>
+                        <t t-else="">Activation code</t>
+                    </label>
                     <input type="text" name="code" id="signup_code" class="form-control form-control-lg text-center"
                            required="required" autofocus="autofocus" autocomplete="one-time-code"
                            inputmode="numeric" maxlength="7" placeholder="000000"/>
@@ -42,13 +52,101 @@
 
     <template id="signup_link_invalid" name="Activation Link Not Valid">
         <t t-call="web.login_layout">
-            <h4 class="mb-3">This link cannot activate your account</h4>
-            <p class="alert alert-warning" role="alert" t-out="error"/>
-            <p>Log in with your email and password: we will email you a new code and link.</p>
-            <div class="d-grid">
-                <a href="/web/login" class="btn btn-primary">Log in</a>
+            <div class="oe_login_form">
+                <h4 class="mb-3">This link cannot activate your account</h4>
+                <p class="alert alert-warning" role="alert" t-out="error"/>
+                <p>Log in with your email and password: we will email you a new code and link.</p>
+                <div class="d-grid">
+                    <a href="/web/login" class="btn btn-primary">Log in</a>
+                </div>
             </div>
         </t>
+    </template>
+
+    <template id="verify_email" name="Confirm Your Email Address">
+        <t t-set="no_verify_email_bar" t-value="True"/>
+        <t t-call="web.login_layout">
+            <div class="oe_login_form">
+                <h4 class="mb-3">Confirm your email address</h4>
+                <p class="alert alert-success" t-if="message" role="status" t-out="message"/>
+                <p class="alert alert-danger" t-if="error" role="alert" t-out="error"/>
+                <t t-if="code_sent">
+                    <p id="verify_email_intro">
+                        We emailed a 6-digit code to <strong t-out="email"/>. Enter it below, or open the link in
+                        the email. It expires <t t-out="validity"/> minutes after we send it.
+                    </p>
+                    <form role="form" method="post" action="/my/verify-email">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <div class="mb-3">
+                            <label for="verify_email_code" class="form-label">Code from the email</label>
+                            <input type="text" name="code" id="verify_email_code" class="form-control form-control-lg text-center"
+                                   required="required" autofocus="autofocus" autocomplete="one-time-code"
+                                   inputmode="numeric" maxlength="7" placeholder="000000"/>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Confirm email</button>
+                        </div>
+                    </form>
+                    <form method="post" action="/my/verify-email" class="text-center mt-3">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="send" value="1"/>
+                        <button type="submit" class="btn btn-link" id="verify_email_resend">Send me a new code</button>
+                    </form>
+                </t>
+                <t t-else="">
+                    <p id="verify_email_intro">
+                        Your account is active. Please also confirm your email address, <strong t-out="email"/>:
+                        we will email you a code and a link.
+                    </p>
+                    <form method="post" action="/my/verify-email">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="send" value="1"/>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary" id="verify_email_send">Email me a code</button>
+                        </div>
+                    </form>
+                </t>
+                <p class="text-center small mt-3 mb-0"><a href="/">Not now</a></p>
+            </div>
+        </t>
+    </template>
+
+    <template id="verify_email_done" name="Email Address Confirmed">
+        <t t-set="no_verify_email_bar" t-value="True"/>
+        <t t-call="web.login_layout">
+            <div class="oe_login_form">
+                <h4 class="mb-3">Email address confirmed</h4>
+                <p>Thank you. Your email address is confirmed.</p>
+                <div class="d-grid">
+                    <a href="/" class="btn btn-primary">Continue</a>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="verify_email_link_invalid" name="Email Confirmation Link Not Valid">
+        <t t-set="no_verify_email_bar" t-value="True"/>
+        <t t-call="web.login_layout">
+            <div class="oe_login_form">
+                <h4 class="mb-3">This link cannot confirm your email address</h4>
+                <p class="alert alert-warning" role="alert" t-out="error"/>
+                <p>Ask for a new code from the confirmation page.</p>
+                <div class="d-grid">
+                    <a href="/my/verify-email" class="btn btn-primary">Confirm my email address</a>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- On every website page, for accounts activated by SMS: nothing is blocked, just a reminder. -->
+    <template id="verify_email_bar" inherit_id="web.frontend_layout" name="Reminder: Confirm Your Email Address">
+        <xpath expr="//div[@id='wrapwrap']/main/t[@t-out='0']" position="before">
+            <div t-if="request and not no_verify_email_bar and request.env.user._signup_email_unverified()"
+                 class="o_verify_email_bar alert alert-warning rounded-0 border-0 mb-0 py-2 px-3 text-center small" role="status">
+                Please confirm your email address, <strong t-out="request.env.user.email"/>.
+                <a href="/my/verify-email" class="alert-link ms-1 text-nowrap">Confirm now</a>
+            </div>
+        </xpath>
     </template>
 
     <template id="signup_phone_field" inherit_id="auth_signup.signup" name="Sign-up: Mobile Number for the SMS Code">
@@ -57,7 +155,7 @@
                 <label for="phone" class="form-label">Mobile number</label>
                 <input type="tel" name="phone" t-att-value="phone" id="phone" class="form-control"
                        required="required" autocomplete="tel" inputmode="tel" placeholder="98XXXXXXXX"/>
-                <div class="form-text">We send your activation code by email and by SMS to this number.</div>
+                <div class="form-text">We text an activation code to this number, and email another one to you.</div>
             </div>
         </xpath>
     </template>

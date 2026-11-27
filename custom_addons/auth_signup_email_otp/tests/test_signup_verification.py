@@ -58,13 +58,18 @@ class TestSignupEmailOtp(HttpCase):
         response = self._signup('sita@example.com')
         self.assertIn('/web/signup/verify', response.url)
         self.assertIn('s**a@example.com', response.text)
-        self.assertFalse(self._user('sita@example.com').signup_email_verified)
+        user = self._user('sita@example.com')
+        self.assertFalse(user.signup_activated)
+        self.assertFalse(user.signup_email_verified)
         self.assertFalse(self._logged_in())
 
         self.assertIn('4 tries left', self._verify(code='000000').text)
         self._verify(code='123 456')
-        self.assertTrue(self._user('sita@example.com').signup_email_verified)
+        user = self._user('sita@example.com')
+        self.assertTrue(user.signup_activated)
+        self.assertTrue(user.signup_email_verified, "The emailed code proves the address.")
         self.assertTrue(self._logged_in())
+        self.assertNotIn('o_verify_email_bar', self.url_open('/').text)
 
     def test_activation_link_works_on_another_device(self):
         self._signup('hari@example.com', token='hari-link')
@@ -159,9 +164,69 @@ class TestSignupEmailOtp(HttpCase):
         pending = user._signup_pending()
         self.assertEqual(pending.expires_at - pending.sent_at, timedelta(minutes=5))
         self.assertLess(pending.sent_at, fields.Datetime.now() + timedelta(seconds=1))
-        self.assertNotIn('777777', pending.code_hash)
+        self.assertNotIn('777777', pending.email_code_hash)
 
         welcome = self.env.ref('auth_signup.mail_template_user_signup_account_created')
         self.assertFalse(welcome.send_mail(user.id), "held back until the account is activated")
         user._signup_mark_verified()
         self.assertTrue(welcome.send_mail(user.id))
+
+    # Confirming the email address later (an account activated with the SMS code)
+    # ------------------------------------------------------------------
+
+    def _activated_by_sms(self, email):
+        patch_code, patch_token = self._codes('121212')
+        with patch_code, patch_token:
+            self.env['res.users'].sudo().signup({'login': email, 'name': 'Sita', 'password': PASSWORD, 'email': email})
+        user = self._user(email)
+        user._signup_pending().verified_by = 'sms'
+        user._signup_mark_verified(user._signup_pending())
+        self.assertTrue(user.signup_activated)
+        self.assertFalse(user.signup_email_verified)
+        return user
+
+    def _post_verify_email(self, **data):
+        return self.url_open('/my/verify-email', data={'csrf_token': self._csrf('/my/verify-email'), **data})
+
+    def test_confirm_email_later_with_the_code(self):
+        self._activated_by_sms('sms@example.com')
+        welcome = self.env.ref('auth_signup.mail_template_user_signup_account_created')
+        self.assertFalse(welcome.send_mail(self._user('sms@example.com').id), "No mail to an unproven address yet.")
+        self.authenticate('sms@example.com', PASSWORD)
+        self.assertNotIn('/web/signup/verify', self.url_open('/my').url, "Nothing is blocked.")
+        home = self.url_open('/').text
+        self.assertIn('o_verify_email_bar', home)
+        self.assertIn('href="/my/verify-email"', home)
+
+        page = self.url_open('/my/verify-email').text
+        self.assertIn('Email me a code', page)
+        self.assertNotIn('o_verify_email_bar', page)
+        patch_code, patch_token = self._codes('343434')
+        with patch_code, patch_token:
+            sent = self._post_verify_email(send='1').text
+        self.assertIn('We emailed you a code and a link.', sent)
+        self.assertIn('<strong>sms@example.com</strong>', sent)
+
+        self.assertIn('4 tries left', self._post_verify_email(code='000000').text)
+        self.assertIn('Email address confirmed', self._post_verify_email(code='343434').text)
+        self.assertTrue(self._user('sms@example.com').signup_email_verified)
+        self.assertNotIn('o_verify_email_bar', self.url_open('/').text)
+        self.assertEqual(self.url_open('/my/verify-email').url.removeprefix(self.base_url()), '/')
+
+    def test_confirm_email_later_with_the_link(self):
+        user = self._activated_by_sms('link@example.com')
+        patch_code, patch_token = self._codes('565656', 'confirm-link')
+        with patch_code, patch_token:
+            self.assertTrue(user._verify_email_send()[0])
+        self.assertIn('Email address confirmed', self.url_open('/web/verify-email?token=confirm-link').text)
+        self.assertTrue(self._user('link@example.com').signup_email_verified)
+        self.assertIn('not valid', self.url_open('/web/verify-email?token=confirm-link').text)
+
+    def test_confirm_email_refused_after_the_address_changed(self):
+        user = self._activated_by_sms('moved@example.com')
+        patch_code, patch_token = self._codes('787878', 'moved-link')
+        with patch_code, patch_token:
+            user._verify_email_send()
+        user.email = 'other@example.com'
+        self.assertIn('changed since', self.url_open('/web/verify-email?token=moved-link').text)
+        self.assertFalse(self._user('moved@example.com').signup_email_verified)

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="portal_my_home_shop_now" inherit_id="portal.portal_my_home" name="My Account: Shop Now">
+        <xpath expr="//div[hasclass('o_portal_my_home')]" position="before">
+            <div class="o_portal_shop_now d-flex flex-wrap align-items-center justify-content-between gap-2 mt-3 mb-2 p-3 border rounded">
+                <span class="fw-semibold">Looking for something new?</span>
+                <a href="/shop" class="btn btn-primary px-4">
+                    <i class="fa fa-shopping-bag me-2" role="img" aria-hidden="true"/>Shop now
+                </a>
+            </div>
+        </xpath>
+    </template>
+
+</odoo>

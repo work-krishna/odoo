@@ -10,6 +10,7 @@ from odoo.addons.auth_otp.models import auth_otp as otp_module
 from odoo.addons.auth_otp.models.auth_otp import CHANNELS, DEFAULT_VALIDITY
 
 CODE = '482913'
+SMS_CODE = '730564'
 
 
 @tagged('post_install', '-at_install')
@@ -18,7 +19,10 @@ class TestAuthOtp(TransactionCase):
     def setUp(self):
         super().setUp()
         self.Otp = self.env['auth.otp']
-        self.startPatcher(patch.object(otp_module, '_new_code', return_value=CODE))
+        # Codes come out of next_codes in order, then CODE: set it to tell the channels' codes apart.
+        self.next_codes = []
+        self.startPatcher(patch.object(otp_module, '_new_code',
+                                       side_effect=lambda: self.next_codes.pop(0) if self.next_codes else CODE))
         self.emails = []   # (otp, code, token) the email sender got
         self.texts = []    # (phone, code) the fake SMS channel got
         self.sms_on = True
@@ -45,21 +49,48 @@ class TestAuthOtp(TransactionCase):
         kwargs.setdefault('email_sender', self._email_sender)
         return self.Otp._otp_issue(purpose, **kwargs)
 
-    def test_one_code_on_every_channel(self):
+    def test_a_code_per_channel(self):
+        self.next_codes = [CODE, SMS_CODE]
         result = self._issue(email='Sita@Example.com', phone='+977 984-1234567')
         self.assertFalse(result['error'])
         self.assertEqual(result['channels'], ['email', 'sms'])
         self.assertEqual([code for _otp, code, _t in self.emails], [CODE])
-        self.assertEqual(self.texts, [('9779841234567', CODE)], "The same code by SMS.")
+        self.assertEqual(self.texts, [('9779841234567', SMS_CODE)], "A different code by SMS.")
         otp = result['otp']
         self.assertEqual(otp.email, 'sita@example.com')
         self.assertEqual(otp._otp_sent_to(), {'email': 's**a@example.com', 'sms': '977*****67'})
-        self.assertNotIn(CODE, otp.sudo().code_hash)
+        self.assertNotIn(CODE, otp.sudo().email_code_hash)
+        self.assertNotEqual(otp.sudo().email_code_hash, otp.sudo().sms_code_hash)
 
         record, error = self.Otp._otp_verify('signup', f' {CODE[:3]} {CODE[3:]} ', email='sita@example.com')
         self.assertEqual(record, otp)
-        self.assertEqual(otp.state, 'verified')
+        self.assertEqual((otp.state, otp.verified_by), ('verified', 'email'))
         self.assertFalse(self.Otp._otp_verify('signup', CODE, email='sita@example.com')[0], "Used up.")
+
+    def test_either_code_closes_both(self):
+        self.next_codes = [CODE, SMS_CODE]
+        otp = self._issue(email='sita@example.com', phone='9841234567')['otp']
+        record, error = self.Otp._otp_verify('signup', SMS_CODE, email='sita@example.com')
+        self.assertEqual(record, otp)
+        self.assertEqual(otp.verified_by, 'sms', "The SMS code proves the mobile number.")
+        record, error = self.Otp._otp_verify('signup', CODE, email='sita@example.com')
+        self.assertFalse(record, "The email code went with it.")
+        self.assertIn('can no longer be used', error)
+
+    def test_codes_differ(self):
+        self.next_codes = [CODE, CODE, SMS_CODE]  # a clash is drawn again
+        self._issue(email='sita@example.com', phone='9841234567')
+        self.assertEqual(self.texts, [('9841234567', SMS_CODE)])
+
+    def test_wrong_tries_shared(self):
+        self.next_codes = [CODE, SMS_CODE]
+        self._issue(email='sita@example.com', phone='9841234567')
+        for _i in range(4):
+            self.Otp._otp_verify('signup', '000000', email='sita@example.com')
+        record, error = self.Otp._otp_verify('signup', '111111', email='sita@example.com')
+        self.assertIn('cannot be used any more', error, "Five wrong codes in all, not five per channel.")
+        for code in (CODE, SMS_CODE):
+            self.assertFalse(self.Otp._otp_verify('signup', code, email='sita@example.com')[0])
 
     def test_email_only_when_sms_is_off(self):
         self.sms_on = False
@@ -123,16 +154,21 @@ class TestAuthOtp(TransactionCase):
         self.assertEqual(self.emails[0][2], 'link-token')
         record, error = self.Otp._otp_verify_link('signup', 'link-token')
         self.assertEqual(record, result['otp'])
+        self.assertEqual(record.verified_by, 'email', "The link came by email.")
         self.assertIn('not valid', self.Otp._otp_verify_link('signup', 'link-token')[1])
         self.assertIn('not valid', self.Otp._otp_verify_link('signup', 'other')[1])
 
     def test_partial_delivery(self):
         def fail_sms(otp, code):
             return False, "NestSMS down"
+        self.next_codes = [CODE, SMS_CODE]
         with patch.object(self.OtpClass, '_otp_send_sms', fail_sms):
             result = self._issue(email='sita@example.com', phone='9841234567')
         self.assertEqual(result['channels'], ['email'], "Still usable by email.")
         self.assertIn('NestSMS down', result['otp'].failure_reason)
+        self.assertFalse(result['otp'].sudo().sms_code_hash, "A code that never arrived can't be used.")
+        self.assertFalse(self.Otp._otp_verify('signup', SMS_CODE, email='sita@example.com')[0])
+        self.assertTrue(self.Otp._otp_verify('signup', CODE, email='sita@example.com')[0])
 
     def test_nothing_delivered(self):
         def boom(otp, code, token):
