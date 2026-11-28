@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- My Account: whether the email address and the mobile number are verified. -->
+    <template id="address_form_fields" inherit_id="portal.address_form_fields" name="My Account: Verified Email and Mobile">
+        <xpath expr="//input[@id='o_email']" position="after">
+            <div t-if="contact_verification and partner_sudo.email" id="o_email_verification"
+                 class="o_contact_verification d-flex flex-wrap align-items-center gap-2 mt-2 small">
+                <span t-if="contact_verification['email_verified']" class="badge rounded-pill text-bg-success">
+                    <i class="fa fa-check me-1" role="img" aria-hidden="true"/>Verified
+                </span>
+                <t t-else="">
+                    <span class="badge rounded-pill text-bg-warning">
+                        <i class="fa fa-exclamation-circle me-1" role="img" aria-hidden="true"/>Not verified
+                    </span>
+                    <a t-if="contact_verification['email_can_verify']" href="/my/verify-email?redirect=/my/account"
+                       class="btn btn-sm btn-outline-primary py-0" id="o_email_verify">Verify</a>
+                </t>
+            </div>
+        </xpath>
+        <xpath expr="//input[@id='o_phone']" position="after">
+            <div t-if="contact_verification and partner_sudo.phone" id="o_phone_verification"
+                 class="o_contact_verification d-flex flex-wrap align-items-center gap-2 mt-2 small">
+                <span t-if="contact_verification['phone_verified']" class="badge rounded-pill text-bg-success">
+                    <i class="fa fa-check me-1" role="img" aria-hidden="true"/>Verified
+                </span>
+                <t t-else="">
+                    <span class="badge rounded-pill text-bg-warning">
+                        <i class="fa fa-exclamation-circle me-1" role="img" aria-hidden="true"/>Not verified
+                    </span>
+                    <a t-if="contact_verification['phone_can_verify']" href="/my/verify-phone"
+                       class="btn btn-sm btn-outline-primary py-0" id="o_phone_verify">Verify</a>
+                    <span t-elif="not contact_verification['phone_is_mobile']" class="text-muted">
+                        Only Nepali mobile numbers (98XXXXXXXX) can be verified.
+                    </span>
+                    <span t-if="contact_verification['verified_phone']" class="w-100 text-muted">
+                        Your verified number is <t t-out="contact_verification['verified_phone']"/>.
+                    </span>
+                </t>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="verify_phone" name="Verify Your Mobile Number">
+        <t t-set="no_verify_email_bar" t-value="True"/>
+        <t t-call="web.login_layout">
+            <div class="oe_login_form">
+                <h4 class="mb-3">Verify your mobile number</h4>
+                <p class="alert alert-success" t-if="message" role="status" t-out="message"/>
+                <p class="alert alert-danger" t-if="error" role="alert" t-out="error"/>
+                <t t-if="not available">
+                    <p class="alert alert-warning" role="alert">
+                        We can't text verification codes at the moment. Please try again later.
+                    </p>
+                </t>
+                <t t-elif="code_sent">
+                    <p id="verify_phone_intro">
+                        We texted a 6-digit code to <strong t-out="number"/>. Enter it below.
+                        It expires 10 minutes after we send it.
+                    </p>
+                    <form role="form" method="post" action="/my/verify-phone">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <div class="mb-3">
+                            <label for="verify_phone_code" class="form-label">Code from the SMS</label>
+                            <input type="text" name="code" id="verify_phone_code" class="form-control form-control-lg text-center"
+                                   required="required" autofocus="autofocus" autocomplete="one-time-code"
+                                   inputmode="numeric" maxlength="7" placeholder="000000"/>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Verify</button>
+                        </div>
+                    </form>
+                    <form method="post" action="/my/verify-phone" class="text-center mt-3">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="send" value="1"/>
+                        <button type="submit" class="btn btn-link" id="verify_phone_resend">Text me a new code</button>
+                    </form>
+                </t>
+                <t t-else="">
+                    <p id="verify_phone_intro">
+                        We'll text a 6-digit code to <strong t-out="number"/>, the mobile number on your account.
+                    </p>
+                    <form method="post" action="/my/verify-phone">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="send" value="1"/>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary" id="verify_phone_send">Text me a code</button>
+                        </div>
+                    </form>
+                </t>
+                <p class="text-center small mt-3 mb-0">
+                    Wrong number? <a href="/my/account">Change it on My Account</a>
+                </p>
+            </div>
+        </t>
+    </template>
+
+    <template id="verify_phone_done" name="Mobile Number Verified">
+        <t t-set="no_verify_email_bar" t-value="True"/>
+        <t t-call="web.login_layout">
+            <div class="oe_login_form">
+                <h4 class="mb-3">Mobile number verified</h4>
+                <p>Thank you. <strong t-out="number"/> is verified.</p>
+                <div class="d-grid">
+                    <a href="/my/account" class="btn btn-primary">Back to My Account</a>
+                </div>
+            </div>
+        </t>
+    </template>
+
+</odoo>

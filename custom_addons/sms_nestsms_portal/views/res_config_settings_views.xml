@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.sms_nestsms_portal</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="sms_nestsms.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <div id="sms_nestsms_otp" position="inside">
+                <div class="mt-2">
+                    <field name="sms_otp_verify_phone" class="w-auto"/>
+                    <label for="sms_otp_verify_phone" string="Let customers verify their mobile number on My Account" class="o_light_label"/>
+                    <field name="sms_otp_verify_phone_approved" invisible="1"/>
+                    <div class="ms-4 mt-1" invisible="not sms_otp_verify_phone">
+                        <div class="d-flex align-items-baseline gap-2">
+                            <label for="sms_otp_verify_phone_template" string="Template" class="o_light_label text-nowrap"/>
+                            <field name="sms_otp_verify_phone_template" class="flex-grow-1 small" placeholder="Choose, or paste the ID"/>
+                        </div>
+                        <div>
+                            <button name="action_sms_otp_choose_template" type="object" string="Choose…" icon="oi-arrow-right"
+                                    class="btn-link p-0 me-3" context="{'sms_otp_purpose': 'verify_phone'}"/>
+                            <button name="action_sms_otp_check_template" type="object" string="Check" icon="oi-arrow-right"
+                                    class="btn-link p-0" context="{'sms_otp_purpose': 'verify_phone'}"/>
+                        </div>
+                        <div class="small">
+                            <span class="text-success" invisible="not sms_otp_verify_phone_approved">Approved by NestSMS: codes are on.</span>
+                            <span class="text-warning" invisible="sms_otp_verify_phone_approved">
+                                The Verify button for the mobile number stays hidden until you choose an approved template.
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </field>
+    </record>
+</odoo>
