@@ -25,6 +25,8 @@ Each flow needs its own approved NestSMS OTP template, and is switched on in Set
 | `sms_nestsms_signup` | Website sign-ups enter their mobile number and get **one activation code by email and a different one by SMS**. Either activates the account and closes the other, and the activation page names both destinations. The SMS code proves the mobile number (the website then reminds them to confirm their email); the email code proves the email (checkout then confirms the mobile). A number outside Nepal, or a failed SMS, still leaves the email. Builds on `auth_signup_email_otp`. |
 | `sms_nestsms_website_sale` | Strict when switched on: after the address step the buyer proves their own mobile number (typed on the page, apart from the addresses) before choosing delivery and paying. A number proven once, at sign-up or on an earlier order, counts; delivery addresses may carry any number. The cart check behind every payment path (shop payment, free orders, the quotation payment route) refuses carts without a proven number, and checkout is held rather than skipped while no approved template is set. The order form shows the customer's verified mobile. |
 | `sms_nestsms_emi` | EMI applicants confirm their number before the form. The application always carries the proven number, whatever the form sends. |
+| `sms_nestsms_reset_password` | Forgot password: the customer picks email or SMS. SMS sends a code to the account's **verified** mobile number and a different code by email (either works, the log records which). The verified number also finds the account. Staff accounts and unproven numbers never get a reset SMS. Builds on `auth_signup_email_otp`, which handles the email-only reset. |
+| `sms_nestsms_portal` | My Account shows Verified / Not verified under the email and the phone, with a Verify button: the email goes to `/my/verify-email`, the phone to `/my/verify-phone` (an SMS code to the number on the account). A customer who changes their email address has to confirm the new one. |
 
 **One code engine.** Every code on the site comes from `auth_otp` (the One-Time Codes module): sign-up, email login, SMS login, checkout and EMI. It generates the codes (one per channel), stores only keyed hashes, and enforces the expiry, the tries and the rate limits in one place. This module is the SMS channel.
 
@@ -128,7 +130,7 @@ If customers report that codes don't arrive, check the code log (One-Time Codes)
   - Approval is kept in the system parameter `sms_nestsms.otp_approved.<company id>.<purpose>`, holding the approved template ID. It is not a stored field, so deploying needs no module upgrade first. `company._sms_otp_enabled(purpose)` is the single gate.
 - `OTP_VALIDITY` (10 minutes) must match the approved template text. Check flags any mismatch.
 - Default texts stay within the GSM-7 alphabet (`is_gsm7`, checked by the tests).
-- Tests: `--test-tags /sms_nestsms,/sms_nestsms_sale,/sms_nestsms_payment,/sms_nestsms_stock,/sms_nestsms_ncm,/sms_nestsms_signup,/sms_nestsms_login,/sms_nestsms_website_sale,/sms_nestsms_emi`.
+- Tests: `--test-tags /sms_nestsms,/sms_nestsms_sale,/sms_nestsms_payment,/sms_nestsms_stock,/sms_nestsms_ncm,/sms_nestsms_signup,/sms_nestsms_login,/sms_nestsms_website_sale,/sms_nestsms_emi,/sms_nestsms_reset_password,/sms_nestsms_portal`.
 
 ## Get template-ID:
 Request:

@@ -32,6 +32,10 @@ class ResCompany(models.Model):
     sms_otp_checkout_template = fields.Char(string="Checkout OTP Template ID")
     sms_otp_emi = fields.Boolean(string="SMS Codes for EMI Applications")
     sms_otp_emi_template = fields.Char(string="EMI OTP Template ID")
+    sms_otp_reset = fields.Boolean(string="SMS Codes for Password Resets")
+    sms_otp_reset_template = fields.Char(string="Password Reset OTP Template ID")
+    sms_otp_verify_phone = fields.Boolean(string="SMS Codes to Verify Mobile Numbers on My Account")
+    sms_otp_verify_phone_template = fields.Char(string="Mobile Verification OTP Template ID")
 
     @api.constrains('sms_brand_name')
     def _check_sms_brand_name(self):

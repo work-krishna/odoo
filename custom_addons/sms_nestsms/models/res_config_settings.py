@@ -22,11 +22,17 @@ class ResConfigSettings(models.TransientModel):
     sms_otp_checkout_template = fields.Char(related='company_id.sms_otp_checkout_template', readonly=False)
     sms_otp_emi = fields.Boolean(related='company_id.sms_otp_emi', readonly=False)
     sms_otp_emi_template = fields.Char(related='company_id.sms_otp_emi_template', readonly=False)
+    sms_otp_reset = fields.Boolean(related='company_id.sms_otp_reset', readonly=False)
+    sms_otp_reset_template = fields.Char(related='company_id.sms_otp_reset_template', readonly=False)
+    sms_otp_verify_phone = fields.Boolean(related='company_id.sms_otp_verify_phone', readonly=False)
+    sms_otp_verify_phone_template = fields.Char(related='company_id.sms_otp_verify_phone_template', readonly=False)
     # Whether the template ID shown is the one Check approved (codes only go out then).
     sms_otp_login_approved = fields.Boolean(compute='_compute_sms_otp_approved')
     sms_otp_signup_approved = fields.Boolean(compute='_compute_sms_otp_approved')
     sms_otp_checkout_approved = fields.Boolean(compute='_compute_sms_otp_approved')
     sms_otp_emi_approved = fields.Boolean(compute='_compute_sms_otp_approved')
+    sms_otp_reset_approved = fields.Boolean(compute='_compute_sms_otp_approved')
+    sms_otp_verify_phone_approved = fields.Boolean(compute='_compute_sms_otp_approved')
 
     @api.depends('company_id', *(f'sms_otp_{purpose}_template' for purpose, _label in OTP_PURPOSES))
     def _compute_sms_otp_approved(self):

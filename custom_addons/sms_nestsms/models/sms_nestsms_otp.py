@@ -20,7 +20,7 @@ _logger = logging.getLogger(__name__)
 OTP_VALIDITY = DEFAULT_VALIDITY
 
 # Purposes whose point is proving the phone: their code must go by SMS only.
-SMS_ONLY_PURPOSES = {'login', 'checkout', 'emi'}
+SMS_ONLY_PURPOSES = {'login', 'checkout', 'emi', 'verify_phone'}
 
 # NestSMS errors that mean the template itself is unusable: stop the flow instead of
 # retrying it for every customer.
@@ -47,6 +47,8 @@ PURPOSE_WORDS = {
     'signup': "account registration",
     'checkout': "order confirmation",
     'emi': "EMI application",
+    'reset': "password reset",
+    'verify_phone': "mobile number verification",
 }
 
 
@@ -84,6 +86,8 @@ OTP_PURPOSES = [
     ('signup', "Sign-up activation"),
     ('checkout', "Checkout phone check"),
     ('emi', "EMI application phone check"),
+    ('reset', "Password reset"),
+    ('verify_phone', "Mobile number check on My Account"),
 ]
 
 

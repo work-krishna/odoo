@@ -9,7 +9,12 @@ the other, and the one used says what was proven:
   confirmed later, e.g. at checkout;
 - the SMS code: the mobile number (see sms_nestsms_signup). The account works, and the website
   asks the person to confirm their email address too, without blocking anything.
+
+A forgotten password is reset the same way: a code by email or, where SMS codes are on for
+password resets, a code by SMS to the account's proven mobile number plus a different one by
+email (see sms_nestsms_reset_password). Either code lets the person choose a new password.
 """
+import logging
 from datetime import timedelta
 
 from werkzeug.urls import url_encode
@@ -23,6 +28,9 @@ VALIDITY_PARAM = 'auth_signup_email_otp.validity_minutes'
 DEFAULT_VALIDITY = 15  # minutes
 PURPOSE = 'signup'
 VERIFY_EMAIL = 'verify_email'  # confirming the address of an account activated by SMS
+RESET = 'reset'  # forgotten password
+
+_logger = logging.getLogger(__name__)
 
 
 class ResUsers(models.Model):
@@ -37,7 +45,11 @@ class ResUsers(models.Model):
         string='Email Verified', default=True, copy=False,
         help="Unticked for accounts created through the website sign-up until the person enters the "
              "code or opens the link emailed to them. An account activated with the SMS code works, "
-             "and the website asks them to confirm their email address.",
+             "and the website asks them to confirm their email address. Unticked again when the "
+             "email address of a customer account changes, until the new one is confirmed.",
+    )
+    signup_welcome_pending = fields.Boolean(
+        copy=False, help="A website sign-up whose welcome email waits for the email address to be confirmed.",
     )
 
     # ------------------------------------------------------------------
@@ -53,7 +65,7 @@ class ResUsers(models.Model):
             if user and not (user.signup_activated and user.signup_email_verified):
                 user._signup_mark_verified()
         elif user:
-            user.write({'signup_activated': False, 'signup_email_verified': False})
+            user.write({'signup_activated': False, 'signup_email_verified': False, 'signup_welcome_pending': True})
             user._signup_send_verification()
         return login, password
 
@@ -141,11 +153,13 @@ class ResUsers(models.Model):
             self._signup_mark_email_verified()
 
     def _signup_mark_email_verified(self):
-        users = self.sudo().filtered(lambda u: not u.signup_email_verified)
-        users.signup_email_verified = True
+        self.sudo().filtered(lambda u: not u.signup_email_verified).signup_email_verified = True
         for user in self:
             self.env['auth.otp']._otp_close(VERIFY_EMAIL, user=user)
-        # The welcome email auth_signup sends at sign-up was held back until now.
+        # The welcome email auth_signup sends at sign-up was held back until now (once: not
+        # again when a changed address is confirmed).
+        users = self.sudo().filtered('signup_welcome_pending')
+        users.signup_welcome_pending = False
         welcome = self.env.ref('auth_signup.mail_template_user_signup_account_created', raise_if_not_found=False)
         for user in users.filtered(lambda u: u.share and u.email):
             if welcome:
@@ -232,6 +246,69 @@ class ResUsers(models.Model):
             'resent': _("We emailed you a new code and link."),
             'expired': _("Your previous code has expired, so we emailed you a new one."),
         }[kind]
+
+    # ------------------------------------------------------------------
+    # Forgotten password: a code instead of a link
+    # ------------------------------------------------------------------
+
+    @api.model
+    def _reset_find_user(self, login):
+        """The one active account `login` names (its login or email address, or, with
+        sms_nestsms_reset_password, its proven mobile number), or an empty recordset."""
+        login = (login or '').strip()
+        Users = self.sudo()
+        if not login:
+            return Users.browse()
+        users = Users.browse()
+        for value in dict.fromkeys([login, login.lower()]):
+            users = Users.search(self._get_login_domain(value), limit=2) or Users.search(self._get_email_domain(value), limit=2)
+            if users:
+                break
+        users = users or self._reset_find_user_by_phone(login)
+        return users if len(users) == 1 else Users.browse()
+
+    @api.model
+    def _reset_find_user_by_phone(self, number):
+        """The account whose proven mobile number is `number` (an SMS module answers)."""
+        return self.browse()
+
+    def _reset_sms_phone(self):
+        """The proven mobile number a reset code may be texted to, or False (an SMS module answers)."""
+        return False
+
+    def _reset_send_code(self, by_sms=False):
+        """Email a reset code to the account's address and, `by_sms`, text a different one to
+        its proven mobile number (if it has one and SMS codes are on for password resets).
+        Either code works; using one closes both. Returns auth.otp's issue result."""
+        self.ensure_one()
+        return self.env['auth.otp']._otp_issue(
+            RESET, user=self, email=self.email, phone=(by_sms and self._reset_sms_phone()) or None,
+            company=self.company_id, email_sender=self._reset_email_sender,
+        )
+
+    def _reset_email_sender(self, otp, code, token):
+        template = self.env.ref('auth_signup_email_otp.mail_template_reset_password_code')
+        template.sudo().with_context(signup_code=code, signup_validity=otp._otp_minutes()).send_mail(
+            self.id, force_send=True,
+        )
+
+    def _reset_check_code(self, code):
+        """Accept `code` (emailed or texted) for a password reset, or raise a UserError saying
+        why not. The code proves where it went: an emailed one the email address, a texted one
+        the mobile number. It also activates an account never activated."""
+        self.ensure_one()
+        otp, error = self.env['auth.otp']._otp_verify(RESET, code, user=self)
+        if not otp:
+            raise UserError(error)
+        self._signup_mark_verified(otp)
+        _logger.info("Password reset: user #%s proved it with the %s code", self.id, otp.verified_by)
+        return otp
+
+    def _reset_set_password(self, password):
+        """Set the new password (the password policy, if any, applies)."""
+        self.ensure_one()
+        self.sudo().write({'password': password})
+        self.env['auth.otp']._otp_close(RESET, user=self)
 
     def action_signup_send_verification(self):
         """Settings > Users: send a new activation code to accounts not activated yet."""

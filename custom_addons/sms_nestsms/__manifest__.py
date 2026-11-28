@@ -2,7 +2,7 @@
 
 {
     'name': "NestSMS",
-    'version': '1.1',
+    'version': '1.2',
     'category': 'Hidden/Tools',
     'summary': "Send every Odoo SMS through NestSMS, on Nepal's domestic routes only.",
     'description': " ",  # Non-empty string to avoid loading the README file.

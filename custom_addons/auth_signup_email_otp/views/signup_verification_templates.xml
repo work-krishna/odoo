@@ -77,6 +77,7 @@
                     </p>
                     <form role="form" method="post" action="/my/verify-email">
                         <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="redirect" t-att-value="redirect"/>
                         <div class="mb-3">
                             <label for="verify_email_code" class="form-label">Code from the email</label>
                             <input type="text" name="code" id="verify_email_code" class="form-control form-control-lg text-center"
@@ -89,6 +90,7 @@
                     </form>
                     <form method="post" action="/my/verify-email" class="text-center mt-3">
                         <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="redirect" t-att-value="redirect"/>
                         <input type="hidden" name="send" value="1"/>
                         <button type="submit" class="btn btn-link" id="verify_email_resend">Send me a new code</button>
                     </form>
@@ -100,13 +102,14 @@
                     </p>
                     <form method="post" action="/my/verify-email">
                         <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="redirect" t-att-value="redirect"/>
                         <input type="hidden" name="send" value="1"/>
                         <div class="d-grid">
                             <button type="submit" class="btn btn-primary" id="verify_email_send">Email me a code</button>
                         </div>
                     </form>
                 </t>
-                <p class="text-center small mt-3 mb-0"><a href="/">Not now</a></p>
+                <p class="text-center small mt-3 mb-0"><a t-att-href="redirect or '/'">Not now</a></p>
             </div>
         </t>
     </template>
@@ -118,7 +121,7 @@
                 <h4 class="mb-3">Email address confirmed</h4>
                 <p>Thank you. Your email address is confirmed.</p>
                 <div class="d-grid">
-                    <a href="/" class="btn btn-primary">Continue</a>
+                    <a t-att-href="redirect or '/'" class="btn btn-primary">Continue</a>
                 </div>
             </div>
         </t>
